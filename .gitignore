@@ -1,0 +1,6 @@
+.project
+.idea/
+*.tmproj
+.vscode/
+tmp
+.DS_Store

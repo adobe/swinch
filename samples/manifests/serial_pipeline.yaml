@@ -1,0 +1,80 @@
+---
+apiVersion: spinnaker.adobe.com/alpha1
+kind: Pipeline
+metadata:
+  name: simplePipe
+  application: swinchuuidtest
+spec:
+# TODO auto index all pipelines in an application
+  index: 1
+  keepWaitingPipelines: false
+  limitConcurrent: true
+  spelEvaluator: v4
+  stages:
+    - name: "Bake 1"
+      type: bakeManifest
+      namespace: "swinch"
+      outputName: redis
+      requisiteStageRefIds: []
+      templateRenderer: HELM2
+      inputArtifacts:
+        - account: stable
+          artifact:
+            name: redis
+            type: helm/chart
+            version: 10.5.7
+      expectedArtifacts:
+        - displayName: redis
+          matchArtifact:
+            artifactAccount: embedded-artifact
+            name: redis
+            type: embedded/base64
+    - name: "Deploy 1 in MyCluster1 from simplePipe"
+      # Extra field to bind the manifestArtifactId of every deploy stage to a single build stage
+      bakeStageRefIds: 1
+      requisiteStageRefIds:
+        - 1
+      type: deployManifest
+      account: "test"
+      cloudProvider: kubernetes
+      namespaceOverride: "swinch"
+      skipExpressionEvaluation: true
+      source: artifact
+    
+    - name: "Deploy 2 in MyCluster2 from simplePipe"
+      # Extra field to bind the manifestArtifactId of every deploy stage to a single build stage
+      bakeStageRefIds: 1
+      requisiteStageRefIds:
+        - 2
+      type: deployManifest
+      account: "test"
+      cloudProvider: kubernetes
+      namespaceOverride: "swinch"
+      skipExpressionEvaluation: true
+      source: artifact
+    
+    - name: Delete (Manifest)
+      requisiteStageRefIds:
+      - 3
+      type: deleteManifest
+      account:  "test"
+      cloudProvider: kubernetes
+      kinds:
+        - statefulSet
+        - configMap
+        - secret
+        - persistentVolumeClaim
+        - service
+      labelSelectors:
+        selectors:
+          - key: app
+            kind: EQUALS
+            values:
+              - redis
+      namespace: "swinch"
+      mode: label
+      options:
+        cascading: true
+  triggers: []
+
+

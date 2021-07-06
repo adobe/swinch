@@ -1,0 +1,15 @@
+---
+apiVersion: spinnaker.adobe.com/alpha1
+kind: Application
+metadata:
+  name:  {{ .Values.application.name }}
+spec:
+  email: {{ .Values.application.email }}
+  cloudProviders: ""
+  permissions:
+    EXECUTE:
+      - {{ .Values.application.ldap }}
+    READ:
+      - {{ .Values.application.ldap }}
+    WRITE:
+      - {{ .Values.application.ldap }}
