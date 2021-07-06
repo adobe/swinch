@@ -1,0 +1,80 @@
+{{- if .Values.complex_pipelines.enabled -}}
+{{- $application := .Values.application.name -}}
+{{- $global := .Values.global -}}
+{{- range $index, $pipeline := .Values.complex_pipelines.pipelines -}}
+  {{- $lenBake := len $pipeline.stages.bake -}}
+  {{- $lenDeploy := len $pipeline.stages.deploy -}}
+---
+apiVersion: spinnaker.adobe.com/alpha1
+kind: Pipeline
+metadata:
+  name: {{ $pipeline.name }}
+  application: {{ $application }}
+spec:
+# TODO auto index all pipelines in an application
+  index: {{ $index }}
+  keepWaitingPipelines: false
+  limitConcurrent: true
+  spelEvaluator: v4
+  stages:
+    {{- range $bake_index, $bake := $pipeline.stages.bake }}
+    - name: "{{ $bake.name }}"
+      type: bakeManifest
+      namespace: "{{ $bake.namespace }}"
+      outputName: redis
+      requisiteStageRefIds: []
+      templateRenderer: HELM2
+      inputArtifacts:
+        - account: {{ $global.bake.inputArtifacts.account }}
+          artifact:
+            name: {{ $global.bake.inputArtifacts.name }}
+            type: helm/chart
+            version: {{ $global.bake.inputArtifacts.version }}
+      expectedArtifacts:
+        - displayName: redis
+          matchArtifact:
+            artifactAccount: embedded-artifact
+            name: redis
+            type: embedded/base64
+    {{ end }}
+    {{- range $deploy_index, $deploy := $pipeline.stages.deploy }}
+    - name: "{{ $deploy.name }} in {{ $deploy.cluster }} from {{$pipeline.name}}"
+      requisiteStageRefIds:
+        - {{  add $deploy_index 1 }}
+      type: deployManifest
+      account: "{{ $deploy.account }}"
+      cloudProvider: kubernetes
+      namespaceOverride: "{{ $deploy.namespace }}"
+      skipExpressionEvaluation: true
+      source: artifact
+    {{ end }}
+    {{- range $index, $delete := $pipeline.stages.delete }}
+    - name: Delete (Manifest)
+      requisiteStageRefIds:
+      {{- range $index, $value := $pipeline.stages.deploy }}
+      - {{ add 1 $index $lenBake -}}
+      {{ end }}
+      type: deleteManifest
+      account:  "{{ $delete.account }}"
+      cloudProvider: kubernetes
+      kinds:
+        - statefulSet
+        - configMap
+        - secret
+        - persistentVolumeClaim
+        - service
+      labelSelectors:
+        selectors:
+          - key: app
+            kind: EQUALS
+            values:
+              - redis
+      namespace: "{{ $delete.namespace }}"
+      mode: label
+      options:
+        cascading: true
+  triggers: []
+    {{ end }}
+{{ end }}
+{{ end }}
+

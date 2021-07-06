@@ -1,0 +1,4 @@
+apiVersion: spinnaker.adobe.com/alpha1
+description: This is a demo chart
+name: demo
+version: 0.1.0

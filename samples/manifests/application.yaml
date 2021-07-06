@@ -1,0 +1,15 @@
+---
+apiVersion: spinnaker.adobe.com/alpha1
+kind: Application
+metadata:
+  name:  swinchuuidtest
+spec:
+  email: dcoman@adobe.com
+  cloudProviders: ""
+  permissions:
+    EXECUTE:
+      - add_spinnaker_team_ldap
+    READ:
+      - add_spinnaker_team_ldap
+    WRITE:
+      - add_spinnaker_team_ldap
