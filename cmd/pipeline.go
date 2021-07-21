@@ -87,8 +87,12 @@ func (p Pipeline) manifestActions(action string) {
 		p.Pipe = manifest.Metadata.Name
 		switch action {
 		case applyAction:
-			p.plan(manifest.Spec)
-			p.Save(p.WriteJSONTmp(manifest.Spec))
+			newpipe, changes := p.plan(manifest.Spec)
+			if newpipe || changes == true {
+				p.Save(p.WriteJSONTmp(manifest.Spec))
+			} else {
+				continue
+			}
 		case deleteAction:
 			p.Delete()
 		case planAction:
@@ -99,11 +103,18 @@ func (p Pipeline) manifestActions(action string) {
 	}
 }
 
-func (p *Pipeline) plan(localData interface{}) {
+func (p *Pipeline) plan(localData interface{}) (newpipe, changes bool) {
 	log.Infof("Running plan on pipeline '%v' in application '%v'", p.Pipe, p.App)
 	pipe := p.Get()
-	if len(pipe) != 0 && plan {
-		Plan(p.MarshalJSON(p.LoadSpec(p.Get())), p.MarshalJSON(localData))
+	if len(pipe) != 0 {
+		changes := Plan(p.MarshalJSON(p.LoadSpec(p.Get())), p.MarshalJSON(localData), plan)
+		if changes {
+			return false, true
+		} else {
+			return false, false
+		}
+	} else {
+		return true, false
 	}
 }
 
