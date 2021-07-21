@@ -80,8 +80,12 @@ func (a Application) manifestActions(action string) {
 		a.App = a.manifests[i].Metadata.Name
 		switch action {
 		case applyAction:
-			a.plan(a.manifests[i].Spec)
-			a.Save(a.WriteJSONTmp(a.manifests[i].Spec))
+			newapp, changes := a.plan(a.manifests[i].Spec)
+			if newapp || changes == true {
+				a.Save(a.WriteJSONTmp(a.manifests[i].Spec))
+			} else {
+				continue
+			}
 		case deleteAction:
 			a.Delete()
 		case planAction:
@@ -92,11 +96,18 @@ func (a Application) manifestActions(action string) {
 	}
 }
 
-func (a *Application) plan(localData interface{}) {
+func (a *Application) plan(localData interface{}) (newapp, changes bool) {
 	log.Infof("Running plan on application '%v'", a.App)
 	app := a.Get()
-	if len(app) != 0 && plan {
-		Plan(a.MarshalJSON(a.LoadSpec(a.Get())), a.MarshalJSON(localData))
+	if len(app) != 0 {
+		changes := Plan(a.MarshalJSON(a.LoadSpec(a.Get())), a.MarshalJSON(localData), plan)
+		if changes {
+			return false, true
+		} else {
+			return false, false
+		}
+	} else {
+		return true, false
 	}
 }
 
