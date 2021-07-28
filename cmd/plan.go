@@ -53,21 +53,16 @@ func PlanCmd() {
 	}
 }
 
-func Plan(oldData, newData []byte, plan bool) bool {
-	comparison := bytes.Compare(oldData, newData)
-	if comparison == 0 {
+func Changes(oldData, newData []byte) bool {
+	changes := bytes.Compare(oldData, newData)
+	if changes == 0 {
 		log.Infof("No changes detected")
 		return false
-	} else {
-		switch plan {
-		case true:
-			log.Infof(diff.LineDiff(string(oldData), string(newData)))
-			return true
-		case false:
-			return true
-		default:
-			return true
-		}
-
 	}
+
+	return true
+}
+
+func DiffChanges(oldData, newData []byte) {
+	log.Infof(diff.LineDiff(string(oldData), string(newData)))
 }
