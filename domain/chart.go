@@ -13,7 +13,6 @@ governing permissions and limitations under the License.
 package domain
 
 import (
-	log "github.com/sirupsen/logrus"
 	"path"
 )
 
@@ -34,15 +33,14 @@ type Chart struct {
 // Import
 
 func (c Chart) GenerateChart(manifest interface{}) {
-	switch c.fileExists(path.Join(c.OutputPath, c.ChartMetadata.Name, ChartValuesFile)) {
-	case true:
-		log.Fatalf("Cannot import over an existing chart, values file present in path '%s'", path.Join(c.OutputPath, c.ChartMetadata.Name, ChartValuesFile))
-	case false:
+	//switch c.fileExists(path.Join(c.OutputPath, c.ChartMetadata.Name, ChartValuesFile)) {
+	//case true:
+	//	log.Fatalf("Cannot import over an existing chart, values file present in path '%s'", path.Join(c.OutputPath, c.ChartMetadata.Name, ChartValuesFile))
+	//case false:
 		c.Mkdir(path.Join(c.OutputPath, c.ChartMetadata.Name, "/", ChartTemplatesFolder))
 		c.WriteChartMetadata()
 		c.WriteChartValues()
 		c.WriteManifest(manifest)
-	}
 }
 
 func (c Chart) MakePipelineManifest(spec PipelineSpec) PipelineManifest {

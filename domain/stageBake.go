@@ -12,7 +12,54 @@ governing permissions and limitations under the License.
 
 package domain
 
-// ExpectedArtifacts is part of Stages
+import "github.com/google/uuid"
+
+func (b *Bake) bakeManifest() {
+	//TODO check that index on ExpectedArtifacts is always 0
+	expectArtifacts := &b.ExpectedArtifacts[0]
+
+	//expectArtifacts ID used in deploy stages
+	expectArtifacts.Id = b.newUUID(expectArtifacts.DisplayName + b.Name).String()
+	//expectArtifacts.Id = b.newUUID(expectArtifacts.DisplayName + b.RefId).String()
+
+	//TODO check that MatchArtifact ID not used
+	//expectArtifacts.MatchArtifact.Id = NewUUID(expectArtifacts.MatchArtifact.Name+expectArtifacts.MatchArtifact.Type).String()
+
+	//TODO check InputArtifacts ID not used
+	//TODO check that index on InputArtifacts is always 0
+	//Deduplicate ArtifactAccount name
+	b.InputArtifacts[0].Artifact.ArtifactAccount = b.InputArtifacts[0].Account
+}
+
+func (b *Bake) newUUID(data string) uuid.UUID {
+	// Just a rand root uuid
+	namespace, _ := uuid.Parse("e8b764da-5fe5-51ed-8af8-c5c6eca28d7a")
+	return uuid.NewSHA1(namespace, []byte(data))
+}
+
+//Stage is part of Pipeline
+type Stage struct {
+	Name                 string `yaml:"name" json:"name"`
+	Type                 string `yaml:"type,omitempty" json:"type,omitempty"`
+	RefId                string `yaml:"refId,omitempty" json:"refId,omitempty"`
+	RequisiteStageRefIds []int  `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
+}
+
+type Bake struct {
+	Name                 string `yaml:"name" json:"name"`
+	Type                 string `yaml:"type,omitempty" json:"type,omitempty"`
+	RefId                string `yaml:"refId,omitempty" json:"refId,omitempty"`
+	RequisiteStageRefIds []int  `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
+
+	OutputName         string              `json:"outputName"`
+	ExpectedArtifacts  []ExpectedArtifacts `yaml:"expectedArtifacts,omitempty" json:"expectedArtifacts,omitempty"`
+	InputArtifacts     []InputArtifacts    `yaml:"inputArtifacts,omitempty" json:"inputArtifacts,omitempty"`
+	ManifestArtifactId string              `json:"manifestArtifactId"`
+	Namespace          string              `json:"namespace"`
+	TemplateRenderer   string              `json:"templateRenderer"`
+	Overrides          struct{}
+}
+
 type ExpectedArtifacts struct {
 	DefaultArtifact    *DefaultArtifact `yaml:"defaultArtifact,omitempty" json:"defaultArtifact,omitempty"`
 	DisplayName        string           `yaml:"displayName" json:"displayName"`
@@ -21,10 +68,6 @@ type ExpectedArtifacts struct {
 	UseDefaultArtifact *bool            `yaml:"useDefaultArtifact,omitempty" json:"useDefaultArtifact,omitempty"`
 	UsePriorArtifact   *bool            `yaml:"usePriorArtifact,omitempty" json:"usePriorArtifact,omitempty"`
 }
-
-//func (e *ExpectedArtifacts) GetID() {
-//	e.Id = NewUUID(e.DisplayName).String()
-//}
 
 // DefaultArtifact is part of ExpectedArtifacts
 type DefaultArtifact struct {

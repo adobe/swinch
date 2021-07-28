@@ -12,79 +12,93 @@ governing permissions and limitations under the License.
 
 package domain
 
-import (
-	"github.com/google/uuid"
-	"strconv"
-)
+//func (s *Stage) deleteManifest(p *Pipeline) {
+//	s.App = p.Metadata.Application
+//	//s.Location = s.Namespace
+//}
 
-// StageSpec is part of Pipeline
-type StageSpec struct {
-	ExpectedArtifacts        []ExpectedArtifacts `yaml:"expectedArtifacts,omitempty" json:"expectedArtifacts,omitempty"`
-	InputArtifacts           []InputArtifacts    `yaml:"inputArtifacts,omitempty" json:"inputArtifacts,omitempty"`
-	Name                     string              `yaml:"name" json:"name"`
-	Namespace                string              `yaml:"namespace,omitempty" json:"namespace,omitempty"`
-	OutputName               string              `yaml:"outputName,omitempty" json:"outputName,omitempty"`
-	Overrides                struct{}            `yaml:"overrides,omitempty" json:"overrides,omitempty"`
-	RefId                    string              `yaml:"refId,omitempty" json:"refId,omitempty"`
-	RequisiteStageRefIds     []string            `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
-	TemplateRenderer         string              `yaml:"templateRenderer,omitempty" json:"templateRenderer,omitempty"`
-	Type                     string              `yaml:"type,omitempty" json:"type,omitempty"`
-	Account                  string              `yaml:"account,omitempty" json:"account,omitempty"`
-	CloudProvider            string              `yaml:"cloudProvider,omitempty" json:"cloudProvider,omitempty"`
-	ManifestArtifactId       string              `yaml:"-" json:"manifestArtifactId"`
-	Moniker                  *Moniker            `yaml:"moniker,omitempty" json:"moniker,omitempty"`
-	NamespaceOverride        string              `yaml:"namespaceOverride,omitempty" json:"namespaceOverride,omitempty"`
-	SkipExpressionEvaluation bool                `yaml:"skipExpressionEvaluation,omitempty" json:"skipExpressionEvaluation,omitempty"`
-	Source                   string              `yaml:"source,omitempty" json:"source,omitempty"`
-	TrafficManagement        *TrafficManagement  `yaml:"trafficManagement,omitempty" json:"trafficManagement,omitempty"`
-	App                      string              `yaml:"-" json:"app,omitempty"`
-	Kinds                    []string            `yaml:"kinds,omitempty" json:"kinds,omitempty"`
-	LabelSelectors           *LabelSelectors     `yaml:"labelSelectors,omitempty" json:"labelSelectors,omitempty"`
-	Location                 string              `yaml:"-" json:"location,omitempty"`
-	Mode                     string              `yaml:"mode,omitempty" json:"mode,omitempty"`
-	Options                  *Options            `yaml:"options,omitempty" json:"options,omitempty"`
-	// swinch extra fields
-	BakeStageRefIds string `yaml:"bakeStageRefIds,omitempty" json:"-"`
+
+
+type TypeManifest struct {
+	Namespace string `yaml:"namespace,omitempty" json:"namespace,omitempty"`
 }
 
-func (s *StageSpec) bakeManifest() {
-	//TODO check that index on ExpectedArtifacts is always 0
-	expectArtifacts := &s.ExpectedArtifacts[0]
+type ManifestStageToFix struct {
+	Overrides                struct{}           `yaml:"overrides,omitempty" json:"overrides,omitempty"`
+	RefId                    string             `yaml:"refId,omitempty" json:"refId,omitempty"`
+	Account                  string             `yaml:"account,omitempty" json:"account,omitempty"`
+	CloudProvider            string             `yaml:"cloudProvider,omitempty" json:"cloudProvider,omitempty"`
+	ManifestArtifactId       string             `yaml:"-" json:"manifestArtifactId"`
+	NamespaceOverride        string             `yaml:"namespaceOverride,omitempty" json:"namespaceOverride,omitempty"`
+	SkipExpressionEvaluation bool               `yaml:"skipExpressionEvaluation,omitempty" json:"skipExpressionEvaluation,omitempty"`
+	Source                   string             `yaml:"source,omitempty" json:"source,omitempty"`
+	TrafficManagement        *TrafficManagement `yaml:"trafficManagement,omitempty" json:"trafficManagement,omitempty"`
+	Kinds                    []string           `yaml:"kinds,omitempty" json:"kinds,omitempty"`
+	LabelSelectors           *LabelSelectors    `yaml:"labelSelectors,omitempty" json:"labelSelectors,omitempty"`
+	Mode                     string             `yaml:"mode,omitempty" json:"mode,omitempty"`
+	Options                  *Options           `yaml:"options,omitempty" json:"options,omitempty"`
 
-	//expectArtifacts ID used in deploy stages
-	expectArtifacts.Id = s.newUUID(expectArtifacts.DisplayName + s.RefId).String()
-
-	//TODO check that MatchArtifact ID not used
-	//expectArtifacts.MatchArtifact.Id = NewUUID(expectArtifacts.MatchArtifact.Name+expectArtifacts.MatchArtifact.Type).String()
-
-	//TODO check InputArtifacts ID not used
-	//TODO check that index on InputArtifacts is always 0
-	//Deduplicate ArtifactAccount name
-	s.InputArtifacts[0].Artifact.ArtifactAccount = s.InputArtifacts[0].Account
 }
 
-func (s *StageSpec) deployManifest(p *Pipeline) {
-	s.Moniker = new(Moniker)
-	s.Moniker.App = p.Metadata.Application
-	bakeStageIndex := new(int)
-	if s.BakeStageRefIds == "" {
-		// Presume a deploy stage has the bake stage as the first element in RequisiteStageRefIds
-		*bakeStageIndex, _ = strconv.Atoi(s.RequisiteStageRefIds[0])
-	} else {
-		*bakeStageIndex, _ = strconv.Atoi(s.BakeStageRefIds)
-	}
-
-	*bakeStageIndex -= 1
-	s.ManifestArtifactId = p.Spec.Stages[*bakeStageIndex].ExpectedArtifacts[0].Id
+// TrafficManagement is part of Stages
+type TrafficManagement struct {
+	Enabled bool `yaml:"enabled" json:"enabled"`
+	Options struct {
+		EnableTraffic bool          `yaml:"enableTraffic" json:"enableTraffic"`
+		Services      []interface{} `yaml:"services" json:"services"`
+	} `yaml:"options" json:"options"`
 }
 
-func (s *StageSpec) deleteManifest(p *Pipeline) {
-	s.App = p.Metadata.Application
-	s.Location = s.Namespace
+// LabelSelectors is part of Stages
+type LabelSelectors struct {
+	Selectors []struct {
+		Key    string   `yaml:"key" json:"key"`
+		Kind   string   `yaml:"kind" json:"kind"`
+		Values []string `yaml:"values" json:"values"`
+	} `yaml:"selectors" json:"selectors"`
 }
 
-func (s *StageSpec) newUUID(data string) uuid.UUID {
-	// Just a rand root uuid
-	namespace, _ := uuid.Parse("e8b764da-5fe5-51ed-8af8-c5c6eca28d7a")
-	return uuid.NewSHA1(namespace, []byte(data))
+// Options is part of Stages
+type Options struct {
+	Cascading bool `yaml:"cascading" json:"cascading"`
 }
+
+type DeleteManifest struct {
+	TypeManifest `yaml:",inline" json:"-"`
+	App          string `yaml:"-" json:"app,omitempty"`
+	Location     string `yaml:"-" json:"location,omitempty"`
+}
+
+//type ManifestStage struct {
+//	ExpectedArtifacts        []ExpectedArtifacts `yaml:"expectedArtifacts,omitempty" json:"expectedArtifacts,omitempty"`
+//	InputArtifacts           []InputArtifacts    `yaml:"inputArtifacts,omitempty" json:"inputArtifacts,omitempty"`
+//	Namespace                string              `yaml:"namespace,omitempty" json:"namespace,omitempty"`
+//	OutputName               string              `yaml:"outputName,omitempty" json:"outputName,omitempty"`
+//	Overrides                struct{}            `yaml:"overrides,omitempty" json:"overrides,omitempty"`
+//	RefId                    string              `yaml:"refId,omitempty" json:"refId,omitempty"`
+//	RequisiteStageRefIds     []string            `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
+//	TemplateRenderer         string              `yaml:"templateRenderer,omitempty" json:"templateRenderer,omitempty"`
+//	Account                  string              `yaml:"account,omitempty" json:"account,omitempty"`
+//	CloudProvider            string              `yaml:"cloudProvider,omitempty" json:"cloudProvider,omitempty"`
+//	ManifestArtifactId       string              `yaml:"-" json:"manifestArtifactId"`
+//	Moniker                  *Moniker            `yaml:"moniker,omitempty" json:"moniker,omitempty"`
+//	NamespaceOverride        string              `yaml:"namespaceOverride,omitempty" json:"namespaceOverride,omitempty"`
+//	SkipExpressionEvaluation bool                `yaml:"skipExpressionEvaluation,omitempty" json:"skipExpressionEvaluation,omitempty"`
+//	Source                   string              `yaml:"source,omitempty" json:"source,omitempty"`
+//	TrafficManagement        *TrafficManagement  `yaml:"trafficManagement,omitempty" json:"trafficManagement,omitempty"`
+//	App                      string              `yaml:"-" json:"app,omitempty"`
+//	Kinds                    []string            `yaml:"kinds,omitempty" json:"kinds,omitempty"`
+//	LabelSelectors           *LabelSelectors     `yaml:"labelSelectors,omitempty" json:"labelSelectors,omitempty"`
+//	Location                 string              `yaml:"-" json:"location,omitempty"`
+//	Mode                     string              `yaml:"mode,omitempty" json:"mode,omitempty"`
+//	Options                  *Options            `yaml:"options,omitempty" json:"options,omitempty"`
+//	// swinch extra fields
+//	BakeStageRefIds string `yaml:"bakeStageRefIds,omitempty" json:"-"`
+//}
+
+//type ManualJudgment struct {
+//	FailPipeline   bool          `yaml:"failPipeline" json:"failPipeline"`
+//	IsNew          bool          `yaml:"isNew" json:"isNew"`
+//	JudgmentInputs []interface{} `yaml:"judgmentInputs" json:"judgmentInputs"`
+//	Notifications  []interface{} `yaml:"notifications" json:"notifications"`
+//}

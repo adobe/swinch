@@ -24,14 +24,16 @@ type PipelineSpec struct {
 	KeepWaitingPipelines bool          `yaml:"keepWaitingPipelines,omitempty" json:"keepWaitingPipelines,omitempty"`
 	LimitConcurrent      bool          `yaml:"limitConcurrent,omitempty" json:"limitConcurrent,omitempty"`
 	SpelEvaluator        string        `yaml:"spelEvaluator,omitempty" json:"spelEvaluator,omitempty"`
-	Stages               []StageSpec   `yaml:"stages" json:"stages"`
+	Stages               []map[string]interface{} `yaml:"stages" json:"stages"`
 	Triggers             []interface{} `yaml:"triggers,omitempty" json:"triggers,omitempty""`
 }
 
-func (p PipelineSpec) LoadSpec(spec []byte) PipelineSpec {
-	err := json.Unmarshal(spec, &p)
+
+func (s PipelineSpec) LoadSpec(spec []byte) PipelineSpec {
+	err := json.Unmarshal(spec, &s)
+
 	if err != nil {
 		log.Fatalf("Error LoadSpec: %v", err)
 	}
-	return p
+	return s
 }
