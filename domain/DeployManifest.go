@@ -13,7 +13,6 @@ governing permissions and limitations under the License.
 package domain
 
 import (
-	"fmt"
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 	"strconv"
@@ -38,17 +37,16 @@ type Deploy struct {
 	BakeStageRefIds string `yaml:"bakeStageRefIds,omitempty" json:"-"`
 }
 
-// SwinchDeployExtra add extra fields not present on Spinnaker struct
-type SwinchDeployExtra struct {
-	BakeStageRefIds string `yaml:"bakeStageRefIds,omitempty" json:"-"`
+// Moniker is part of Stages
+type Moniker struct {
+	App string `yaml:"app" json:"app"`
 }
 
 func (d *Deploy) DeployManifest(p *Pipeline) {
 	d.Moniker = new(Moniker)
 	d.Moniker.App = p.Metadata.Application
 	bakeStageIndex := new(int)
-	fmt.Println("deploy")
-	fmt.Println(d.RequisiteStageRefIds)
+
 	if d.BakeStageRefIds == "" {
 		// Presume a deploy stage has the bake stage as the first element in RequisiteStageRefIds
 		*bakeStageIndex = d.RequisiteStageRefIds[0]
@@ -66,9 +64,4 @@ func (d *Deploy) DeployManifest(p *Pipeline) {
 	}
 
 	d.ManifestArtifactId = bake.ExpectedArtifacts[0].Id
-}
-
-// Moniker is part of Stages
-type Moniker struct {
-	App string `yaml:"app" json:"app"`
 }

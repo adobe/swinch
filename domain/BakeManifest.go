@@ -14,36 +14,6 @@ package domain
 
 import "github.com/google/uuid"
 
-func (b *Bake) bakeManifest() {
-	//TODO check that index on ExpectedArtifacts is always 0
-	expectArtifacts := &b.ExpectedArtifacts[0]
-
-	//expectArtifacts ID used in deploy stages
-	expectArtifacts.Id = b.newUUID(expectArtifacts.DisplayName + b.Name).String()
-	//expectArtifacts.Id = b.newUUID(expectArtifacts.DisplayName + b.RefId).String()
-
-	//TODO check that MatchArtifact ID not used
-	//expectArtifacts.MatchArtifact.Id = NewUUID(expectArtifacts.MatchArtifact.Name+expectArtifacts.MatchArtifact.Type).String()
-
-	//TODO check InputArtifacts ID not used
-	//TODO check that index on InputArtifacts is always 0
-	//Deduplicate ArtifactAccount name
-	b.InputArtifacts[0].Artifact.ArtifactAccount = b.InputArtifacts[0].Account
-}
-
-func (b *Bake) newUUID(data string) uuid.UUID {
-	// Just a rand root uuid
-	namespace, _ := uuid.Parse("e8b764da-5fe5-51ed-8af8-c5c6eca28d7a")
-	return uuid.NewSHA1(namespace, []byte(data))
-}
-
-//Stage is part of Pipeline
-type Stage struct {
-	Name                 string `yaml:"name" json:"name"`
-	Type                 string `yaml:"type,omitempty" json:"type,omitempty"`
-	RefId                string `yaml:"refId,omitempty" json:"refId,omitempty"`
-	RequisiteStageRefIds []int  `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
-}
 
 type Bake struct {
 	Name                 string `yaml:"name" json:"name"`
@@ -94,4 +64,27 @@ type InputArtifacts struct {
 		Type            string  `yaml:"type" json:"type"`
 		Version         string  `yaml:"version" json:"version"`
 	} `yaml:"artifact" json:"artifact"`
+}
+
+func (b *Bake) BakeManifest() {
+	//TODO check that index on ExpectedArtifacts is always 0
+	expectArtifacts := &b.ExpectedArtifacts[0]
+
+	//expectArtifacts ID used in deploy stages
+	expectArtifacts.Id = b.newUUID(expectArtifacts.DisplayName + b.Name).String()
+	//expectArtifacts.Id = b.newUUID(expectArtifacts.DisplayName + b.RefId).String()
+
+	//TODO check that MatchArtifact ID not used
+	//expectArtifacts.MatchArtifact.Id = NewUUID(expectArtifacts.MatchArtifact.Name+expectArtifacts.MatchArtifact.Type).String()
+
+	//TODO check InputArtifacts ID not used
+	//TODO check that index on InputArtifacts is always 0
+	//Deduplicate ArtifactAccount name
+	b.InputArtifacts[0].Artifact.ArtifactAccount = b.InputArtifacts[0].Account
+}
+
+func (b *Bake) newUUID(data string) uuid.UUID {
+	// Just a rand root uuid
+	namespace, _ := uuid.Parse("e8b764da-5fe5-51ed-8af8-c5c6eca28d7a")
+	return uuid.NewSHA1(namespace, []byte(data))
 }
