@@ -87,23 +87,37 @@ func (p Pipeline) manifestActions(action string) {
 		p.Pipe = manifest.Metadata.Name
 		switch action {
 		case applyAction:
-			p.plan(manifest.Spec)
-			p.Save(p.WriteJSONTmp(manifest.Spec))
+			dryRun := false
+			p.save(manifest.Spec, dryRun)
 		case deleteAction:
 			p.Delete()
 		case planAction:
-			p.plan(manifest.Spec)
+			dryRun := true
+			p.save(manifest.Spec, dryRun)
 		default:
 			log.Fatalf("Bad application action")
 		}
 	}
 }
 
-func (p *Pipeline) plan(localData interface{}) {
-	log.Infof("Running plan on pipeline '%v' in application '%v'", p.Pipe, p.App)
+func (p *Pipeline) save(spec domain.PipelineSpec, dryRun bool) {
 	pipe := p.Get()
-	if len(pipe) != 0 && plan {
-		Plan(p.MarshalJSON(p.LoadSpec(p.Get())), p.MarshalJSON(localData))
+	changes := false
+	newPipe := false
+	if len(pipe) == 0 {
+		newPipe = true
+	} else {
+		changes = Changes(p.MarshalJSON(p.LoadSpec(pipe)), p.MarshalJSON(spec))
+	}
+
+	if changes && plan {
+		log.Infof("Planing changes for pipeline '%v' in application '%v'", p.Pipe, p.App)
+		DiffChanges(p.MarshalJSON(p.LoadSpec(pipe)), p.MarshalJSON(spec))
+	}
+
+	if !dryRun && (changes || newPipe) {
+		log.Infof("Saving pipeline '%v' in application '%v'", p.Pipe, p.App)
+		p.Save(p.WriteJSONTmp(spec))
 	}
 }
 

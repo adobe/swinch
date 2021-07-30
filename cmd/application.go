@@ -77,26 +77,41 @@ func (a Application) cmdActions(action string) {
 
 func (a Application) manifestActions(action string) {
 	for i := 0; i < len(a.manifests); i++ {
+		manifest := &a.manifests[i]
 		a.App = a.manifests[i].Metadata.Name
 		switch action {
 		case applyAction:
-			a.plan(a.manifests[i].Spec)
-			a.Save(a.WriteJSONTmp(a.manifests[i].Spec))
+			dryRun := false
+			a.save(manifest.Spec, dryRun)
 		case deleteAction:
 			a.Delete()
 		case planAction:
-			a.plan(a.manifests[i].Spec)
+			dryRun := true
+			a.save(manifest.Spec, dryRun)
 		default:
 			log.Fatalf("Bad application action")
 		}
 	}
 }
 
-func (a *Application) plan(localData interface{}) {
-	log.Infof("Running plan on application '%v'", a.App)
+func (a *Application) save(spec domain.ApplicationSpec, dryRun bool) {
 	app := a.Get()
-	if len(app) != 0 && plan {
-		Plan(a.MarshalJSON(a.LoadSpec(a.Get())), a.MarshalJSON(localData))
+	changes := false
+	newApp := false
+	if len(app) == 0 {
+		newApp = true
+	} else {
+		changes = Changes(a.MarshalJSON(a.LoadSpec(app)), a.MarshalJSON(spec))
+	}
+
+	if changes && plan {
+		log.Infof("Planing changes for application '%v'", a.App)
+		DiffChanges(a.MarshalJSON(a.LoadSpec(app)), a.MarshalJSON(spec))
+	}
+
+	if !dryRun && (changes || newApp) {
+		log.Infof("Saving application '%v'", a.App)
+		a.Save(a.WriteJSONTmp(spec))
 	}
 }
 

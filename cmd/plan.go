@@ -13,7 +13,9 @@ governing permissions and limitations under the License.
 package cmd
 
 import (
+	"bytes"
 	"github.com/danielcoman/diff"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"swinch/domain"
 )
@@ -51,6 +53,16 @@ func PlanCmd() {
 	}
 }
 
-func Plan(oldData, newData []byte) {
-	println(diff.LineDiff(string(oldData), string(newData)))
+func Changes(oldData, newData []byte) bool {
+	changes := bytes.Compare(oldData, newData)
+	if changes == 0 {
+		log.Infof("No changes detected")
+		return false
+	}
+
+	return true
+}
+
+func DiffChanges(oldData, newData []byte) {
+	log.Infof(diff.LineDiff(string(oldData), string(newData)))
 }
