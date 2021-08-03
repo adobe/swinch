@@ -36,7 +36,7 @@ var (
 )
 
 const (
-	SwinchVersion = "0.0.5"
+	SwinchVersion = "0.0.6"
 )
 
 const (
