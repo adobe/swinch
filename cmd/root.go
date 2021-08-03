@@ -22,16 +22,17 @@ import (
 )
 
 var (
-	cfgFile        string
-	logLevel       string
-	plan           bool
-	filePath       string
-	outputPath     string
-	valuesFilePath string
-	chartName      string
-	application    string
-	pipeline       string
-	chartPath      string
+	cfgFile         string
+	logLevel        string
+	plan            bool
+	filePath        string
+	outputPath      string
+	valuesFilePath  string
+	chartName       string
+	protectedImport bool
+	application     string
+	pipeline        string
+	chartPath       string
 )
 
 const (
