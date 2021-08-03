@@ -43,7 +43,7 @@ type Moniker struct {
 	App string `yaml:"app" json:"app"`
 }
 
-func (dm *DeployManifest) ProcessDeployManifest(p *Pipeline, stage *map[string]interface{}, metadata *StageMetadata)  {
+func (dm *DeployManifest) ProcessDeployManifest(p *Pipeline, stage *map[string]interface{}, metadata *StageMetadata) {
 	dm.decode(stage)
 	dm.expand(p, metadata)
 	dm.updateStage(stage)
@@ -98,4 +98,3 @@ func (dm *DeployManifest) decode(stage *map[string]interface{}) {
 		log.Fatalf("err: %v", err)
 	}
 }
-

@@ -39,7 +39,6 @@ type LabelSelectors struct {
 	} `yaml:"selectors" json:"selectors"`
 }
 
-
 func (delm *DeleteManifest) ProcessDeleteManifest(p *Pipeline, stage *map[string]interface{}, metadata *StageMetadata) {
 	delm.decode(stage)
 	delm.expand(p)

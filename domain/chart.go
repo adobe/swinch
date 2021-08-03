@@ -24,8 +24,8 @@ const (
 )
 
 type Chart struct {
-	OutputPath string
-	Kind       string
+	OutputPath      string
+	Kind            string
 	ProtectedImport bool
 	ChartMetadata
 	ChartValues

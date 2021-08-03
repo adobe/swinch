@@ -18,14 +18,14 @@ import (
 )
 
 type PipelineSpec struct {
-	Application          string        `yaml:"-" json:"application"`
-	Name                 string        `yaml:"-" json:"name"`
-	Index                int           `yaml:"index" json:"index"`
-	KeepWaitingPipelines bool          `yaml:"keepWaitingPipelines,omitempty" json:"keepWaitingPipelines,omitempty"`
-	LimitConcurrent      bool          `yaml:"limitConcurrent,omitempty" json:"limitConcurrent,omitempty"`
-	SpelEvaluator        string        `yaml:"spelEvaluator,omitempty" json:"spelEvaluator,omitempty"`
+	Application          string                   `yaml:"-" json:"application"`
+	Name                 string                   `yaml:"-" json:"name"`
+	Index                int                      `yaml:"index" json:"index"`
+	KeepWaitingPipelines bool                     `yaml:"keepWaitingPipelines,omitempty" json:"keepWaitingPipelines,omitempty"`
+	LimitConcurrent      bool                     `yaml:"limitConcurrent,omitempty" json:"limitConcurrent,omitempty"`
+	SpelEvaluator        string                   `yaml:"spelEvaluator,omitempty" json:"spelEvaluator,omitempty"`
 	Stages               []map[string]interface{} `yaml:"stages" json:"stages"`
-	Triggers             []interface{} `yaml:"triggers,omitempty" json:"triggers,omitempty""`
+	Triggers             []interface{}            `yaml:"triggers,omitempty" json:"triggers,omitempty""`
 }
 
 func (s PipelineSpec) LoadSpec(spec []byte) PipelineSpec {
