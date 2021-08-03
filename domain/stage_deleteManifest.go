@@ -28,7 +28,7 @@ type DeleteManifest struct {
 	Location string `yaml:"-" json:"location,omitempty"`
 	// Namespace not in spinnaker json struct
 	Namespace string `yaml:"namespace,omitempty" json:"-"`
-	//*LabelSelectors
+	*LabelSelectors
 }
 
 type LabelSelectors struct {

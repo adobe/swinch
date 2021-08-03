@@ -77,22 +77,21 @@ func (bm *BakeManifest) ProcessBakeManifest(stage *map[string]interface{}, metad
 }
 
 func (bm *BakeManifest) expand(metadata *StageMetadata) {
-	//TODO check that index on ExpectedArtifacts is always 0
+	// TODO check that index on ExpectedArtifacts is always 0
 	expectArtifacts := &bm.ExpectedArtifacts[0]
 
-	//expectArtifacts ID used in deploy stages
+	// expectArtifacts ID is used by the deploy stage
 	expectArtifacts.Id = bm.newUUID(expectArtifacts.DisplayName + bm.Name).String()
-	//expectArtifacts.Id = bm.newUUID(expectArtifacts.DisplayName + bm.RefId).String()
 
-	//TODO check that MatchArtifact ID not used
+	// TODO make sure MatchArtifact ID is not used
 	//expectArtifacts.MatchArtifact.Id = NewUUID(expectArtifacts.MatchArtifact.Name+expectArtifacts.MatchArtifact.Type).String()
 
-	//TODO check InputArtifacts ID not used
-	//TODO check that index on InputArtifacts is always 0
-	//Deduplicate ArtifactAccount name
+	// TODO check if InputArtifacts ID is used
+	// TODO check that index on InputArtifacts is always 0
+	// Deduplicate ArtifactAccount name
 	bm.InputArtifacts[0].Artifact.ArtifactAccount = bm.InputArtifacts[0].Account
 
-	//RefId is either specified by the user or generated based on the stage index
+	// RefId is either specified by the user or generated based on the stage index
 	bm.RefId = metadata.RefId
 }
 

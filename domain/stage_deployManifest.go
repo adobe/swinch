@@ -34,7 +34,7 @@ type DeployManifest struct {
 	Overrides          struct{}            `json:"overrides"`
 	Source             string              `json:"source"`
 
-	//SwinchDeployExtra
+	// Swinch only field
 	BakeStageRefIds *int `yaml:"bakeStageRefIds,omitempty" json:"-"`
 }
 
@@ -75,7 +75,7 @@ func (dm *DeployManifest) expand(p *Pipeline, metadata *StageMetadata) {
 
 	dm.ManifestArtifactId = bake.ExpectedArtifacts[0].Id
 
-	//RefId is either specified by the user or generated based on the stage index
+	// RefId is either specified by the user or generated based on the stage index
 	dm.RefId = metadata.RefId
 }
 
