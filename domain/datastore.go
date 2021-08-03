@@ -100,7 +100,7 @@ func (d Datastore) ReadYAMLDocs(yamlFilesBuffer *bytes.Buffer) ([]ApplicationMan
 		case PipelineKind:
 			pipe := Pipeline{}
 			pipe.LoadManifest(*manifest)
-			pipe.ExpandStagesSpec()
+			pipe.ProcessStages()
 			pipelines = append(pipelines, pipe.PipelineManifest)
 		default:
 			log.Fatalf("Error detecting manifest Kind")

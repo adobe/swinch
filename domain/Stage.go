@@ -40,17 +40,3 @@ func (sm *StageMetadata) getStageMetadata(p *Pipeline, i int) StageMetadata {
 
 	return *sm
 }
-
-//type TrafficManagement struct {
-//	Enabled bool `yaml:"enabled" json:"enabled"`
-//	Options struct {
-//		EnableTraffic bool          `yaml:"enableTraffic" json:"enableTraffic"`
-//		Services      []interface{} `yaml:"services" json:"services"`
-//	} `yaml:"options" json:"options"`
-//}
-//
-
-//
-//type Options struct {
-//	Cascading bool `yaml:"cascading" json:"cascading"`
-//}

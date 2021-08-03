@@ -33,7 +33,7 @@ const (
 )
 
 
-func (p *Pipeline) ExpandStagesSpec() {
+func (p *Pipeline) ProcessStages() {
 	for i := 0; i < len(p.Spec.Stages); i++ {
 		metadata := p.getStageMetadata(p, i)
 		stage := &p.Spec.Stages[i]
