@@ -12,69 +12,45 @@ governing permissions and limitations under the License.
 
 package domain
 
+import (
+	"github.com/mitchellh/mapstructure"
+	log "github.com/sirupsen/logrus"
+	"strconv"
+)
 
-//Stage is part of Pipeline
-type Stage struct {
+type StageMetadata struct {
 	Name                 string `yaml:"name" json:"name"`
 	Type                 string `yaml:"type,omitempty" json:"type,omitempty"`
 	RefId                string `yaml:"refId,omitempty" json:"refId,omitempty"`
 	RequisiteStageRefIds []int  `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 }
-type TypeManifest struct {
-	Namespace string `yaml:"namespace,omitempty" json:"namespace,omitempty"`
+
+func (sm *StageMetadata) getStageMetadata(p *Pipeline, i int) StageMetadata {
+	err := mapstructure.Decode(&p.Spec.Stages[i], sm)
+	if err != nil {
+
+		log.Fatalf("err: %v", err)
+	}
+
+	if sm.RefId == "" {
+		sm.RefId = strconv.Itoa(i + 1)
+	}
+
+	log.Debugf("Running stage: %v, RefId: %v", i, sm.RefId)
+
+	return *sm
 }
 
-//type ManifestStageToFix struct {
-//	Overrides                struct{}           `yaml:"overrides,omitempty" json:"overrides,omitempty"`
-//	RefId                    string             `yaml:"refId,omitempty" json:"refId,omitempty"`
-//	Account                  string             `yaml:"account,omitempty" json:"account,omitempty"`
-//	CloudProvider            string             `yaml:"cloudProvider,omitempty" json:"cloudProvider,omitempty"`
-//	ManifestArtifactId       string             `yaml:"-" json:"manifestArtifactId"`
-//	NamespaceOverride        string             `yaml:"namespaceOverride,omitempty" json:"namespaceOverride,omitempty"`
-//	SkipExpressionEvaluation bool               `yaml:"skipExpressionEvaluation,omitempty" json:"skipExpressionEvaluation,omitempty"`
-//	Source                   string             `yaml:"source,omitempty" json:"source,omitempty"`
-//	TrafficManagement        *TrafficManagement `yaml:"trafficManagement,omitempty" json:"trafficManagement,omitempty"`
-//	Kinds                    []string           `yaml:"kinds,omitempty" json:"kinds,omitempty"`
-//	LabelSelectors           *LabelSelectors    `yaml:"labelSelectors,omitempty" json:"labelSelectors,omitempty"`
-//	Mode                     string             `yaml:"mode,omitempty" json:"mode,omitempty"`
-//	Options                  *Options           `yaml:"options,omitempty" json:"options,omitempty"`
-//
+//type TrafficManagement struct {
+//	Enabled bool `yaml:"enabled" json:"enabled"`
+//	Options struct {
+//		EnableTraffic bool          `yaml:"enableTraffic" json:"enableTraffic"`
+//		Services      []interface{} `yaml:"services" json:"services"`
+//	} `yaml:"options" json:"options"`
 //}
+//
 
-// TrafficManagement is part of Stages
-type TrafficManagement struct {
-	Enabled bool `yaml:"enabled" json:"enabled"`
-	Options struct {
-		EnableTraffic bool          `yaml:"enableTraffic" json:"enableTraffic"`
-		Services      []interface{} `yaml:"services" json:"services"`
-	} `yaml:"options" json:"options"`
-}
-
-// LabelSelectors is part of Stages
-type LabelSelectors struct {
-	Selectors []struct {
-		Key    string   `yaml:"key" json:"key"`
-		Kind   string   `yaml:"kind" json:"kind"`
-		Values []string `yaml:"values" json:"values"`
-	} `yaml:"selectors" json:"selectors"`
-}
-
-// Options is part of Stages
-type Options struct {
-	Cascading bool `yaml:"cascading" json:"cascading"`
-}
-
-type DeleteManifest struct {
-	TypeManifest `yaml:",inline" json:"-"`
-	App          string `yaml:"-" json:"app,omitempty"`
-	Location     string `yaml:"-" json:"location,omitempty"`
-}
-
-
-
-//type ManualJudgment struct {
-//	FailPipeline   bool          `yaml:"failPipeline" json:"failPipeline"`
-//	IsNew          bool          `yaml:"isNew" json:"isNew"`
-//	JudgmentInputs []interface{} `yaml:"judgmentInputs" json:"judgmentInputs"`
-//	Notifications  []interface{} `yaml:"notifications" json:"notifications"`
+//
+//type Options struct {
+//	Cascading bool `yaml:"cascading" json:"cascading"`
 //}

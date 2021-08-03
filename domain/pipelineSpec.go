@@ -28,7 +28,6 @@ type PipelineSpec struct {
 	Triggers             []interface{} `yaml:"triggers,omitempty" json:"triggers,omitempty""`
 }
 
-
 func (s PipelineSpec) LoadSpec(spec []byte) PipelineSpec {
 	err := json.Unmarshal(spec, &s)
 

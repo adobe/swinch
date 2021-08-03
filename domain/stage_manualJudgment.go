@@ -12,17 +12,10 @@ governing permissions and limitations under the License.
 
 package domain
 
-type Delete struct {
-	Name                 string `yaml:"name" json:"name"`
-	Type                 string `yaml:"type,omitempty" json:"type,omitempty"`
-	RefId                string `yaml:"refId,omitempty" json:"refId,omitempty"`
-	RequisiteStageRefIds []int  `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 
-	App      string `yaml:"-" json:"app,omitempty"`
-	Location string `yaml:"-" json:"location,omitempty"`
-}
-
-func (del *Delete) DeleteManifest(p *Pipeline) {
-	del.App = p.Metadata.Application
-	del.Location = p.Namespace
+type ManualJudgment struct {
+	FailPipeline   bool          `yaml:"failPipeline" json:"failPipeline"`
+	IsNew          bool          `yaml:"isNew" json:"isNew"`
+	JudgmentInputs []interface{} `yaml:"judgmentInputs" json:"judgmentInputs"`
+	Notifications  []interface{} `yaml:"notifications" json:"notifications"`
 }

@@ -12,13 +12,17 @@ governing permissions and limitations under the License.
 
 package domain
 
-import "github.com/google/uuid"
+import (
+	"encoding/json"
+	"github.com/google/uuid"
+	"github.com/mitchellh/mapstructure"
+	log "github.com/sirupsen/logrus"
+)
 
-
-type Bake struct {
+type BakeManifest struct {
 	Name                 string `yaml:"name" json:"name"`
 	Type                 string `yaml:"type,omitempty" json:"type,omitempty"`
-	RefId                string `yaml:"refId,omitempty" json:"refId,omitempty"`
+	RefId                string `yaml:"refId,omitempty" json:"refId"`
 	RequisiteStageRefIds []int  `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 
 	OutputName         string              `json:"outputName"`
@@ -66,13 +70,19 @@ type InputArtifacts struct {
 	} `yaml:"artifact" json:"artifact"`
 }
 
-func (b *Bake) BakeManifest() {
+func (bm *BakeManifest) ProcessBakeManifest(stage *map[string]interface{}, metadata *StageMetadata) {
+	bm.decode(stage)
+	bm.expand(metadata)
+	bm.updateStage(stage)
+}
+
+func (bm *BakeManifest) expand(metadata *StageMetadata) {
 	//TODO check that index on ExpectedArtifacts is always 0
-	expectArtifacts := &b.ExpectedArtifacts[0]
+	expectArtifacts := &bm.ExpectedArtifacts[0]
 
 	//expectArtifacts ID used in deploy stages
-	expectArtifacts.Id = b.newUUID(expectArtifacts.DisplayName + b.Name).String()
-	//expectArtifacts.Id = b.newUUID(expectArtifacts.DisplayName + b.RefId).String()
+	expectArtifacts.Id = bm.newUUID(expectArtifacts.DisplayName + bm.Name).String()
+	//expectArtifacts.Id = bm.newUUID(expectArtifacts.DisplayName + bm.RefId).String()
 
 	//TODO check that MatchArtifact ID not used
 	//expectArtifacts.MatchArtifact.Id = NewUUID(expectArtifacts.MatchArtifact.Name+expectArtifacts.MatchArtifact.Type).String()
@@ -80,11 +90,34 @@ func (b *Bake) BakeManifest() {
 	//TODO check InputArtifacts ID not used
 	//TODO check that index on InputArtifacts is always 0
 	//Deduplicate ArtifactAccount name
-	b.InputArtifacts[0].Artifact.ArtifactAccount = b.InputArtifacts[0].Account
+	bm.InputArtifacts[0].Artifact.ArtifactAccount = bm.InputArtifacts[0].Account
+
+	//RefId is either specified by the user or generated based on the stage index
+	bm.RefId = metadata.RefId
 }
 
-func (b *Bake) newUUID(data string) uuid.UUID {
+func (bm *BakeManifest) newUUID(data string) uuid.UUID {
 	// Just a rand root uuid
 	namespace, _ := uuid.Parse("e8b764da-5fe5-51ed-8af8-c5c6eca28d7a")
 	return uuid.NewSHA1(namespace, []byte(data))
+}
+
+func (bm *BakeManifest) updateStage(stage *map[string]interface{}) {
+	d := Datastore{}
+	buffer := d.MarshalJSON(bm)
+	stageMap := new(map[string]interface{})
+	err := json.Unmarshal(buffer, stageMap)
+	if err != nil {
+		log.Fatalf("Failed to unmarshal JSON:  %v", err)
+
+	}
+
+	*stage = *stageMap
+}
+
+func (bm *BakeManifest) decode(stage *map[string]interface{}) {
+	err := mapstructure.Decode(stage, *bm)
+	if err != nil {
+		log.Fatalf("err: %v", err)
+	}
 }
