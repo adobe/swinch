@@ -15,6 +15,7 @@ package spincli
 import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"swinch/cmd/config"
 )
 
 type ApplicationAPI struct {
@@ -24,6 +25,7 @@ type ApplicationAPI struct {
 
 var baseArgs = []string{
 	"--no-color=false",
+	"--config", config.HomeFolder()+config.CfgFolderName+config.CfgSpinFileName,
 }
 
 func (a *ApplicationAPI) NotFound() error {
@@ -31,7 +33,7 @@ func (a *ApplicationAPI) NotFound() error {
 }
 
 func (a *ApplicationAPI) deleteNotFound() error {
-	return fmt.Errorf("Attempting to delete application '%v' which does not exist, exiting...", a.App)
+	return fmt.Errorf("attempting to delete application '%v' which does not exist, exiting", a.App)
 }
 
 func (a *ApplicationAPI) Get() []byte {

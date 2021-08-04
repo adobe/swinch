@@ -111,7 +111,7 @@ func (d Datastore) ReadYAMLDocs(yamlFilesBuffer *bytes.Buffer) ([]ApplicationMan
 
 func (d Datastore) WriteJSON(data interface{}, outputPath string) {
 	byteData := d.MarshalJSON(data)
-	d.writeFile(outputPath, byteData)
+	d.WriteFile(outputPath, byteData, FilePerm)
 }
 
 func (d Datastore) WriteJSONTmp(data interface{}) (filePath string) {
@@ -120,8 +120,8 @@ func (d Datastore) WriteJSONTmp(data interface{}) (filePath string) {
 }
 
 func (d Datastore) WriteYAML(data interface{}, outputPath string) {
-	byteData := d.marshalYAML(data)
-	d.writeFile(outputPath, byteData)
+	byteData := d.MarshalYAML(data)
+	d.WriteFile(outputPath, byteData, FilePerm)
 }
 
 // Utils
@@ -143,7 +143,7 @@ func (d Datastore) UnmarshalJSON(data []byte) []byte {
 	return *buffer
 }
 
-func (d *Datastore) marshalYAML(data interface{}) []byte {
+func (d *Datastore) MarshalYAML(data interface{}) []byte {
 	byteData := new(bytes.Buffer)
 	yamlEncoder := yaml.NewEncoder(byteData)
 	yamlEncoder.SetIndent(2)
@@ -191,25 +191,25 @@ func (d Datastore) ReadFile(filePath string) []byte {
 	return byteData
 }
 
-func (d Datastore) writeFile(outputPath string, byteData []byte) {
+func (d Datastore) WriteFile(outputPath string, byteData []byte, perm int) {
 	filePath := path.Join(outputPath)
-	err := os.WriteFile(filePath, byteData, FilePerm)
+	err := os.WriteFile(filePath, byteData, os.FileMode(perm))
 	if err != nil {
 		log.Fatalf("Failed to write:  %v in path: %v", err, filePath)
 		log.Debugf("Writing: %v", byteData)
 	}
 }
 
-func (d Datastore) Mkdir(path string) {
+func (d Datastore) Mkdir(path string, perm int) {
 	if _, errStat := os.Stat(path); os.IsNotExist(errStat) {
-		err := os.MkdirAll(path, FilePerm)
+		err := os.MkdirAll(path, os.FileMode(perm))
 		if err != nil {
 			log.Fatalf("Error mkdir:  %v", err)
 		}
 	}
 }
 
-func (d Datastore) fileExists(path string) bool {
+func (d Datastore) FileExists(path string) bool {
 	if _, errStat := os.Stat(path); os.IsNotExist(errStat) {
 		return false
 	} else {
