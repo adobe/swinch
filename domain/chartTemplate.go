@@ -43,7 +43,7 @@ func (t Template) RenderChart(chartPath, valuesFile, outputPath string) {
 		}
 
 		d := Datastore{}
-		d.Mkdir(path.Join(outputPath))
+		d.Mkdir(path.Join(outputPath), FilePerm)
 		outFile, err := os.Create(path.Join(outputPath, chartFile.Name()))
 		if err != nil {
 			log.Fatalf("Error in output files: %v", err)

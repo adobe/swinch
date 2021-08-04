@@ -41,7 +41,7 @@ type ApplicationMetadata struct {
 
 func (am *ApplicationManifest) LoadManifest(manifest interface{}) {
 	d := Datastore{}
-	err := yaml.Unmarshal(d.marshalYAML(manifest), &am)
+	err := yaml.Unmarshal(d.MarshalYAML(manifest), &am)
 	if err != nil {
 		log.Fatalf("Error LoadManifest: %v", err)
 	}

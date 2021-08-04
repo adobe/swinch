@@ -16,20 +16,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// importCmd represents the import command
-var importCmd = &cobra.Command{
-	Use:   "import",
-	Short: "Import a chart from spinnaker",
-	Long:  `Import a chart from spinnaker`,
+// configCmd represents the config command
+var configCmd = &cobra.Command{
+	Use:   "config",
+	Short: "Tweak swinch config",
+	Long:  `Tweak swinch config - setup is similar with kubernetes kubeconfig; one can easily define multiple contexts and switch between them`,
+	Example: `Steps to initialize a custom config:
+	swinch config generate (generates a mock config file with some example entries)
+	swinch config add-context (add a new real context)
+	swinch config use-context (select the real context to use)
+	swinch config delete-context (delete the example entries)`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
+
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		// import only used with additional child commands
 		cmd.Help()
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(importCmd)
+	rootCmd.AddCommand(configCmd)
 }

@@ -35,10 +35,10 @@ type Chart struct {
 // Import
 
 func (c Chart) GenerateChart(manifest interface{}) {
-	if c.fileExists(path.Join(c.OutputPath, c.ChartMetadata.Name, ChartValuesFile)) && c.ProtectedImport {
+	if c.FileExists(path.Join(c.OutputPath, c.ChartMetadata.Name, ChartValuesFile)) && c.ProtectedImport {
 		log.Fatalf("Cannot import over an existing chart, values file present in path '%s'", path.Join(c.OutputPath, c.ChartMetadata.Name, ChartValuesFile))
 	} else {
-		c.Mkdir(path.Join(c.OutputPath, c.ChartMetadata.Name, "/", ChartTemplatesFolder))
+		c.Mkdir(path.Join(c.OutputPath, c.ChartMetadata.Name, "/", ChartTemplatesFolder), FilePerm)
 		c.WriteChartMetadata()
 		c.WriteChartValues()
 		c.WriteManifest(manifest)
