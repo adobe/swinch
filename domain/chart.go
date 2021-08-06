@@ -24,8 +24,9 @@ const (
 )
 
 type Chart struct {
-	OutputPath string
-	Kind       string
+	OutputPath      string
+	Kind            string
+	ProtectedImport bool
 	ChartMetadata
 	ChartValues
 	Datastore
@@ -34,10 +35,9 @@ type Chart struct {
 // Import
 
 func (c Chart) GenerateChart(manifest interface{}) {
-	switch c.fileExists(path.Join(c.OutputPath, c.ChartMetadata.Name, ChartValuesFile)) {
-	case true:
+	if c.fileExists(path.Join(c.OutputPath, c.ChartMetadata.Name, ChartValuesFile)) && c.ProtectedImport {
 		log.Fatalf("Cannot import over an existing chart, values file present in path '%s'", path.Join(c.OutputPath, c.ChartMetadata.Name, ChartValuesFile))
-	case false:
+	} else {
 		c.Mkdir(path.Join(c.OutputPath, c.ChartMetadata.Name, "/", ChartTemplatesFolder))
 		c.WriteChartMetadata()
 		c.WriteChartValues()

@@ -22,7 +22,7 @@ import (
 var installCmd = &cobra.Command{
 	Use:   "install",
 	Short: "Installs a swinch chart",
-	Long: `Installs a swinch chart.`,
+	Long:  `Installs a swinch chart.`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
 	},
