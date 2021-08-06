@@ -1,0 +1,4 @@
+application:
+  name: swinchuuidtest
+  email: dcoman@adobe.com
+  ldap: "add_spinnaker_team_ldap"
