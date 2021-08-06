@@ -15,7 +15,6 @@ package domain
 import (
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
-	"strconv"
 )
 
 type StageMetadata struct {
@@ -25,9 +24,8 @@ type StageMetadata struct {
 	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 }
 
-func (sm *StageMetadata) getStageMetadata(stage *map[string]interface{}, i int) StageMetadata {
+func (sm *StageMetadata) getStageMetadata(stage *map[string]interface{}) StageMetadata {
 	sm.decode(stage)
-	sm.expand(i)
 	return *sm
 }
 
@@ -41,11 +39,5 @@ func (sm *StageMetadata) decode(stage *map[string]interface{}) {
 	err = decoder.Decode(stage)
 	if err != nil {
 		log.Fatalf("err: %v", err)
-	}
-}
-
-func (sm *StageMetadata) expand(i int) {
-	if sm.RefId == "" {
-		sm.RefId = strconv.Itoa(i + 1)
 	}
 }

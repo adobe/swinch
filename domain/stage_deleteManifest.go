@@ -24,6 +24,7 @@ type DeleteManifest struct {
 	RefId                string   `yaml:"refId,omitempty" json:"refId"`
 	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 
+	Account  string `yaml:"account,omitempty" json:"account,omitempty"`
 	App      string `yaml:"-" json:"app,omitempty"`
 	Location string `yaml:"-" json:"location,omitempty"`
 	// Namespace not in spinnaker json struct
@@ -41,7 +42,7 @@ type LabelSelectors struct {
 
 func (delm *DeleteManifest) ProcessDeleteManifest(p *Pipeline, stage *map[string]interface{}, metadata *StageMetadata) {
 	delm.decode(p, stage)
-	delm.expand(p)
+	delm.expand(p, metadata)
 	delm.updateStage(stage)
 }
 
@@ -58,13 +59,16 @@ func (delm *DeleteManifest) decode(p *Pipeline, stage *map[string]interface{}) {
 	}
 }
 
-func (delm *DeleteManifest) expand(p *Pipeline) {
+func (delm *DeleteManifest) expand(p *Pipeline, metadata *StageMetadata) {
 	delm.App = p.Metadata.Application
 	if delm.Location != "" {
 		delm.Namespace = delm.Location
 	} else if delm.Namespace != "" {
 		delm.Location = delm.Namespace
 	}
+
+	// RefId is either specified by the user or generated based on the stage index
+	delm.RefId = metadata.RefId
 }
 
 func (delm *DeleteManifest) updateStage(stage *map[string]interface{}) {

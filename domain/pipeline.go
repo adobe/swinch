@@ -14,6 +14,7 @@ package domain
 
 import (
 	log "github.com/sirupsen/logrus"
+	"strconv"
 )
 
 type Pipeline struct {
@@ -35,7 +36,9 @@ const (
 func (p *Pipeline) ProcessStages() {
 	for i := 0; i < len(p.Spec.Stages); i++ {
 		stage := &p.Spec.Stages[i]
-		metadata := p.getStageMetadata(stage, i)
+		metadata := p.getStageMetadata(stage)
+		metadata.RefId = strconv.Itoa(i+1)
+
 		switch metadata.Type {
 		case bakeManifest:
 			p.ProcessBakeManifest(p, stage, &metadata)

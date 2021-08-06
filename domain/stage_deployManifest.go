@@ -25,7 +25,7 @@ type DeployManifest struct {
 	RefId                string   `yaml:"refId,omitempty" json:"refId"`
 	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 
-	Account            string              `json:"account"`
+	Account            string              `yaml:"account,omitempty" json:"account,omitempty"`
 	ExpectedArtifacts  []ExpectedArtifacts `yaml:"expectedArtifacts,omitempty" json:"expectedArtifacts,omitempty"`
 	CloudProvider      string              `json:"cloudProvider"`
 	ManifestArtifactId string              `json:"manifestArtifactId"`
