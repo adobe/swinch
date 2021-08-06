@@ -23,7 +23,7 @@ import (
 var uninstallCmd = &cobra.Command{
 	Use:   "uninstall",
 	Short: "Uninstalls a swinch chart",
-	Long: `Uninstalls a swinch chart.`,
+	Long:  `Uninstalls a swinch chart.`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
 	},

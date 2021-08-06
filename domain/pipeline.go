@@ -20,26 +20,34 @@ import (
 type Pipeline struct {
 	PipelineManifest
 	PipelineSpec
+	StageMetadata
+	BakeManifest
+	DeployManifest
+	DeleteManifest
 }
 
 const (
 	bakeManifest   = "bakeManifest"
 	deployManifest = "deployManifest"
 	deleteManifest = "deleteManifest"
+	manualJudgment = "manualJudgment"
 )
 
-func (p *Pipeline) ExpandSpec() {
+func (p *Pipeline) ProcessStages() {
 	for i := 0; i < len(p.Spec.Stages); i++ {
 		stage := &p.Spec.Stages[i]
-		stage.RefId = strconv.Itoa(i + 1)
-		log.Debugf("Running stage: %v, RefId: %v", i, stage.RefId)
-		switch stage.Type {
+		metadata := p.getStageMetadata(stage)
+		metadata.RefId = strconv.Itoa(i+1)
+
+		switch metadata.Type {
 		case bakeManifest:
-			stage.bakeManifest()
+			p.ProcessBakeManifest(p, stage, &metadata)
 		case deployManifest:
-			stage.deployManifest(p)
+			p.ProcessDeployManifest(p, stage, &metadata)
 		case deleteManifest:
-			stage.deleteManifest(p)
+			p.ProcessDeleteManifest(p, stage, &metadata)
+		default:
+			log.Fatalf("Failed to detect stage type: %v", metadata.Type)
 		}
 	}
 }

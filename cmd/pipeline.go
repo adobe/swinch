@@ -44,6 +44,7 @@ func init() {
 	ImportPipeCmd.Flags().StringVarP(&filePath, "filePath", "f", "", "JSON file input")
 	ImportPipeCmd.Flags().StringVarP(&outputPath, "outputPath", "o", "", "Generated chart output path")
 	ImportPipeCmd.Flags().StringVarP(&chartName, "chartName", "n", "", "Specify chart name for imported pipeline")
+	ImportPipeCmd.Flags().BoolVarP(&protectedImport, "protectedImport", "", false, "Protect already created chart from overwriting")
 	ImportPipeCmd.MarkFlagRequired("application")
 	ImportPipeCmd.MarkFlagRequired("pipeline")
 	ImportPipeCmd.MarkFlagRequired("outputPath")
@@ -123,6 +124,7 @@ func (p *Pipeline) save(spec domain.PipelineSpec, dryRun bool) {
 
 func (p *Pipeline) importChart() {
 	p.OutputPath = outputPath
+	p.ProtectedImport = protectedImport
 	p.Kind = "pipeline"
 
 	data := new([]byte)
