@@ -28,8 +28,12 @@ type DeleteManifest struct {
 	App      string `yaml:"-" json:"app,omitempty"`
 	Location string `yaml:"-" json:"location,omitempty"`
 	// Namespace not in spinnaker json struct
-	Namespace string `yaml:"namespace,omitempty" json:"-"`
-	*LabelSelectors
+	Namespace      string          `yaml:"namespace,omitempty" json:"-"`
+	Kinds          []string        `yaml:"kinds,omitempty" json:"kinds,omitempty"`
+	LabelSelectors *LabelSelectors `yaml:"labelSelectors,omitempty" json:"labelSelectors,omitempty"`
+	Options        *Options        `yaml:"options,omitempty" json:"options,omitempty"`
+	Mode           string          `yaml:"mode,omitempty" json:"mode,omitempty"`
+	//Overrides      struct{}        `yaml:"overrides,omitempty" json:"overrides,omitempty"`
 }
 
 type LabelSelectors struct {
@@ -38,6 +42,10 @@ type LabelSelectors struct {
 		Kind   string   `yaml:"kind" json:"kind"`
 		Values []string `yaml:"values" json:"values"`
 	} `yaml:"selectors" json:"selectors"`
+}
+
+type Options struct {
+	Cascading bool `yaml:"cascading" json:"cascading"`
 }
 
 func (delm *DeleteManifest) ProcessDeleteManifest(p *Pipeline, stage *map[string]interface{}, metadata *StageMetadata) {
