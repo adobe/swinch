@@ -20,10 +20,10 @@ import (
 )
 
 type BakeManifest struct {
-	Name                 string `yaml:"name" json:"name"`
-	Type                 string `yaml:"type,omitempty" json:"type,omitempty"`
-	RefId                string `yaml:"refId,omitempty" json:"refId"`
-	RequisiteStageRefIds []int  `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
+	Name                 string   `yaml:"name" json:"name"`
+	Type                 string   `yaml:"type,omitempty" json:"type,omitempty"`
+	RefId                string   `yaml:"refId,omitempty" json:"refId"`
+	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 
 	OutputName         string              `json:"outputName"`
 	ExpectedArtifacts  []ExpectedArtifacts `yaml:"expectedArtifacts,omitempty" json:"expectedArtifacts,omitempty"`
@@ -70,10 +70,24 @@ type InputArtifacts struct {
 	} `yaml:"artifact" json:"artifact"`
 }
 
-func (bm *BakeManifest) ProcessBakeManifest(stage *map[string]interface{}, metadata *StageMetadata) {
+func (bm *BakeManifest) ProcessBakeManifest(p *Pipeline, stage *map[string]interface{}, metadata *StageMetadata) {
 	bm.decode(stage)
 	bm.expand(metadata)
 	bm.updateStage(stage)
+}
+
+func (bm *BakeManifest) decode(stage *map[string]interface{}) {
+	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &bm}
+	decoder, err := mapstructure.NewDecoder(&decoderConfig)
+
+	if err != nil {
+		log.Fatalf("err: %v", err)
+	}
+
+	err = decoder.Decode(stage)
+	if err != nil {
+		log.Fatalf("err: %v", err)
+	}
 }
 
 func (bm *BakeManifest) expand(metadata *StageMetadata) {
@@ -108,15 +122,7 @@ func (bm *BakeManifest) updateStage(stage *map[string]interface{}) {
 	err := json.Unmarshal(buffer, stageMap)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
-
 	}
 
 	*stage = *stageMap
-}
-
-func (bm *BakeManifest) decode(stage *map[string]interface{}) {
-	err := mapstructure.Decode(stage, *bm)
-	if err != nil {
-		log.Fatalf("err: %v", err)
-	}
 }

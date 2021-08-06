@@ -14,16 +14,16 @@ package domain
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
+	"strconv"
 )
 
 type DeployManifest struct {
-	Name                 string `yaml:"name" json:"name"`
-	Type                 string `yaml:"type,omitempty" json:"type,omitempty"`
-	RefId                string `yaml:"refId,omitempty" json:"refId"`
-	RequisiteStageRefIds []int  `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
+	Name                 string   `yaml:"name" json:"name"`
+	Type                 string   `yaml:"type,omitempty" json:"type,omitempty"`
+	RefId                string   `yaml:"refId,omitempty" json:"refId"`
+	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 
 	Account            string              `json:"account"`
 	ExpectedArtifacts  []ExpectedArtifacts `yaml:"expectedArtifacts,omitempty" json:"expectedArtifacts,omitempty"`
@@ -44,13 +44,25 @@ type Moniker struct {
 }
 
 func (dm *DeployManifest) ProcessDeployManifest(p *Pipeline, stage *map[string]interface{}, metadata *StageMetadata) {
-	dm.decode(stage)
+	dm.decode(p, stage)
 	dm.expand(p, metadata)
 	dm.updateStage(stage)
 }
 
+func (dm *DeployManifest) decode(p *Pipeline, stage *map[string]interface{}) {
+	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &dm}
+	decoder, err := mapstructure.NewDecoder(&decoderConfig)
+	if err != nil {
+		log.Fatalf("err: %v", err)
+	}
+
+	err = decoder.Decode(stage)
+	if err != nil {
+		log.Fatalf("err: %v", err)
+	}
+}
+
 func (dm *DeployManifest) expand(p *Pipeline, metadata *StageMetadata) {
-	fmt.Println(dm.RefId)
 	dm.Moniker = new(Moniker)
 	dm.Moniker.App = p.Metadata.Application
 	bakeStageIndex := new(int)
@@ -58,7 +70,7 @@ func (dm *DeployManifest) expand(p *Pipeline, metadata *StageMetadata) {
 	// Bind deploy stage to a specific bake
 	if dm.BakeStageRefIds == nil {
 		// Presume a deploy stage has the bake stage as the first element in RequisiteStageRefIds
-		*bakeStageIndex = dm.RequisiteStageRefIds[0]
+		*bakeStageIndex, _ = strconv.Atoi(dm.RequisiteStageRefIds[0])
 	} else {
 		*bakeStageIndex = *dm.BakeStageRefIds
 	}
@@ -86,15 +98,7 @@ func (dm *DeployManifest) updateStage(stage *map[string]interface{}) {
 	err := json.Unmarshal(buffer, stageMap)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
-
 	}
 
 	*stage = *stageMap
-}
-
-func (dm *DeployManifest) decode(stage *map[string]interface{}) {
-	err := mapstructure.Decode(stage, *dm)
-	if err != nil {
-		log.Fatalf("err: %v", err)
-	}
 }

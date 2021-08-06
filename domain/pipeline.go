@@ -34,11 +34,11 @@ const (
 
 func (p *Pipeline) ProcessStages() {
 	for i := 0; i < len(p.Spec.Stages); i++ {
-		metadata := p.getStageMetadata(p, i)
 		stage := &p.Spec.Stages[i]
+		metadata := p.getStageMetadata(stage, i)
 		switch metadata.Type {
 		case bakeManifest:
-			p.ProcessBakeManifest(stage, &metadata)
+			p.ProcessBakeManifest(p, stage, &metadata)
 		case deployManifest:
 			p.ProcessDeployManifest(p, stage, &metadata)
 		case deleteManifest:

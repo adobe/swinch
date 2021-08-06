@@ -19,24 +19,33 @@ import (
 )
 
 type StageMetadata struct {
-	Name                 string `yaml:"name" json:"name"`
-	Type                 string `yaml:"type,omitempty" json:"type,omitempty"`
-	RefId                string `yaml:"refId,omitempty" json:"refId,omitempty"`
-	RequisiteStageRefIds []int  `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
+	Name                 string   `yaml:"name" json:"name"`
+	Type                 string   `yaml:"type,omitempty" json:"type,omitempty"`
+	RefId                string   `yaml:"refId,omitempty" json:"refId,omitempty"`
+	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 }
 
-func (sm *StageMetadata) getStageMetadata(p *Pipeline, i int) StageMetadata {
-	err := mapstructure.Decode(&p.Spec.Stages[i], sm)
-	if err != nil {
+func (sm *StageMetadata) getStageMetadata(stage *map[string]interface{}, i int) StageMetadata {
+	sm.decode(stage)
+	sm.expand(i)
+	return *sm
+}
 
+func (sm *StageMetadata) decode(stage *map[string]interface{}) {
+	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &sm}
+	decoder, err := mapstructure.NewDecoder(&decoderConfig)
+	if err != nil {
 		log.Fatalf("err: %v", err)
 	}
 
+	err = decoder.Decode(stage)
+	if err != nil {
+		log.Fatalf("err: %v", err)
+	}
+}
+
+func (sm *StageMetadata) expand(i int) {
 	if sm.RefId == "" {
 		sm.RefId = strconv.Itoa(i + 1)
 	}
-
-	log.Debugf("Running stage: %v, RefId: %v", i, sm.RefId)
-
-	return *sm
 }

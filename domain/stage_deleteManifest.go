@@ -19,10 +19,10 @@ import (
 )
 
 type DeleteManifest struct {
-	Name                 string `yaml:"name" json:"name"`
-	Type                 string `yaml:"type,omitempty" json:"type,omitempty"`
-	RefId                string `yaml:"refId,omitempty" json:"refId"`
-	RequisiteStageRefIds []int  `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
+	Name                 string   `yaml:"name" json:"name"`
+	Type                 string   `yaml:"type,omitempty" json:"type,omitempty"`
+	RefId                string   `yaml:"refId,omitempty" json:"refId"`
+	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 
 	App      string `yaml:"-" json:"app,omitempty"`
 	Location string `yaml:"-" json:"location,omitempty"`
@@ -40,9 +40,22 @@ type LabelSelectors struct {
 }
 
 func (delm *DeleteManifest) ProcessDeleteManifest(p *Pipeline, stage *map[string]interface{}, metadata *StageMetadata) {
-	delm.decode(stage)
+	delm.decode(p, stage)
 	delm.expand(p)
 	delm.updateStage(stage)
+}
+
+func (delm *DeleteManifest) decode(p *Pipeline, stage *map[string]interface{}) {
+	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &delm}
+	decoder, err := mapstructure.NewDecoder(&decoderConfig)
+	if err != nil {
+		log.Fatalf("err: %v", err)
+	}
+
+	err = decoder.Decode(stage)
+	if err != nil {
+		log.Fatalf("err: %v", err)
+	}
 }
 
 func (delm *DeleteManifest) expand(p *Pipeline) {
@@ -54,13 +67,6 @@ func (delm *DeleteManifest) expand(p *Pipeline) {
 	}
 }
 
-func (delm *DeleteManifest) decode(stage *map[string]interface{}) {
-	err := mapstructure.Decode(stage, *delm)
-	if err != nil {
-		log.Fatalf("err: %v", err)
-	}
-}
-
 func (delm *DeleteManifest) updateStage(stage *map[string]interface{}) {
 	d := Datastore{}
 	buffer := d.MarshalJSON(delm)
@@ -68,7 +74,6 @@ func (delm *DeleteManifest) updateStage(stage *map[string]interface{}) {
 	err := json.Unmarshal(buffer, stageMap)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
-
 	}
 
 	*stage = *stageMap
