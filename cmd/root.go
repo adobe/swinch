@@ -93,7 +93,7 @@ func initConfig() {
 			log.Debugf("Using config file: '%s' with current-context as '%s'", viper.ConfigFileUsed(), viper.Get("current-context.name"))
 			contextExists := config.ValidateCurrentContext()
 			if contextExists != true {
-				log.Fatalf("The context set as current-context '%s' is not valid (missing fields) OR does not exist in the contexts list; run 'swinch config use-context' to select a valid context", viper.Get("current-context.name"))
+				log.Errorf("The context set as current-context '%s' is not valid (missing fields) OR does not exist in the contexts list; run 'swinch config use-context' to select a valid context", viper.Get("current-context.name"))
 			}
 		} else {
 			log.Fatalf("A parsing error detected in '%s': '%s'", viper.ConfigFileUsed(), err)

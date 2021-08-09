@@ -45,14 +45,14 @@ func generateConfig() {
 			Endpoint: "https://spinnaker-dev-api.example.com",
 			Auth:     "ldap",
 			Username: "username",
-			Password: config.Base64Actions("encode", "base64EncodedPassword"),
+			Password: config.Base64Encode("base64EncodedPassword"),
 		},
 		{
 			Name:     "spinnaker-prod",
 			Endpoint: "https://spinnaker-prod-api.example.com",
 			Auth:     "basic",
 			Username: "username",
-			Password: config.Base64Actions("encode", "base64EncodedPassword"),
+			Password: config.Base64Encode("base64EncodedPassword"),
 		},
 	}
 

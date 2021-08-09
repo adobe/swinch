@@ -154,7 +154,7 @@ func addNewContext(fields map[string]string) {
 		Endpoint: fields["endpoint"],
 		Auth:     fields["auth"],
 		Username: fields["username"],
-		Password: config.Base64Actions("encode", fields["password"]),
+		Password: config.Base64Encode(fields["password"]),
 	}
 
 	ctx = append(ctx, newContext)
