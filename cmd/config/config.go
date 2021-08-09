@@ -84,10 +84,10 @@ func (scf SpinConfigFile) GenerateSpinConfigFile() {
 			switch context.Auth {
 			case "ldap":
 				cfg.Auth.Ldap.Username = context.Username
-				cfg.Auth.Ldap.Password = Base64Actions("decode", context.Password)
+				cfg.Auth.Ldap.Password = Base64Decode(context.Password)
 			case "basic":
 				cfg.Auth.Basic.Username = context.Username
-				cfg.Auth.Basic.Password = Base64Actions("decode", context.Password)
+				cfg.Auth.Basic.Password = Base64Decode(context.Password)
 			}
 		}
 	}
@@ -103,45 +103,37 @@ func (cd ContextDefinition) GetContexts() ([]ContextDefinition, []string) {
 
 	if err := viper.UnmarshalKey("contexts", &ctx); err != nil {
 		log.Fatalf("Error reading contexts: %s", err)
-		return nil, nil
-	} else {
-		// ctxList string slice needed by promptui; adding to list only contexts with all the fields set
-		for _, v := range ctx {
-			if v.Name != "" && v.Endpoint != "" && v.Auth != "" && v.Username != "" && v.Password != "" {
-				ctxList = append(ctxList, v.Name)
-			}
-		}
-		return ctx, ctxList
 	}
+
+	// ctxList string slice needed by promptui; adding to list only contexts with all the fields set
+	for _, v := range ctx {
+		if v.Name != "" && v.Endpoint != "" && v.Auth != "" && v.Username != "" && v.Password != "" {
+			ctxList = append(ctxList, v.Name)
+		}
+	}
+	return ctx, ctxList
 }
 
 func (cc CurrentContext) GetCurrentContext() string {
-	var currentCtx CurrentContext
-	if err := viper.UnmarshalKey("current-context", &currentCtx); err != nil {
+	if err := viper.UnmarshalKey("current-context", &cc); err != nil {
 		log.Fatalf("Error reading current context: %s", err)
-		return ""
-	} else {
-		return currentCtx.Name
 	}
+	return cc.Name
 }
 
-func Base64Actions(action, data string) string {
-	switch action {
-	case "encode":
-		encodedData := base64.StdEncoding.EncodeToString([]byte(data))
-		return encodedData
-	case "decode":
-		decodedData, err := base64.StdEncoding.DecodeString(data)
-		if err != nil {
-			log.Fatalf("Error decoding data: %s", err)
-			return ""
-		} else {
-			return string(decodedData)
-		}
-	default:
-		return ""
-	}
+func Base64Encode(data string) string {
+	encodedData := base64.StdEncoding.EncodeToString([]byte(data))
+	return encodedData
 }
+
+func Base64Decode(data string) string {
+	decodedData, err := base64.StdEncoding.DecodeString(data)
+	if err != nil {
+		log.Fatalf("Error decoding data: %s", err)
+	}
+	return string(decodedData)
+}
+
 
 // ValidateCurrentContext function validates that 'current-context' exists in the contexts list and it is valid (all fields populated); returns bool type
 func ValidateCurrentContext() bool {
@@ -166,8 +158,6 @@ func HomeFolder() string {
 	home, err := homedir.Dir()
 	if err != nil {
 		log.Fatalf("Error establishing the home directory: %s", err)
-		return ""
-	} else {
-		return home
 	}
+	return home
 }

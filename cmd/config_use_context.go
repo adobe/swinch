@@ -46,22 +46,19 @@ func useContextPromptUI() string {
 	cd := config.ContextDefinition{}
 	_, ctxList := cd.GetContexts()
 
-	if len(ctxList) > 0 {
-		prompt := promptui.Select{
-			Label: "Set a new Spinnaker Context",
-			Items: ctxList,
-		}
-		_, context, err := prompt.Run()
-		if err != nil {
-			log.Errorf("Exiting %v\n", err)
-			return ""
-		} else {
-			return context
-		}
-	} else {
-		log.Errorf("The config file does not have any valid contexts")
-		return ""
+	if len(ctxList) == 0 {
+		log.Fatalf("The config file does not have any valid contexts")
 	}
+
+	prompt := promptui.Select{
+		Label: "Set a new Spinnaker Context",
+		Items: ctxList,
+	}
+	_, context, err := prompt.Run()
+	if err != nil {
+		log.Fatalf("Exiting %v\n", err)
+	}
+	return context
 }
 
 func changeCurrentContext(newContext string) {
