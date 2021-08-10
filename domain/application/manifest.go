@@ -40,36 +40,36 @@ type Metadata struct {
 	Name string `yaml:"name" json:"name"`
 }
 
-func (am *Manifest) MakeManifest(spec Spec) *Manifest {
-	am.ApiVersion = API
-	am.Kind = Kind
-	am.Metadata.Name = spec.Name
-	am.Spec = spec
-	return am
+func (m *Manifest) MakeManifest(spec Spec) *Manifest {
+	m.ApiVersion = API
+	m.Kind = Kind
+	m.Metadata.Name = spec.Name
+	m.Spec = spec
+	return m
 }
 
-func (am *Manifest) LoadManifest(manifest interface{}) {
+func (m *Manifest) LoadManifest(manifest interface{}) {
 	d := datastore.Datastore{}
-	err := yaml.Unmarshal(d.MarshalYAML(manifest), &am)
+	err := yaml.Unmarshal(d.MarshalYAML(manifest), &m)
 	if err != nil {
 		log.Fatalf("Error LoadManifest: %v", err)
 	}
 
-	am.inferFromManifest()
+	m.inferFromManifest()
 
-	err = am.Validate()
+	err = m.Validate()
 	if err != nil {
 		log.Fatalf("Application manifest validation failed: %v", err)
 	}
 }
 
-func (am *Manifest) inferFromManifest() {
+func (m *Manifest) inferFromManifest() {
 	// Spinnaker requires lower case application name
-	am.Spec.Name = strings.ToLower(am.Metadata.Name)
+	m.Spec.Name = strings.ToLower(m.Metadata.Name)
 }
 
-func (am Manifest) Validate() error {
-	if len(am.Spec.Name) < 3 {
+func (m Manifest) Validate() error {
+	if len(m.Spec.Name) < 3 {
 		return AppNameLen
 	}
 	return nil

@@ -18,6 +18,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 	"swinch/domain/datastore"
+	"swinch/domain/stage"
 )
 
 type BakeManifest struct {
@@ -72,7 +73,7 @@ type InputArtifacts struct {
 	} `yaml:"artifact" json:"artifact"`
 }
 
-func (bm *BakeManifest) ProcessBakeManifest(p *Pipeline, stage *map[string]interface{}, metadata *StageMetadata) {
+func (bm *BakeManifest) ProcessBakeManifest(p *Pipeline, stage *map[string]interface{}, metadata *stage.Stage) {
 	bm.decode(stage)
 	bm.expand(metadata)
 	bm.updateStage(stage)
@@ -92,7 +93,7 @@ func (bm *BakeManifest) decode(stage *map[string]interface{}) {
 	}
 }
 
-func (bm *BakeManifest) expand(metadata *StageMetadata) {
+func (bm *BakeManifest) expand(metadata *stage.Stage) {
 	// TODO check that index on ExpectedArtifacts is always 0
 	expectArtifacts := &bm.ExpectedArtifacts[0]
 

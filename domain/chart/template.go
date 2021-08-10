@@ -27,7 +27,7 @@ const (
 
 type Template struct {
 	chartPath string
-	ChartValues
+	Values
 }
 
 func (t Template) RenderChart(chartPath, valuesFile, outputPath string) {
@@ -40,7 +40,7 @@ func (t Template) RenderChart(chartPath, valuesFile, outputPath string) {
 	for _, chartFile := range t.discoverTemplates() {
 		log.Debugf("Found chart template: %v", chartFile.Name())
 
-		templatePath := path.Join(t.chartPath, ChartTemplatesFolder, chartFile.Name())
+		templatePath := path.Join(t.chartPath, TemplatesFolder, chartFile.Name())
 		tpl := template.New(chartFile.Name()).Funcs(template.FuncMap(sprig.FuncMap()))
 		tpl, err := tpl.ParseFiles(templatePath)
 		if err != nil {
@@ -67,7 +67,7 @@ func (t Template) RenderChart(chartPath, valuesFile, outputPath string) {
 }
 
 func (t Template) discoverTemplates() []os.DirEntry {
-	chartTemplates, err := os.ReadDir(path.Join(t.chartPath, ChartTemplatesFolder))
+	chartTemplates, err := os.ReadDir(path.Join(t.chartPath, TemplatesFolder))
 
 	if err != nil {
 		log.Fatalf("Error dicovering Chart templates: %v", err)

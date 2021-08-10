@@ -15,6 +15,7 @@ package pipeline
 import (
 	log "github.com/sirupsen/logrus"
 	"strconv"
+	"swinch/domain/stage"
 )
 
 type Pipeline struct {
@@ -23,9 +24,8 @@ type Pipeline struct {
 	BakeManifest
 	DeployManifest
 	DeleteManifest
-	StageMetadata
+	stage.Stage
 }
-
 
 const (
 	bakeManifest   = "bakeManifest"
@@ -35,21 +35,19 @@ const (
 )
 
 func (p *Pipeline) ProcessStages() {
-	for i := 0; i < len(p.Spec.Stages); i++ {
-		stage := &p.Spec.Stages[i]
-		metadata := p.GetStageMetadata(stage)
-		metadata.RefId = strconv.Itoa(i+1)
-
+	for i := 0; i < len(p.Manifest.Spec.Stages); i++ {
+		stageMap := &p.Manifest.Spec.Stages[i]
+		metadata := p.GetStageMetadata(stageMap)
+		metadata.RefId = strconv.Itoa(i + 1)
 		switch metadata.Type {
 		case bakeManifest:
-			p.ProcessBakeManifest(p, stage, &metadata)
+			p.ProcessBakeManifest(p, stageMap, &metadata)
 		case deployManifest:
-			p.ProcessDeployManifest(p, stage, &metadata)
+			p.ProcessDeployManifest(p, stageMap, &metadata)
 		case deleteManifest:
-			p.ProcessDeleteManifest(p, stage, &metadata)
+			p.ProcessDeleteManifest(p, stageMap, &metadata)
 		default:
 			log.Fatalf("Failed to detect stage type: %v", metadata.Type)
 		}
 	}
 }
-

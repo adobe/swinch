@@ -40,37 +40,37 @@ type Metadata struct {
 	Application string `yaml:"application" json:"application"`
 }
 
-func (pm *Manifest) MakeManifest(spec Spec) *Manifest {
-	pm.ApiVersion = API
-	pm.Kind = Kind
-	pm.Metadata.Name = spec.Name
-	pm.Metadata.Application = spec.Application
-	pm.Spec = spec
-	return pm
+func (m *Manifest) MakeManifest(spec Spec) *Manifest {
+	m.ApiVersion = API
+	m.Kind = Kind
+	m.Metadata.Name = spec.Name
+	m.Metadata.Application = spec.Application
+	m.Spec = spec
+	return m
 }
 
-func (pm *Manifest) LoadManifest(manifest interface{}) {
+func (m *Manifest) LoadManifest(manifest interface{}) {
 	d := datastore.Datastore{}
-	err := yaml.Unmarshal(d.MarshalYAML(manifest), &pm)
+	err := yaml.Unmarshal(d.MarshalYAML(manifest), &m)
 	if err != nil {
 		log.Fatalf("Error LoadManifest: %v", err)
 	}
 
-	pm.inferFromMetadata()
+	m.inferFromMetadata()
 
-	err = pm.Validate()
+	err = m.Validate()
 	if err != nil {
 		log.Fatalf("Pipeline manifest validation failed: %v", err)
 	}
 }
 
-func (pm *Manifest) inferFromMetadata() {
-	pm.Spec.Name = pm.Metadata.Name
-	pm.Spec.Application = pm.Metadata.Application
+func (m *Manifest) inferFromMetadata() {
+	m.Spec.Name = m.Metadata.Name
+	m.Spec.Application = m.Metadata.Application
 }
 
-func (pm Manifest) Validate() error {
-	if len(pm.Spec.Name) < 3 {
+func (m Manifest) Validate() error {
+	if len(m.Spec.Name) < 3 {
 		return PipeNameLen
 	}
 	return nil

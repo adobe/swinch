@@ -136,12 +136,12 @@ func (p *Pipeline) importChart() {
 	}
 
 	manifest := p.MakeManifest(p.LoadSpec(*data))
-	p.ChartMetadata.Name = chartName
-	if p.ChartMetadata.Name == "" {
-		p.ChartMetadata.Name = manifest.Metadata.Name
+	p.Chart.Metadata.Name = chartName
+	if p.Chart.Metadata.Name == "" {
+		p.Chart.Metadata.Name = manifest.Metadata.Name
 	}
 
-	p.ChartValues.Values = map[interface{}]interface{}{p.Kind: map[string]string{"name": manifest.Metadata.Name}}
+	p.Values.Values = map[interface{}]interface{}{p.Kind: map[string]string{"name": manifest.Metadata.Name}}
 
 	p.GenerateChart(manifest)
 }

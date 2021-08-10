@@ -15,33 +15,23 @@ package chart
 import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
-	"path"
 	"swinch/domain/datastore"
 )
 
-var DefaultChartMetadata = `
-apiVersion: v1
-description: "This is a generated chart"
-version: 0.0.1
-`
-
-type ChartMetadata struct {
-	ApiVersion  string `yaml:"apiVersion" json:"apiVersion"`
-	Description string `yaml:"description" json:"description"`
-	Name        string `yaml:"name" json:"name"`
-	Version     string `yaml:"version" json:"version"`
+type Values struct {
+	Values map[interface{}]interface{}
 }
 
-func (m ChartMetadata) loadMetadataFile(ChartPath string) ChartMetadata {
+func (v Values) loadValuesFile(valuesFilePath string) Values {
 	d := datastore.Datastore{}
-	metadataBuffer := d.ReadFile(path.Join(ChartPath, "/Chart.yaml"))
-	return m.loadMetadata(metadataBuffer)
+	valuesBuffer := d.ReadFile(valuesFilePath)
+	return v.loadValues(valuesBuffer)
 }
 
-func (m ChartMetadata) loadMetadata(byteData []byte) ChartMetadata {
-	err := yaml.Unmarshal(byteData, &m)
+func (v Values) loadValues(byteData []byte) Values {
+	err := yaml.Unmarshal(byteData, &v.Values)
 	if err != nil {
-		log.Fatalf("Error loading Chart metadata: %v", err)
+		log.Fatalf("Error loading values: %v", err)
 	}
-	return m
+	return v
 }
