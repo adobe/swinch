@@ -114,6 +114,7 @@ swinch help
 Available Commands:
   apply       Apply or sync an Application or Pipeline from a manifest
   completion  Generate shell completion script
+  config      Tweak swinch config
   delete      Delete the Application or Pipeline form a manifest
   help        Help about any command
   import      Import a chart from spinnaker
