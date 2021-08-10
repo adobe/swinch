@@ -10,14 +10,19 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package domain
+package chart
 
 import (
 	"github.com/Masterminds/sprig"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"path"
+	"swinch/domain/datastore"
 	"text/template"
+)
+
+const (
+	FilePerm = 0775
 )
 
 type Template struct {
@@ -42,7 +47,7 @@ func (t Template) RenderChart(chartPath, valuesFile, outputPath string) {
 			log.Fatalf("Error in parsing: %v", err)
 		}
 
-		d := Datastore{}
+		d := datastore.Datastore{}
 		d.Mkdir(path.Join(outputPath), FilePerm)
 		outFile, err := os.Create(path.Join(outputPath, chartFile.Name()))
 		if err != nil {

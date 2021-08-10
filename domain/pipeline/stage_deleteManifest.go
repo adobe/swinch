@@ -10,12 +10,13 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package domain
+package pipeline
 
 import (
 	"encoding/json"
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
+	"swinch/domain/datastore"
 )
 
 type DeleteManifest struct {
@@ -80,7 +81,7 @@ func (delm *DeleteManifest) expand(p *Pipeline, metadata *StageMetadata) {
 }
 
 func (delm *DeleteManifest) updateStage(stage *map[string]interface{}) {
-	d := Datastore{}
+	d := datastore.Datastore{}
 	buffer := d.MarshalJSON(delm)
 	stageMap := new(map[string]interface{})
 	err := json.Unmarshal(buffer, stageMap)

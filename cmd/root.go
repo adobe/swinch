@@ -29,8 +29,8 @@ var (
 	valuesFilePath  string
 	chartName       string
 	protectedImport bool
-	application     string
-	pipeline        string
+	applicationName string
+	pipelineName    string
 	chartPath       string
 )
 

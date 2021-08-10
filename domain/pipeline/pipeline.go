@@ -10,7 +10,7 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package domain
+package pipeline
 
 import (
 	log "github.com/sirupsen/logrus"
@@ -18,13 +18,14 @@ import (
 )
 
 type Pipeline struct {
-	PipelineManifest
-	PipelineSpec
-	StageMetadata
+	Manifest
+	Spec
 	BakeManifest
 	DeployManifest
 	DeleteManifest
+	StageMetadata
 }
+
 
 const (
 	bakeManifest   = "bakeManifest"
@@ -36,7 +37,7 @@ const (
 func (p *Pipeline) ProcessStages() {
 	for i := 0; i < len(p.Spec.Stages); i++ {
 		stage := &p.Spec.Stages[i]
-		metadata := p.getStageMetadata(stage)
+		metadata := p.GetStageMetadata(stage)
 		metadata.RefId = strconv.Itoa(i+1)
 
 		switch metadata.Type {
@@ -51,3 +52,4 @@ func (p *Pipeline) ProcessStages() {
 		}
 	}
 }
+

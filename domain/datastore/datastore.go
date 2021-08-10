@@ -10,15 +10,13 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package domain
+package datastore
 
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
-	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -66,48 +64,7 @@ func (d Datastore) DiscoverYAMLFiles(path string) *bytes.Buffer {
 	return yamlFilesBuffer
 }
 
-// ReadYAMLDocs used to load all m types
-func (d Datastore) ReadYAMLDocs(yamlFilesBuffer *bytes.Buffer) ([]ApplicationManifest, []PipelineManifest) {
-	decoder := yaml.NewDecoder(yamlFilesBuffer)
 
-	applications := make([]ApplicationManifest, 0)
-	pipelines := make([]PipelineManifest, 0)
-
-	for {
-		manifest := new(Manifest)
-		errDecode := decoder.Decode(&manifest)
-
-		if manifest == nil {
-			continue
-		}
-		if errors.Is(errDecode, io.EOF) {
-			break
-		}
-		if errDecode != nil {
-			log.Fatalf("Error reading YAML: %v", errDecode)
-		}
-
-		err := manifest.Validate()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		switch manifest.Kind {
-		case ApplicationKind:
-			app := Application{}
-			app.LoadManifest(*manifest)
-			applications = append(applications, app.ApplicationManifest)
-		case PipelineKind:
-			pipe := Pipeline{}
-			pipe.LoadManifest(*manifest)
-			pipe.ProcessStages()
-			pipelines = append(pipelines, pipe.PipelineManifest)
-		default:
-			log.Fatalf("Error detecting manifest Kind")
-		}
-	}
-	return applications, pipelines
-}
 
 func (d Datastore) WriteJSON(data interface{}, outputPath string) {
 	byteData := d.MarshalJSON(data)
@@ -154,7 +111,7 @@ func (d *Datastore) MarshalYAML(data interface{}) []byte {
 	return byteData.Bytes()
 }
 
-func (d Datastore) unmarshalYAML(data []byte) []byte {
+func (d Datastore) UnmarshalYAML(data []byte) []byte {
 	buffer := new([]byte)
 	err := yaml.Unmarshal(data, buffer)
 	if err != nil {

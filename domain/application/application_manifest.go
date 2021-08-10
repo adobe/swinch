@@ -10,37 +10,46 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package domain
+package application
 
 import (
 	"errors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 	"strings"
+	"swinch/domain/datastore"
 )
 
 const (
-	ApplicationKind = "Application"
-	ApplicationAPI  = "spinnaker.adobe.com/alpha1"
+	Kind = "Application"
+	API  = "spinnaker.adobe.com/alpha1"
 )
 
 var (
 	AppNameLen = errors.New("invalid name length, 4 char min")
 )
 
-type ApplicationManifest struct {
+type Manifest struct {
 	ApiVersion string              `yaml:"apiVersion" json:"apiVersion"`
 	Kind       string              `yaml:"kind" json:"kind"`
-	Metadata   ApplicationMetadata `yaml:"metadata" json:"metadata"`
-	Spec       ApplicationSpec     `yaml:"spec" json:"spec"`
+	Metadata   Metadata `yaml:"metadata" json:"metadata"`
+	Spec       Spec     `yaml:"spec" json:"spec"`
 }
 
-type ApplicationMetadata struct {
+type Metadata struct {
 	Name string `yaml:"name" json:"name"`
 }
 
-func (am *ApplicationManifest) LoadManifest(manifest interface{}) {
-	d := Datastore{}
+func (am *Manifest) MakeManifest(spec Spec) *Manifest {
+	am.ApiVersion = API
+	am.Kind = Kind
+	am.Metadata.Name = spec.Name
+	am.Spec = spec
+	return am
+}
+
+func (am *Manifest) LoadManifest(manifest interface{}) {
+	d := datastore.Datastore{}
 	err := yaml.Unmarshal(d.MarshalYAML(manifest), &am)
 	if err != nil {
 		log.Fatalf("Error LoadManifest: %v", err)
@@ -54,12 +63,12 @@ func (am *ApplicationManifest) LoadManifest(manifest interface{}) {
 	}
 }
 
-func (am *ApplicationManifest) inferFromManifest() {
+func (am *Manifest) inferFromManifest() {
 	// Spinnaker requires lower case application name
 	am.Spec.Name = strings.ToLower(am.Metadata.Name)
 }
 
-func (am ApplicationManifest) Validate() error {
+func (am Manifest) Validate() error {
 	if len(am.Spec.Name) < 3 {
 		return AppNameLen
 	}
