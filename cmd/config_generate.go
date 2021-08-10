@@ -18,7 +18,7 @@ import (
 	"github.com/spf13/viper"
 	"path"
 	"swinch/cmd/config"
-	"swinch/domain"
+	"swinch/domain/datastore"
 )
 
 // generateCmd represents the generate command
@@ -64,7 +64,7 @@ func generateConfig() {
 	viper.SetConfigPermissions(config.CfgFilePerm)
 
 	// Write the config file to the default location ~/.swinch/config.yaml
-	ds := domain.Datastore{}
+	ds := datastore.Datastore{}
 	ds.Mkdir(path.Join(config.HomeFolder(), config.CfgFolderName), config.CfgFolderPerm)
 
 	err := viper.SafeWriteConfigAs(config.HomeFolder() + config.CfgFolderName + config.CfgFileName)

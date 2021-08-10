@@ -18,7 +18,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"swinch/domain"
+	"swinch/domain/datastore"
 )
 
 const (
@@ -95,7 +95,7 @@ func (scf SpinConfigFile) GenerateSpinConfigFile() {
 		}
 	}
 
-	d := domain.Datastore{}
+	d := datastore.Datastore{}
 	spinCfgFile := d.MarshalYAML(&scf)
 	d.WriteFile(HomeFolder()+CfgFolderName+CfgSpinFileName, spinCfgFile, CfgSpinFilePerm)
 }
