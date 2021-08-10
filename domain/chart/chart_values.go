@@ -10,30 +10,28 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package domain
+package chart
 
 import (
-	"encoding/json"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
+	"swinch/domain/datastore"
 )
 
-type ApplicationSpec struct {
-	CloudProviders string      `yaml:"cloudProviders" json:"cloudProviders"`
-	Email          string      `yaml:"email" json:"email"`
-	Name           string      `yaml:"-" json:"name"`
-	Permissions    Permissions `yaml:"permissions" json:"permissions"`
+type ChartValues struct {
+	Values map[interface{}]interface{}
 }
 
-type Permissions struct {
-	EXECUTE []string `yaml:"EXECUTE" json:"EXECUTE"`
-	READ    []string `yaml:"READ" json:"READ"`
-	WRITE   []string `yaml:"WRITE" json:"WRITE"`
+func (v ChartValues) loadValuesFile(valuesFilePath string) ChartValues {
+	d := datastore.Datastore{}
+	valuesBuffer := d.ReadFile(valuesFilePath)
+	return v.loadValues(valuesBuffer)
 }
 
-func (a ApplicationSpec) LoadSpec(spec []byte) ApplicationSpec {
-	err := json.Unmarshal(spec, &a)
+func (v ChartValues) loadValues(byteData []byte) ChartValues {
+	err := yaml.Unmarshal(byteData, &v.Values)
 	if err != nil {
-		log.Fatalf("Error LoadSpec: %v", err)
+		log.Fatalf("Error loading values: %v", err)
 	}
-	return a
+	return v
 }

@@ -14,7 +14,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"swinch/domain"
+	"swinch/domain/manifest"
 )
 
 // applyCmd represents the apply command
@@ -38,7 +38,7 @@ func init() {
 }
 
 func Apply() {
-	m := domain.Manifest{}
+	m := manifest.Manifest{}
 	a := Application{}
 	p := Pipeline{}
 	a.manifests, p.manifests = m.GetManifests(filePath)

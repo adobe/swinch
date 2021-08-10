@@ -10,13 +10,14 @@ OF ANY KIND, either express or impliedm. See the License for the specific langua
 governing permissions and limitations under the License.
 */
 
-package domain
+package pipeline
 
 import (
 	"encoding/json"
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 	"strconv"
+	"swinch/domain/datastore"
 )
 
 type DeployManifest struct {
@@ -92,7 +93,7 @@ func (dm *DeployManifest) expand(p *Pipeline, metadata *StageMetadata) {
 }
 
 func (dm *DeployManifest) updateStage(stage *map[string]interface{}) {
-	d := Datastore{}
+	d := datastore.Datastore{}
 	buffer := d.MarshalJSON(dm)
 	stageMap := new(map[string]interface{})
 	err := json.Unmarshal(buffer, stageMap)

@@ -10,14 +10,14 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package domain
+package pipeline
 
 import (
 	"encoding/json"
 	log "github.com/sirupsen/logrus"
 )
 
-type PipelineSpec struct {
+type Spec struct {
 	Application          string                   `yaml:"-" json:"application"`
 	Name                 string                   `yaml:"-" json:"name"`
 	Index                int                      `yaml:"index" json:"index"`
@@ -28,7 +28,7 @@ type PipelineSpec struct {
 	Triggers             []interface{}            `yaml:"triggers,omitempty" json:"triggers,omitempty""`
 }
 
-func (s PipelineSpec) LoadSpec(spec []byte) PipelineSpec {
+func (s Spec) LoadSpec(spec []byte) Spec {
 	err := json.Unmarshal(spec, &s)
 
 	if err != nil {

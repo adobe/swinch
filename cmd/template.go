@@ -14,7 +14,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"swinch/domain"
+	"swinch/domain/chart"
 )
 
 // templateCmd represents the template command
@@ -40,6 +40,6 @@ func init() {
 }
 
 func Template() {
-	t := domain.Template{}
+	t := chart.Template{}
 	t.RenderChart(chartPath, valuesFilePath, outputPath)
 }

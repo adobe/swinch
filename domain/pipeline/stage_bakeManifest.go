@@ -10,13 +10,14 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package domain
+package pipeline
 
 import (
 	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
+	"swinch/domain/datastore"
 )
 
 type BakeManifest struct {
@@ -117,7 +118,7 @@ func (bm *BakeManifest) newUUID(data string) uuid.UUID {
 }
 
 func (bm *BakeManifest) updateStage(stage *map[string]interface{}) {
-	d := Datastore{}
+	d := datastore.Datastore{}
 	buffer := d.MarshalJSON(bm)
 	stageMap := new(map[string]interface{})
 	err := json.Unmarshal(buffer, stageMap)

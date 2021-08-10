@@ -10,7 +10,7 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package domain
+package pipeline
 
 import (
 	"github.com/mitchellh/mapstructure"
@@ -24,7 +24,9 @@ type StageMetadata struct {
 	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 }
 
-func (sm *StageMetadata) getStageMetadata(stage *map[string]interface{}) StageMetadata {
+
+
+func (sm *StageMetadata) GetStageMetadata(stage *map[string]interface{}) StageMetadata {
 	sm.decode(stage)
 	return *sm
 }

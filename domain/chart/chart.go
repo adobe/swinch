@@ -10,11 +10,12 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package domain
+package chart
 
 import (
 	log "github.com/sirupsen/logrus"
 	"path"
+	"swinch/domain/datastore"
 )
 
 const (
@@ -29,7 +30,7 @@ type Chart struct {
 	ProtectedImport bool
 	ChartMetadata
 	ChartValues
-	Datastore
+	datastore.Datastore
 }
 
 // Import
@@ -43,25 +44,6 @@ func (c Chart) GenerateChart(manifest interface{}) {
 		c.WriteChartValues()
 		c.WriteManifest(manifest)
 	}
-}
-
-func (c Chart) MakePipelineManifest(spec PipelineSpec) PipelineManifest {
-	manifest := PipelineManifest{}
-	manifest.ApiVersion = Kinds[PipelineKind]
-	manifest.Kind = PipelineKind
-	manifest.Metadata.Name = spec.Name
-	manifest.Metadata.Application = spec.Application
-	manifest.Spec = spec
-	return manifest
-}
-
-func (c Chart) MakeApplicationManifest(spec ApplicationSpec) ApplicationManifest {
-	manifest := ApplicationManifest{}
-	manifest.ApiVersion = Kinds[ApplicationKind]
-	manifest.Kind = ApplicationKind
-	manifest.Metadata.Name = spec.Name
-	manifest.Spec = spec
-	return manifest
 }
 
 // WriteChartMetadata default Chart metadata for imported pipelines

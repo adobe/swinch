@@ -10,11 +10,9 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package domain
+package application
 
-type ManualJudgment struct {
-	FailPipeline   bool          `yaml:"failPipeline" json:"failPipeline"`
-	IsNew          bool          `yaml:"isNew" json:"isNew"`
-	JudgmentInputs []interface{} `yaml:"judgmentInputs" json:"judgmentInputs"`
-	Notifications  []interface{} `yaml:"notifications" json:"notifications"`
+type Application struct {
+	Manifest
+	Spec
 }

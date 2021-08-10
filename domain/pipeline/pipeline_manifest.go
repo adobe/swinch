@@ -10,37 +10,47 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package domain
+package pipeline
 
 import (
 	"errors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
+	"swinch/domain/datastore"
 )
 
 const (
-	PipelineKind = "Pipeline"
-	PipelineAPI  = "spinnaker.adobe.com/alpha1"
+	Kind = "Pipeline"
+	API  = "spinnaker.adobe.com/alpha1"
 )
 
 var (
 	PipeNameLen = errors.New("invalid name length, 4 char min")
 )
 
-type PipelineManifest struct {
+type Manifest struct {
 	ApiVersion string           `yaml:"apiVersion" json:"apiVersion"`
 	Kind       string           `yaml:"kind" json:"kind"`
-	Metadata   PipelineMetadata `yaml:"metadata" json:"metadata"`
-	Spec       PipelineSpec     `yaml:"spec" json:"spec"`
+	Metadata   Metadata `yaml:"metadata" json:"metadata"`
+	Spec       Spec     `yaml:"spec" json:"spec"`
 }
 
-type PipelineMetadata struct {
+type Metadata struct {
 	Name        string `yaml:"name" json:"name"`
 	Application string `yaml:"application" json:"application"`
 }
 
-func (pm *PipelineManifest) LoadManifest(manifest interface{}) {
-	d := Datastore{}
+func (pm *Manifest) MakeManifest(spec Spec) *Manifest {
+	pm.ApiVersion = API
+	pm.Kind = Kind
+	pm.Metadata.Name = spec.Name
+	pm.Metadata.Application = spec.Application
+	pm.Spec = spec
+	return pm
+}
+
+func (pm *Manifest) LoadManifest(manifest interface{}) {
+	d := datastore.Datastore{}
 	err := yaml.Unmarshal(d.MarshalYAML(manifest), &pm)
 	if err != nil {
 		log.Fatalf("Error LoadManifest: %v", err)
@@ -54,12 +64,12 @@ func (pm *PipelineManifest) LoadManifest(manifest interface{}) {
 	}
 }
 
-func (pm *PipelineManifest) inferFromMetadata() {
+func (pm *Manifest) inferFromMetadata() {
 	pm.Spec.Name = pm.Metadata.Name
 	pm.Spec.Application = pm.Metadata.Application
 }
 
-func (pm PipelineManifest) Validate() error {
+func (pm Manifest) Validate() error {
 	if len(pm.Spec.Name) < 3 {
 		return PipeNameLen
 	}

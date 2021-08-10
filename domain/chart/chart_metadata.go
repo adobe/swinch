@@ -10,12 +10,13 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package domain
+package chart
 
 import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 	"path"
+	"swinch/domain/datastore"
 )
 
 var DefaultChartMetadata = `
@@ -32,7 +33,7 @@ type ChartMetadata struct {
 }
 
 func (m ChartMetadata) loadMetadataFile(ChartPath string) ChartMetadata {
-	d := Datastore{}
+	d := datastore.Datastore{}
 	metadataBuffer := d.ReadFile(path.Join(ChartPath, "/Chart.yaml"))
 	return m.loadMetadata(metadataBuffer)
 }
