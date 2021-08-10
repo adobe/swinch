@@ -41,7 +41,7 @@ type PipelineMetadata struct {
 
 func (pm *PipelineManifest) LoadManifest(manifest interface{}) {
 	d := Datastore{}
-	err := yaml.Unmarshal(d.marshalYAML(manifest), &pm)
+	err := yaml.Unmarshal(d.MarshalYAML(manifest), &pm)
 	if err != nil {
 		log.Fatalf("Error LoadManifest: %v", err)
 	}
