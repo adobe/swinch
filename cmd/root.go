@@ -80,30 +80,46 @@ func initConfig() {
 
 	viper.AutomaticEnv() // read in environment variables that match
 
-	ds := domain.Datastore{}
+	d := domain.Datastore{}
+	cd := config.ContextDefinition{}
 
-	switch ds.FileExists(config.HomeFolder() + config.CfgFolderName + config.CfgFileName) {
+	switch d.FileExists(config.HomeFolder() + config.CfgFolderName + config.CfgFileName) {
 	case true:
 		// If a config file is found, read it in and validate current-context against available contexts
 		if err := viper.ReadInConfig(); err == nil {
 			log.Debugf("Using config file: '%s' with current-context as '%s'", viper.ConfigFileUsed(), viper.Get("current-context.name"))
-			contextExists := config.ValidateCurrentContext()
+			contextExists := cd.ValidateCurrentContext()
+			cfgSubcommand := configSubcommand()
 			if contextExists != true {
-				log.Errorf("The context set as current-context '%s' is not valid (missing fields) OR does not exist in the contexts list; run 'swinch config use-context' to select a valid context", viper.Get("current-context.name"))
+				// If the subcommand is not a config one, log.Fatalf will stop the program
+				switch cfgSubcommand {
+				case true:
+					log.Errorf("The context set as current-context '%s' is not valid (missing fields) OR does not exist in the contexts list; run 'swinch config use-context' to select a valid context", viper.Get("current-context.name"))
+				case false:
+					log.Fatalf("The context set as current-context '%s' is not valid (missing fields) OR does not exist in the contexts list; run 'swinch config use-context' to select a valid context", viper.Get("current-context.name"))
+				}
 			}
 		} else {
 			log.Fatalf("A parsing error detected in '%s': '%s'", viper.ConfigFileUsed(), err)
 		}
 	case false:
-		// If no config file is found, allow only the 'swinch config generate' command
-		_, str, _ := rootCmd.Find(os.Args)
-
-		if len(str) == 3 {
-			if str[1] != "config" || str[2] != "generate" {
-				log.Fatalf("Config file not found, please generate and adapt one (see 'swinch config generate -h')")
-			}
+		cfgSubcommand := configSubcommand()
+		// If the subcommand is not a config one, log.Fatalf will stop the program
+		if cfgSubcommand == true {
+			log.Errorf("Config file not found, please generate and adapt one (see 'swinch config generate -h')")
 		} else {
 			log.Fatalf("Config file not found, please generate and adapt one (see 'swinch config generate -h')")
 		}
+	}
+}
+
+// configSubcommand function validates if a config subcommand is issued; returns bool
+func configSubcommand() bool {
+	_, str, _ := rootCmd.Find(os.Args)
+
+	if len(str) == 3 && str[1] == "config" {
+		return true
+	} else {
+		return false
 	}
 }

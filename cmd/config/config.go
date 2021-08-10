@@ -32,6 +32,7 @@ const (
 	CfgSpinFilePerm = 0600
 )
 
+// SpinConfigFile struct used to populate ~/.swinch/context-spin-config.yaml; this file is served to the spin-cli calls
 type SpinConfigFile struct {
 	Gate struct {
 		Endpoint string `yaml:"endpoint"`
@@ -50,6 +51,7 @@ type SpinConfigFile struct {
 	} `yaml:"auth"`
 }
 
+// ContextDefinition struct used to populate ~/.swinch/config.yaml contexts
 type ContextDefinition struct {
 	Name     string
 	Endpoint string
@@ -58,6 +60,7 @@ type ContextDefinition struct {
 	Password string
 }
 
+// CurrentContext struct used to populate ~/.swinch/config.yaml current-context
 type CurrentContext struct {
 	Name string
 }
@@ -67,6 +70,8 @@ type CPrompt struct {
 	FieldName string
 }
 
+// GenerateSpinConfigFile method parses the ~/.swinch/config.yaml file, validates the current-context against all the available contexts
+// and creates/populates the ~/.swinch/context-spin-config.yaml file used by the spin-cli calls
 func (scf SpinConfigFile) GenerateSpinConfigFile() {
 	cd := ContextDefinition{}
 	ctx, _ := cd.GetContexts()
@@ -74,29 +79,28 @@ func (scf SpinConfigFile) GenerateSpinConfigFile() {
 	cc := CurrentContext{}
 	currentCtx := cc.GetCurrentContext()
 
-	var cfg SpinConfigFile
-
 	for _, context := range ctx {
 		if context.Name == currentCtx {
-			cfg.Gate.Endpoint = context.Endpoint
-			cfg.Auth.Enabled = true
+			scf.Gate.Endpoint = context.Endpoint
+			scf.Auth.Enabled = true
 
 			switch context.Auth {
 			case "ldap":
-				cfg.Auth.Ldap.Username = context.Username
-				cfg.Auth.Ldap.Password = Base64Decode(context.Password)
+				scf.Auth.Ldap.Username = context.Username
+				scf.Auth.Ldap.Password = Base64Decode(context.Password)
 			case "basic":
-				cfg.Auth.Basic.Username = context.Username
-				cfg.Auth.Basic.Password = Base64Decode(context.Password)
+				scf.Auth.Basic.Username = context.Username
+				scf.Auth.Basic.Password = Base64Decode(context.Password)
 			}
 		}
 	}
 
-	ds := domain.Datastore{}
-	spinCfgFile := ds.MarshalYAML(&cfg)
-	ds.WriteFile(HomeFolder()+CfgFolderName+CfgSpinFileName, spinCfgFile, CfgSpinFilePerm)
+	d := domain.Datastore{}
+	spinCfgFile := d.MarshalYAML(&scf)
+	d.WriteFile(HomeFolder()+CfgFolderName+CfgSpinFileName, spinCfgFile, CfgSpinFilePerm)
 }
 
+// GetContexts method parses the ~/.swinch/config.yaml file and returns the the contexts
 func (cd ContextDefinition) GetContexts() ([]ContextDefinition, []string) {
 	var ctx []ContextDefinition
 	var ctxList []string
@@ -114,6 +118,7 @@ func (cd ContextDefinition) GetContexts() ([]ContextDefinition, []string) {
 	return ctx, ctxList
 }
 
+// GetCurrentContext method parses the ~/.swinch/config.yaml file and returns the current-context as string type
 func (cc CurrentContext) GetCurrentContext() string {
 	if err := viper.UnmarshalKey("current-context", &cc); err != nil {
 		log.Fatalf("Error reading current context: %s", err)
@@ -121,23 +126,8 @@ func (cc CurrentContext) GetCurrentContext() string {
 	return cc.Name
 }
 
-func Base64Encode(data string) string {
-	encodedData := base64.StdEncoding.EncodeToString([]byte(data))
-	return encodedData
-}
-
-func Base64Decode(data string) string {
-	decodedData, err := base64.StdEncoding.DecodeString(data)
-	if err != nil {
-		log.Fatalf("Error decoding data: %s", err)
-	}
-	return string(decodedData)
-}
-
-
 // ValidateCurrentContext function validates that 'current-context' exists in the contexts list and it is valid (all fields populated); returns bool type
-func ValidateCurrentContext() bool {
-	cd := ContextDefinition{}
+func (cd ContextDefinition) ValidateCurrentContext() bool {
 	_, ctxList := cd.GetContexts()
 
 	cc := CurrentContext{}
@@ -154,6 +144,20 @@ func ValidateCurrentContext() bool {
 	return contextExists
 }
 
+func Base64Encode(data string) string {
+	encodedData := base64.StdEncoding.EncodeToString([]byte(data))
+	return encodedData
+}
+
+func Base64Decode(data string) string {
+	decodedData, err := base64.StdEncoding.DecodeString(data)
+	if err != nil {
+		log.Fatalf("Error decoding data: %s", err)
+	}
+	return string(decodedData)
+}
+
+// HomeFolder function retrieves the user's home folder; returns the home folder path as string type
 func HomeFolder() string {
 	home, err := homedir.Dir()
 	if err != nil {
