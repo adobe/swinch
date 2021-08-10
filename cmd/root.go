@@ -36,10 +36,6 @@ var (
 )
 
 const (
-	SwinchVersion = "0.0.6"
-)
-
-const (
 	planAction   = "plan"
 	importAction = "import"
 	applyAction  = "apply"

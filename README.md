@@ -126,6 +126,7 @@ Available Commands:
 
 ## Dev setup
 
+### Build locally
 Install go for your [platform](https://golang.org/doc/install)  
 Set up your GO env, example:  
 
@@ -144,4 +145,3 @@ Install swinch:
 SWINCH_REPO=$HOME/git/swinch
 go install
 ```
-
