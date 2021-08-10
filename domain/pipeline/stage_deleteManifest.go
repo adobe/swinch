@@ -17,6 +17,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 	"swinch/domain/datastore"
+	"swinch/domain/stage"
 )
 
 type DeleteManifest struct {
@@ -49,7 +50,7 @@ type Options struct {
 	Cascading bool `yaml:"cascading" json:"cascading"`
 }
 
-func (delm *DeleteManifest) ProcessDeleteManifest(p *Pipeline, stage *map[string]interface{}, metadata *StageMetadata) {
+func (delm *DeleteManifest) ProcessDeleteManifest(p *Pipeline, stage *map[string]interface{}, metadata *stage.Stage) {
 	delm.decode(p, stage)
 	delm.expand(p, metadata)
 	delm.updateStage(stage)
@@ -68,8 +69,8 @@ func (delm *DeleteManifest) decode(p *Pipeline, stage *map[string]interface{}) {
 	}
 }
 
-func (delm *DeleteManifest) expand(p *Pipeline, metadata *StageMetadata) {
-	delm.App = p.Metadata.Application
+func (delm *DeleteManifest) expand(p *Pipeline, metadata *stage.Stage) {
+	delm.App = p.Manifest.Metadata.Application
 	if delm.Location != "" {
 		delm.Namespace = delm.Location
 	} else if delm.Namespace != "" {

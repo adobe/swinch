@@ -10,28 +10,26 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package pipeline
+package stage
 
 import (
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 )
 
-type StageMetadata struct {
+type Stage struct {
 	Name                 string   `yaml:"name" json:"name"`
 	Type                 string   `yaml:"type,omitempty" json:"type,omitempty"`
 	RefId                string   `yaml:"refId,omitempty" json:"refId,omitempty"`
 	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 }
 
-
-
-func (sm *StageMetadata) GetStageMetadata(stage *map[string]interface{}) StageMetadata {
+func (sm *Stage) GetStageMetadata(stage *map[string]interface{}) Stage {
 	sm.decode(stage)
 	return *sm
 }
 
-func (sm *StageMetadata) decode(stage *map[string]interface{}) {
+func (sm *Stage) decode(stage *map[string]interface{}) {
 	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &sm}
 	decoder, err := mapstructure.NewDecoder(&decoderConfig)
 	if err != nil {

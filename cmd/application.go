@@ -130,12 +130,12 @@ func (a *Application) importChart() {
 	}
 
 	manifest := a.MakeManifest(a.LoadSpec(*data))
-	a.ChartMetadata.Name = chartName
-	if a.ChartMetadata.Name == "" {
-		a.ChartMetadata.Name = manifest.Metadata.Name
+	a.Metadata.Name = chartName
+	if a.Metadata.Name == "" {
+		a.Metadata.Name = manifest.Metadata.Name
 	}
 
-	a.ChartValues.Values = map[interface{}]interface{}{a.Kind: map[string]string{"name": manifest.Metadata.Name}}
+	a.Values.Values = map[interface{}]interface{}{a.Kind: map[string]string{"name": manifest.Metadata.Name}}
 
 	a.GenerateChart(manifest)
 }

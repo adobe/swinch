@@ -37,14 +37,14 @@ type Manifest struct {
 }
 
 
-func (m Manifest) GetManifests(filePath string) ([]application.Manifest, []pipeline.Manifest) {
+func (m *Manifest) GetManifests(filePath string) ([]application.Manifest, []pipeline.Manifest) {
 	d := datastore.Datastore{}
 	discoveredYAMLDocs := d.DiscoverYAMLFiles(filePath)
-	return m.ReadYAMLDocs(discoveredYAMLDocs)
+	return m.ReadManifest(discoveredYAMLDocs)
 }
 
-// ReadYAMLDocs used to load all m types
-func (m Manifest) ReadYAMLDocs(yamlFilesBuffer *bytes.Buffer) ([]application.Manifest, []pipeline.Manifest) {
+// ReadManifest used to load all m types
+func (m *Manifest) ReadManifest(yamlFilesBuffer *bytes.Buffer) ([]application.Manifest, []pipeline.Manifest) {
 	decoder := yaml.NewDecoder(yamlFilesBuffer)
 
 	applications := make([]application.Manifest, 0)
@@ -72,11 +72,11 @@ func (m Manifest) ReadYAMLDocs(yamlFilesBuffer *bytes.Buffer) ([]application.Man
 		switch manifest.Kind {
 		case application.Kind:
 			app := application.Application{}
-			app.LoadManifest(*manifest)
+			app.LoadManifest(manifest)
 			applications = append(applications, app.Manifest)
 		case pipeline.Kind:
 			pipe := pipeline.Pipeline{}
-			pipe.LoadManifest(*manifest)
+			pipe.LoadManifest(manifest)
 			pipe.ProcessStages()
 			pipelines = append(pipelines, pipe.Manifest)
 		default:
@@ -86,7 +86,7 @@ func (m Manifest) ReadYAMLDocs(yamlFilesBuffer *bytes.Buffer) ([]application.Man
 	return applications, pipelines
 }
 
-func (m Manifest) Validate() error {
+func (m *Manifest) Validate() error {
 	_, ok := Kinds[m.Kind]
 	if ok {
 		kindApiVersion := Kinds[m.Kind]
