@@ -28,7 +28,6 @@ var configCmd = &cobra.Command{
 	swinch config delete-context (delete the example entries)`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
-
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()

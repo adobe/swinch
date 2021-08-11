@@ -14,6 +14,7 @@ package config
 
 import (
 	"encoding/base64"
+	"fmt"
 	"github.com/manifoldco/promptui"
 	"github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
@@ -127,21 +128,19 @@ func (cc CurrentContext) GetCurrentContext() string {
 }
 
 // ValidateCurrentContext function validates that 'current-context' exists in the contexts list and it is valid (all fields populated); returns bool type
-func (cd ContextDefinition) ValidateCurrentContext() bool {
+func (cd ContextDefinition) ValidateCurrentContext() error {
 	_, ctxList := cd.GetContexts()
 
 	cc := CurrentContext{}
 	currentCtx := cc.GetCurrentContext()
 
-	contextExists := false
-
 	for _, context := range ctxList {
 		if currentCtx == context {
-			contextExists = true
+			return nil
 		}
 	}
 
-	return contextExists
+	return fmt.Errorf("curent context '%s' not valid", currentCtx)
 }
 
 func Base64Encode(data string) string {
