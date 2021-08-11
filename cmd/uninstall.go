@@ -26,6 +26,8 @@ var uninstallCmd = &cobra.Command{
 	Long:  `Uninstalls a swinch chart.`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
+		ValidateConfigFile()
+		ValidateConfig()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		// Template call

@@ -27,6 +27,8 @@ var planCmd = &cobra.Command{
 	Long:  `Plan`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
+		ValidateConfigFile()
+		ValidateConfig()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		PlanCmd()

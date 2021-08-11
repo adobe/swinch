@@ -79,43 +79,27 @@ func initConfig() {
 	viper.SetConfigType("yaml")
 
 	viper.AutomaticEnv() // read in environment variables that match
-	validate()
 }
 
-// configSubcommand function validates if a config subcommand is issued; returns bool
-func validate() {
-	skipCMD := map[string]string{
-		"config":     "",
-		"help":       "",
-		"completion": "",
-	}
-	_, args, _ := rootCmd.Find(os.Args)
-	if len(args) > 1 {
-		_, ok := skipCMD[args[1]]
-		if !ok {
-			validateCFG()
-		}
-	}
-}
-
-func validateCFG() {
+func ValidateConfigFile() {
 	d := datastore.Datastore{}
-	cd := config.ContextDefinition{}
-	switch d.FileExists(config.HomeFolder() + config.CfgFolderName + config.CfgFileName) {
-	case true:
-		// If a config file is found, read it in and validate current-context against available contexts
-		err := viper.ReadInConfig()
-		if err != nil {
-			log.Fatalf("A parsing error detected in '%s': '%s'", viper.ConfigFileUsed(), err)
-		}
-		err = cd.ValidateCurrentContext()
-		if err != nil {
-			log.Fatalf("Context validation error: %s", err)
-		}
-		log.Debugf("Using config file: '%s' with current-context as '%s'", viper.ConfigFileUsed(), viper.Get("current-context.name"))
-	case false:
+	if !d.FileExists(config.HomeFolder() + config.CfgFolderName + config.CfgFileName) {
 		log.Errorf("Config file not found, please generate one:")
 		configCmd.Usage()
 		os.Exit(1)
 	}
+}
+
+func ValidateConfig() {
+	cd := config.ContextDefinition{}
+	// If a config file is found, read it in and validate current-context against available contexts
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatalf("A parsing error detected in '%s': '%s'", viper.ConfigFileUsed(), err)
+	}
+	err = cd.ValidateCurrentContext()
+	if err != nil {
+		log.Fatalf("Context validation error: %s", err)
+	}
+	log.Debugf("Using config file: '%s' with current-context as '%s'", viper.ConfigFileUsed(), viper.Get("current-context.name"))
 }
