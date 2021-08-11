@@ -15,7 +15,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"os"
-	datastore "swinch/domain/datastore"
+	"swinch/domain/datastore"
 )
 
 // installCmd represents the install command

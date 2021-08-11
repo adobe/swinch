@@ -14,7 +14,7 @@ package cmd
 
 import (
 	"os"
-	datastore "swinch/domain/datastore"
+	"swinch/domain/datastore"
 
 	"github.com/spf13/cobra"
 )
