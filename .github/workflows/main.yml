@@ -1,9 +1,6 @@
-name: release
+name: Build binary on release
 
 on:
-#  push:
-#    branches:
-#      - master
   release:
     types:
       - created

@@ -5,7 +5,10 @@
 Manage your Spinnaker pipelines with Kubernetes manifest and objects.    
 Swinch is a CLI tool that aims at functionality similar to kubectl and helm, but for Spinnaker.  
 
-Our goal is to make using Spinnaker friendly for users already familiar with the Kubernetes way of deploying by provide the same language and format used for managing Kubernetes asset, but for Spinnaker. Create, delete, edit and manage your Spinnaker CD pipelines reliably, programmatically and sourced controlled, from Helm like templated charts, with built in support for dry-run, diff and validation.
+Our goal is to make using Spinnaker friendly for users already familiar with the Kubernetes way of deploying by provide the same language and format used for managing Kubernetes asset, but for Spinnaker.   
+Create, delete, edit and manage your Spinnaker CD pipelines reliably, programmatically and sourced controlled, from Helm like templated charts, with built in support for dry-run, diff and validation.
+
+**Swinch is at an alpha stage and under active development**   
 
 ## High Level Design
 
@@ -79,32 +82,17 @@ swinch template -c samples/charts/pipeline  -o samples/manifests/pipeline
 
 ## Basic usage
 
-### Template and apply flow
 
-Generate manifest from the Chart and apply the resulting manifests:
+### Install 
+Downdload latest [swinch relase](https://github.com/adobe/swinch/releases) and unpack it:
 
-```bash
-swinch template -c samples/charts/application -o samples/manifests/application 
-swinch template -c samples/charts/pipeline  -o samples/manifests/pipeline
-swinch apply -f samples/manifests/application
-swinch apply -f samples/manifests/pipeline
 ```
+tar zxvf swinch-*
+chmod +x
+mv swinch /usr/local/bin/swinch
 
-### Install flow 
-
-Directly install a Chart:
-
-```bash
-swinch install samples/charts/application 
-swinch install samples/charts/pipeline 
 ```
-
-### Shell completion
-To get shell completion instructions for bash and zsh run:
-
-```bash
-swinch completion -h
-```
+On MacOS make sure to allow swinch in `System Preferences` -> `Security and Privacy`
 
 ### Usage
 
@@ -123,6 +111,62 @@ Available Commands:
   template    Generate manifests from chart domain
   uninstall   Uninstalls a swinch chart
   version     Print swinch version
+```
+
+### Configuration file 
+In the swinch config file you will set up the spinnaker endpoint and authentication metod.  
+Run `swinch config` to get the full list of options and intructions.
+
+```bash
+swinch config generate
+swinch config add-context
+```
+
+Example configuration file located in `cd ${HOME}/.swinch`:  
+
+```yaml
+contexts:
+- auth: ldap
+  endpoint: https://spinnaker-dev-api.example.com
+  name: spinnaker-dev
+  password: eW91Y2hlZWt5YmFzdGFyZAo=
+  username: username
+- auth: basic
+  endpoint: https://spinnaker-prod-api.example.com
+  name: spinnaker-prod
+  password: eW91Y2hlZWt5YmFzdGFyZAo=
+  username: username
+current-context:
+  name: spinnaker-dev
+``` 
+
+### Shell completion
+To get shell completion instructions for bash and zsh run:
+
+```bash
+swinch completion -h
+```
+
+### Template Charts and render manifests
+Generate manifest from the Chart and apply the resulting manifests:
+
+```bash
+swinch template -c samples/charts/application -o samples/manifests/application 
+swinch template -c samples/charts/pipeline  -o samples/manifests/pipeline
+```
+
+### Apply manifests
+```bash
+swinch apply -f samples/manifests/application
+swinch apply -f samples/manifests/pipeline
+```
+
+### Chart install 
+Directly install a Chart without rendering the manifests from a Chart template:
+
+```bash
+swinch install samples/charts/application 
+swinch install samples/charts/pipeline 
 ```
 
 ## Dev setup
@@ -146,3 +190,14 @@ Install swinch:
 SWINCH_REPO=$HOME/git/swinch
 go install
 ```
+
+### Release
+Install [bump2version](https://pypi.org/project/bump2version/0.5.4/).   
+Push a release commit:
+
+```bash
+bump2version patch
+git push upstream master  --follow-tags  
+```
+
+
