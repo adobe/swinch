@@ -27,6 +27,8 @@ var pipelineCmd = &cobra.Command{
 	Long:  `Import Spinnaker pipelines`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
+		ValidateConfigFile()
+		ValidateConfig()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		action := cmd.Parent().Use

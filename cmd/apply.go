@@ -24,6 +24,8 @@ var applyCmd = &cobra.Command{
 	Long:  "Apply or sync an Application or Pipeline from a manifest",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
+		ValidateConfigFile()
+		ValidateConfig()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		Apply()

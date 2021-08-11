@@ -27,6 +27,8 @@ var useContextCmd = &cobra.Command{
 	Long:  `Switches between Spinnaker contexts`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
+		ValidateConfigFile()
+		ValidateConfig()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := viper.ReadInConfig(); err == nil {

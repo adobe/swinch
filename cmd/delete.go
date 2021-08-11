@@ -24,6 +24,8 @@ var deleteCmd = &cobra.Command{
 	Long:  "Delete the Application or Pipeline form a manifest",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
+		ValidateConfigFile()
+		ValidateConfig()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		Delete()

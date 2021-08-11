@@ -29,6 +29,7 @@ var addContextCmd = &cobra.Command{
 	Long:  `Adds a new Spinnaker context to the config file`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
+		ValidateConfigFile()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := viper.ReadInConfig(); err == nil {

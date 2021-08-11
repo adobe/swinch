@@ -25,6 +25,8 @@ var installCmd = &cobra.Command{
 	Long:  `Installs a swinch chart.`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
+		ValidateConfigFile()
+		ValidateConfig()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		// Template call

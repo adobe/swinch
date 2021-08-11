@@ -79,47 +79,27 @@ func initConfig() {
 	viper.SetConfigType("yaml")
 
 	viper.AutomaticEnv() // read in environment variables that match
+}
 
+func ValidateConfigFile() {
 	d := datastore.Datastore{}
-	cd := config.ContextDefinition{}
-
-	switch d.FileExists(config.HomeFolder() + config.CfgFolderName + config.CfgFileName) {
-	case true:
-		// If a config file is found, read it in and validate current-context against available contexts
-		if err := viper.ReadInConfig(); err == nil {
-			log.Debugf("Using config file: '%s' with current-context as '%s'", viper.ConfigFileUsed(), viper.Get("current-context.name"))
-			contextExists := cd.ValidateCurrentContext()
-			cfgSubcommand := configSubcommand()
-			if contextExists != true {
-				// If the subcommand is not a config one, log.Fatalf will stop the program
-				switch cfgSubcommand {
-				case true:
-					log.Errorf("The context set as current-context '%s' is not valid (missing fields) OR does not exist in the contexts list; run 'swinch config use-context' to select a valid context", viper.Get("current-context.name"))
-				case false:
-					log.Fatalf("The context set as current-context '%s' is not valid (missing fields) OR does not exist in the contexts list; run 'swinch config use-context' to select a valid context", viper.Get("current-context.name"))
-				}
-			}
-		} else {
-			log.Fatalf("A parsing error detected in '%s': '%s'", viper.ConfigFileUsed(), err)
-		}
-	case false:
-		cfgSubcommand := configSubcommand()
-		// If the subcommand is not a config one, log.Fatalf will stop the program
-		if cfgSubcommand == true {
-			log.Errorf("Config file not found, please generate and adapt one (see 'swinch config generate -h')")
-		} else {
-			log.Fatalf("Config file not found, please generate and adapt one (see 'swinch config generate -h')")
-		}
+	if !d.FileExists(config.HomeFolder() + config.CfgFolderName + config.CfgFileName) {
+		log.Errorf("Config file not found, please generate one:")
+		configCmd.Usage()
+		os.Exit(1)
 	}
 }
 
-// configSubcommand function validates if a config subcommand is issued; returns bool
-func configSubcommand() bool {
-	_, str, _ := rootCmd.Find(os.Args)
-
-	if len(str) == 3 && str[1] == "config" {
-		return true
-	} else {
-		return false
+func ValidateConfig() {
+	cd := config.ContextDefinition{}
+	// If a config file is found, read it in and validate current-context against available contexts
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatalf("A parsing error detected in '%s': '%s'", viper.ConfigFileUsed(), err)
 	}
+	err = cd.ValidateCurrentContext()
+	if err != nil {
+		log.Fatalf("Context validation error: %s", err)
+	}
+	log.Debugf("Using config file: '%s' with current-context as '%s'", viper.ConfigFileUsed(), viper.Get("current-context.name"))
 }

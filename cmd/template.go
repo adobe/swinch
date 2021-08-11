@@ -24,6 +24,8 @@ var templateCmd = &cobra.Command{
 	Long:  "Template command will generate the Spinnaker Application manifest from the chart domain",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
+		ValidateConfigFile()
+		ValidateConfig()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		Template()

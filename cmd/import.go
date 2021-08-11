@@ -23,6 +23,8 @@ var importCmd = &cobra.Command{
 	Long:  `Import a chart from spinnaker`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
+		ValidateConfigFile()
+		ValidateConfig()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		// import only used with additional child commands
