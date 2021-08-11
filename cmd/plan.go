@@ -17,7 +17,7 @@ import (
 	"github.com/danielcoman/diff"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"swinch/domain"
+	"swinch/domain/manifest"
 )
 
 // planCmd represents the plan command
@@ -40,7 +40,7 @@ func init() {
 }
 
 func PlanCmd() {
-	m := domain.Manifest{}
+	m := manifest.Manifest{}
 	a := Application{}
 	p := Pipeline{}
 	a.manifests, p.manifests = m.GetManifests(filePath)

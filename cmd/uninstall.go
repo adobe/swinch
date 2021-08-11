@@ -14,7 +14,7 @@ package cmd
 
 import (
 	"os"
-	"swinch/domain"
+	"swinch/domain/datastore"
 
 	"github.com/spf13/cobra"
 )
@@ -29,8 +29,8 @@ var uninstallCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		// Template call
-		datastore := domain.Datastore{}
-		outputPath = datastore.CreateTmpFolder()
+		d := datastore.Datastore{}
+		outputPath = d.CreateTmpFolder()
 		defer os.RemoveAll(outputPath)
 		templateCmd.Run(cmd, []string{})
 

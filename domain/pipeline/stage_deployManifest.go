@@ -10,13 +10,15 @@ OF ANY KIND, either express or impliedm. See the License for the specific langua
 governing permissions and limitations under the License.
 */
 
-package domain
+package pipeline
 
 import (
 	"encoding/json"
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 	"strconv"
+	"swinch/domain/datastore"
+	"swinch/domain/stage"
 )
 
 type DeployManifest struct {
@@ -43,7 +45,7 @@ type Moniker struct {
 	App string `yaml:"app" json:"app"`
 }
 
-func (dm *DeployManifest) ProcessDeployManifest(p *Pipeline, stage *map[string]interface{}, metadata *StageMetadata) {
+func (dm *DeployManifest) ProcessDeployManifest(p *Pipeline, stage *map[string]interface{}, metadata *stage.Stage) {
 	dm.decode(p, stage)
 	dm.expand(p, metadata)
 	dm.updateStage(stage)
@@ -62,9 +64,9 @@ func (dm *DeployManifest) decode(p *Pipeline, stage *map[string]interface{}) {
 	}
 }
 
-func (dm *DeployManifest) expand(p *Pipeline, metadata *StageMetadata) {
+func (dm *DeployManifest) expand(p *Pipeline, metadata *stage.Stage) {
 	dm.Moniker = new(Moniker)
-	dm.Moniker.App = p.Metadata.Application
+	dm.Moniker.App = p.Manifest.Metadata.Application
 	bakeStageIndex := new(int)
 
 	// Bind deploy stage to a specific bake
@@ -80,7 +82,7 @@ func (dm *DeployManifest) expand(p *Pipeline, metadata *StageMetadata) {
 
 	//TODO get the bake stage without decoding
 	bake := new(DeployManifest)
-	err := mapstructure.Decode(p.Spec.Stages[*bakeStageIndex], bake)
+	err := mapstructure.Decode(p.Manifest.Spec.Stages[*bakeStageIndex], bake)
 	if err != nil {
 		log.Fatalf("err: %v", err)
 	}
@@ -92,7 +94,7 @@ func (dm *DeployManifest) expand(p *Pipeline, metadata *StageMetadata) {
 }
 
 func (dm *DeployManifest) updateStage(stage *map[string]interface{}) {
-	d := Datastore{}
+	d := datastore.Datastore{}
 	buffer := d.MarshalJSON(dm)
 	stageMap := new(map[string]interface{})
 	err := json.Unmarshal(buffer, stageMap)

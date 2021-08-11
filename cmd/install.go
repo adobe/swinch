@@ -15,7 +15,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"os"
-	"swinch/domain"
+	"swinch/domain/datastore"
 )
 
 // installCmd represents the install command
@@ -28,8 +28,8 @@ var installCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		// Template call
-		datastore := domain.Datastore{}
-		outputPath = datastore.CreateTmpFolder()
+		d := datastore.Datastore{}
+		outputPath = d.CreateTmpFolder()
 		defer os.RemoveAll(outputPath)
 		templateCmd.Run(cmd, []string{})
 

@@ -10,13 +10,15 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package domain
+package pipeline
 
 import (
 	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
+	"swinch/domain/datastore"
+	"swinch/domain/stage"
 )
 
 type BakeManifest struct {
@@ -71,7 +73,7 @@ type InputArtifacts struct {
 	} `yaml:"artifact" json:"artifact"`
 }
 
-func (bm *BakeManifest) ProcessBakeManifest(p *Pipeline, stage *map[string]interface{}, metadata *StageMetadata) {
+func (bm *BakeManifest) ProcessBakeManifest(p *Pipeline, stage *map[string]interface{}, metadata *stage.Stage) {
 	bm.decode(stage)
 	bm.expand(metadata)
 	bm.updateStage(stage)
@@ -91,7 +93,7 @@ func (bm *BakeManifest) decode(stage *map[string]interface{}) {
 	}
 }
 
-func (bm *BakeManifest) expand(metadata *StageMetadata) {
+func (bm *BakeManifest) expand(metadata *stage.Stage) {
 	// TODO check that index on ExpectedArtifacts is always 0
 	expectArtifacts := &bm.ExpectedArtifacts[0]
 
@@ -117,7 +119,7 @@ func (bm *BakeManifest) newUUID(data string) uuid.UUID {
 }
 
 func (bm *BakeManifest) updateStage(stage *map[string]interface{}) {
-	d := Datastore{}
+	d := datastore.Datastore{}
 	buffer := d.MarshalJSON(bm)
 	stageMap := new(map[string]interface{})
 	err := json.Unmarshal(buffer, stageMap)

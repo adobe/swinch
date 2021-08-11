@@ -15,7 +15,8 @@ package cmd
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"swinch/domain"
+	"swinch/domain/chart"
+	"swinch/domain/pipeline"
 	"swinch/spincli"
 )
 
@@ -29,7 +30,7 @@ var pipelineCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		action := cmd.Parent().Use
-		Pipeline{}.cmdActions(application, pipeline, action)
+		Pipeline{}.cmdActions(applicationName, pipelineName, action)
 	},
 }
 
@@ -39,8 +40,8 @@ var DeletePipeCmd = *pipelineCmd
 
 func init() {
 	// import flags
-	ImportPipeCmd.Flags().StringVarP(&application, "application", "a", "", "Application name")
-	ImportPipeCmd.Flags().StringVarP(&pipeline, "pipeline", "p", "", "Pipeline name")
+	ImportPipeCmd.Flags().StringVarP(&applicationName, "application", "a", "", "Application name")
+	ImportPipeCmd.Flags().StringVarP(&pipelineName, "pipeline", "p", "", "Pipeline name")
 	ImportPipeCmd.Flags().StringVarP(&filePath, "filePath", "f", "", "JSON file input")
 	ImportPipeCmd.Flags().StringVarP(&outputPath, "outputPath", "o", "", "Generated chart output path")
 	ImportPipeCmd.Flags().StringVarP(&chartName, "chartName", "n", "", "Specify chart name for imported pipeline")
@@ -51,8 +52,8 @@ func init() {
 	importCmd.AddCommand(&ImportPipeCmd)
 
 	// delete flags
-	DeletePipeCmd.Flags().StringVarP(&application, "application", "a", "", "Application name")
-	DeletePipeCmd.Flags().StringVarP(&pipeline, "pipeline", "p", "", "Pipeline name")
+	DeletePipeCmd.Flags().StringVarP(&applicationName, "application", "a", "", "Application name")
+	DeletePipeCmd.Flags().StringVarP(&pipelineName, "pipeline", "p", "", "Pipeline name")
 	DeletePipeCmd.MarkFlagRequired("application")
 	DeletePipeCmd.MarkFlagRequired("pipeline")
 	deleteCmd.AddCommand(&DeletePipeCmd)
@@ -62,10 +63,10 @@ func init() {
 }
 
 type Pipeline struct {
-	manifests []domain.PipelineManifest
-	domain.Pipeline
+	manifests []pipeline.Manifest
+	pipeline.Pipeline
 	spincli.PipelineAPI
-	domain.Chart
+	chart.Chart
 }
 
 func (p Pipeline) cmdActions(app, pipe, action string) {
@@ -101,7 +102,7 @@ func (p Pipeline) manifestActions(action string) {
 	}
 }
 
-func (p *Pipeline) save(spec domain.PipelineSpec, dryRun bool) {
+func (p *Pipeline) save(spec pipeline.Spec, dryRun bool) {
 	pipe := p.Get()
 	changes := false
 	newPipe := false
@@ -134,13 +135,13 @@ func (p *Pipeline) importChart() {
 		*data = p.Get()
 	}
 
-	manifest := p.MakePipelineManifest(p.LoadSpec(*data))
-	p.ChartMetadata.Name = chartName
-	if p.ChartMetadata.Name == "" {
-		p.ChartMetadata.Name = manifest.Metadata.Name
+	manifest := p.MakeManifest(p.LoadSpec(*data))
+	p.Chart.Metadata.Name = chartName
+	if p.Chart.Metadata.Name == "" {
+		p.Chart.Metadata.Name = manifest.Metadata.Name
 	}
 
-	p.ChartValues.Values = map[interface{}]interface{}{p.Kind: map[string]string{"name": manifest.Metadata.Name}}
+	p.Values.Values = map[interface{}]interface{}{p.Kind: map[string]string{"name": manifest.Metadata.Name}}
 
 	p.GenerateChart(manifest)
 }

@@ -15,7 +15,8 @@ package cmd
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"swinch/domain"
+	"swinch/domain/application"
+	"swinch/domain/chart"
 	"swinch/spincli"
 )
 
@@ -29,7 +30,7 @@ var applicationCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		action := cmd.Parent().Use
-		Application{}.cmdActions(action)
+		Application{}.cmdActions(applicationName, action)
 	},
 }
 
@@ -39,7 +40,7 @@ var DeleteAppCmd = *applicationCmd
 
 func init() {
 	// import flags
-	ImportAppCmd.Flags().StringVarP(&application, "application", "a", "", "Application name")
+	ImportAppCmd.Flags().StringVarP(&applicationName, "application", "a", "", "Application name")
 	ImportAppCmd.Flags().StringVarP(&filePath, "filePath", "f", "", "JSON file input")
 	ImportAppCmd.Flags().StringVarP(&outputPath, "outputPath", "o", "", "Generated chart output path")
 	ImportAppCmd.Flags().StringVarP(&chartName, "chartName", "n", "", "Specify chart name for imported pipeline")
@@ -49,7 +50,7 @@ func init() {
 	importCmd.AddCommand(&ImportAppCmd)
 
 	// delete flags
-	DeleteAppCmd.Flags().StringVarP(&application, "application", "a", "", "Application name")
+	DeleteAppCmd.Flags().StringVarP(&applicationName, "application", "a", "", "Application name")
 	DeleteAppCmd.MarkFlagRequired("application")
 	deleteCmd.AddCommand(&DeleteAppCmd)
 
@@ -58,14 +59,14 @@ func init() {
 }
 
 type Application struct {
-	manifests []domain.ApplicationManifest
-	domain.Application
+	manifests []application.Manifest
+	application.Application
 	spincli.ApplicationAPI
-	domain.Chart
+	chart.Chart
 }
 
-func (a Application) cmdActions(action string) {
-	a.App = application
+func (a Application) cmdActions(app, action string) {
+	a.App = app
 	switch action {
 	case deleteAction:
 		a.Delete()
@@ -95,7 +96,7 @@ func (a Application) manifestActions(action string) {
 	}
 }
 
-func (a *Application) save(spec domain.ApplicationSpec, dryRun bool) {
+func (a *Application) save(spec application.Spec, dryRun bool) {
 	app := a.Get()
 	changes := false
 	newApp := false
@@ -128,13 +129,13 @@ func (a *Application) importChart() {
 		*data = a.Get()
 	}
 
-	manifest := a.MakeApplicationManifest(a.LoadSpec(*data))
-	a.ChartMetadata.Name = chartName
-	if a.ChartMetadata.Name == "" {
-		a.ChartMetadata.Name = manifest.Metadata.Name
+	manifest := a.MakeManifest(a.LoadSpec(*data))
+	a.Metadata.Name = chartName
+	if a.Metadata.Name == "" {
+		a.Metadata.Name = manifest.Metadata.Name
 	}
 
-	a.ChartValues.Values = map[interface{}]interface{}{a.Kind: map[string]string{"name": manifest.Metadata.Name}}
+	a.Values.Values = map[interface{}]interface{}{a.Kind: map[string]string{"name": manifest.Metadata.Name}}
 
 	a.GenerateChart(manifest)
 }

@@ -10,57 +10,66 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package domain
+package application
 
 import (
 	"errors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 	"strings"
+	"swinch/domain/datastore"
 )
 
 const (
-	ApplicationKind = "Application"
-	ApplicationAPI  = "spinnaker.adobe.com/alpha1"
+	Kind = "Application"
+	API  = "spinnaker.adobe.com/alpha1"
 )
 
 var (
 	AppNameLen = errors.New("invalid name length, 4 char min")
 )
 
-type ApplicationManifest struct {
-	ApiVersion string              `yaml:"apiVersion" json:"apiVersion"`
-	Kind       string              `yaml:"kind" json:"kind"`
-	Metadata   ApplicationMetadata `yaml:"metadata" json:"metadata"`
-	Spec       ApplicationSpec     `yaml:"spec" json:"spec"`
+type Manifest struct {
+	ApiVersion string   `yaml:"apiVersion" json:"apiVersion"`
+	Kind       string   `yaml:"kind" json:"kind"`
+	Metadata   Metadata `yaml:"metadata" json:"metadata"`
+	Spec       Spec     `yaml:"spec" json:"spec"`
 }
 
-type ApplicationMetadata struct {
+type Metadata struct {
 	Name string `yaml:"name" json:"name"`
 }
 
-func (am *ApplicationManifest) LoadManifest(manifest interface{}) {
-	d := Datastore{}
-	err := yaml.Unmarshal(d.MarshalYAML(manifest), &am)
+func (m *Manifest) MakeManifest(spec Spec) *Manifest {
+	m.ApiVersion = API
+	m.Kind = Kind
+	m.Metadata.Name = spec.Name
+	m.Spec = spec
+	return m
+}
+
+func (m *Manifest) LoadManifest(manifest interface{}) {
+	d := datastore.Datastore{}
+	err := yaml.Unmarshal(d.MarshalYAML(manifest), &m)
 	if err != nil {
 		log.Fatalf("Error LoadManifest: %v", err)
 	}
 
-	am.inferFromManifest()
+	m.inferFromManifest()
 
-	err = am.Validate()
+	err = m.Validate()
 	if err != nil {
 		log.Fatalf("Application manifest validation failed: %v", err)
 	}
 }
 
-func (am *ApplicationManifest) inferFromManifest() {
+func (m *Manifest) inferFromManifest() {
 	// Spinnaker requires lower case application name
-	am.Spec.Name = strings.ToLower(am.Metadata.Name)
+	m.Spec.Name = strings.ToLower(m.Metadata.Name)
 }
 
-func (am ApplicationManifest) Validate() error {
-	if len(am.Spec.Name) < 3 {
+func (m Manifest) Validate() error {
+	if len(m.Spec.Name) < 3 {
 		return AppNameLen
 	}
 	return nil

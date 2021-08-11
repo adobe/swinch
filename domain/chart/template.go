@@ -10,19 +10,24 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package domain
+package chart
 
 import (
 	"github.com/Masterminds/sprig"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"path"
+	"swinch/domain/datastore"
 	"text/template"
+)
+
+const (
+	FilePerm = 0775
 )
 
 type Template struct {
 	chartPath string
-	ChartValues
+	Values
 }
 
 func (t Template) RenderChart(chartPath, valuesFile, outputPath string) {
@@ -35,14 +40,14 @@ func (t Template) RenderChart(chartPath, valuesFile, outputPath string) {
 	for _, chartFile := range t.discoverTemplates() {
 		log.Debugf("Found chart template: %v", chartFile.Name())
 
-		templatePath := path.Join(t.chartPath, ChartTemplatesFolder, chartFile.Name())
+		templatePath := path.Join(t.chartPath, TemplatesFolder, chartFile.Name())
 		tpl := template.New(chartFile.Name()).Funcs(template.FuncMap(sprig.FuncMap()))
 		tpl, err := tpl.ParseFiles(templatePath)
 		if err != nil {
 			log.Fatalf("Error in parsing: %v", err)
 		}
 
-		d := Datastore{}
+		d := datastore.Datastore{}
 		d.Mkdir(path.Join(outputPath), FilePerm)
 		outFile, err := os.Create(path.Join(outputPath, chartFile.Name()))
 		if err != nil {
@@ -62,7 +67,7 @@ func (t Template) RenderChart(chartPath, valuesFile, outputPath string) {
 }
 
 func (t Template) discoverTemplates() []os.DirEntry {
-	chartTemplates, err := os.ReadDir(path.Join(t.chartPath, ChartTemplatesFolder))
+	chartTemplates, err := os.ReadDir(path.Join(t.chartPath, TemplatesFolder))
 
 	if err != nil {
 		log.Fatalf("Error dicovering Chart templates: %v", err)

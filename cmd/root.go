@@ -18,7 +18,7 @@ import (
 	"github.com/spf13/viper"
 	"os"
 	"swinch/cmd/config"
-	"swinch/domain"
+	"swinch/domain/datastore"
 )
 
 var (
@@ -29,8 +29,8 @@ var (
 	valuesFilePath  string
 	chartName       string
 	protectedImport bool
-	application     string
-	pipeline        string
+	applicationName string
+	pipelineName    string
 	chartPath       string
 )
 
@@ -80,7 +80,7 @@ func initConfig() {
 
 	viper.AutomaticEnv() // read in environment variables that match
 
-	d := domain.Datastore{}
+	d := datastore.Datastore{}
 	cd := config.ContextDefinition{}
 
 	switch d.FileExists(config.HomeFolder() + config.CfgFolderName + config.CfgFileName) {

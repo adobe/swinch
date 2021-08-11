@@ -10,27 +10,11 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package domain
+package pipeline
 
-import (
-	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v3"
-)
-
-type ChartValues struct {
-	Values map[interface{}]interface{}
-}
-
-func (v ChartValues) loadValuesFile(valuesFilePath string) ChartValues {
-	d := Datastore{}
-	valuesBuffer := d.ReadFile(valuesFilePath)
-	return v.loadValues(valuesBuffer)
-}
-
-func (v ChartValues) loadValues(byteData []byte) ChartValues {
-	err := yaml.Unmarshal(byteData, &v.Values)
-	if err != nil {
-		log.Fatalf("Error loading values: %v", err)
-	}
-	return v
+type ManualJudgment struct {
+	FailPipeline   bool          `yaml:"failPipeline" json:"failPipeline"`
+	IsNew          bool          `yaml:"isNew" json:"isNew"`
+	JudgmentInputs []interface{} `yaml:"judgmentInputs" json:"judgmentInputs"`
+	Notifications  []interface{} `yaml:"notifications" json:"notifications"`
 }
