@@ -64,8 +64,6 @@ func (d Datastore) DiscoverYAMLFiles(path string) *bytes.Buffer {
 	return yamlFilesBuffer
 }
 
-
-
 func (d Datastore) WriteJSON(data interface{}, outputPath string) {
 	byteData := d.MarshalJSON(data)
 	d.WriteFile(outputPath, byteData, FilePerm)

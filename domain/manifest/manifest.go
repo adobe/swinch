@@ -36,7 +36,6 @@ type Manifest struct {
 	Spec       interface{} `yaml:"spec" json:"spec"`
 }
 
-
 func (m *Manifest) GetManifests(filePath string) ([]application.Manifest, []pipeline.Manifest) {
 	d := datastore.Datastore{}
 	discoveredYAMLDocs := d.DiscoverYAMLFiles(filePath)

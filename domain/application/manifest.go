@@ -30,8 +30,8 @@ var (
 )
 
 type Manifest struct {
-	ApiVersion string              `yaml:"apiVersion" json:"apiVersion"`
-	Kind       string              `yaml:"kind" json:"kind"`
+	ApiVersion string   `yaml:"apiVersion" json:"apiVersion"`
+	Kind       string   `yaml:"kind" json:"kind"`
 	Metadata   Metadata `yaml:"metadata" json:"metadata"`
 	Spec       Spec     `yaml:"spec" json:"spec"`
 }
