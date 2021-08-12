@@ -99,29 +99,18 @@ On macOS make sure to allow swinch in `System Preferences` -> `Security and Priv
 ```bash
 swinch help
 
-Available Commands/Subcommands:
-  apply              Apply or sync an Application or Pipeline from a manifest
-  completion         Generate shell completion script
-  config             Tweak swinch config
-    generate           Generates a mock swinch config file in '~/.swinch/config.yaml'
-    add-context        Adds a new Spinnaker context to the config file
-    get-contexts       Lists the available contexts present in the config file ~/.swinch/config.yaml
-    use-context        Switches between Spinnaker contexts
-    delete-context     Deletes a Spinnaker context from the config file
-  delete             Delete the Application or Pipeline form a manifest
-    application
-    pipeline
-  help               Help about any command
-  import             Imports an application or pipeline from Spinnaker and generates a swinch chart
-    application
-    pipeline
-  install            Installs a swinch chart
-  plan               Usefull before running apply or install
-    application
-    pipeline
-  template           Generate manifests from chart domain
-  uninstall          Uninstalls a swinch chart
-  version            Print swinch version
+Available Commands:
+  apply       Apply or sync an Application or Pipeline from a manifest
+  completion  Generate shell completion script
+  config      Tweak swinch config
+  delete      Delete the Application or Pipeline form a manifest
+  help        Help about any command
+  import      Import a chart from spinnaker
+  install     Installs a swinch chart
+  plan        Plan
+  template    Generate manifests from chart domain
+  uninstall   Uninstalls a swinch chart
+  version     Print swinch version
 ```
 
 ### Configuration file 

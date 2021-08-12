@@ -16,6 +16,7 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"os"
 	"swinch/cmd/config"
 
@@ -30,10 +31,11 @@ var getContextsCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
 		ValidateConfigFile()
-		ValidateConfig()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		getContexts()
+		if err := viper.ReadInConfig(); err == nil {
+			getContexts()
+		}
 	},
 }
 

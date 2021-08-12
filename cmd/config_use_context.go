@@ -32,7 +32,6 @@ var useContextCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
 		ValidateConfigFile()
-		ValidateConfig()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := viper.ReadInConfig(); err == nil {
