@@ -164,7 +164,7 @@ func addNewContext(fields map[string]string) {
 
 	err := viper.WriteConfig()
 	if err != nil {
-		log.Errorf("Error: %s", err)
+		log.Fatalf("Error: %s", err)
 	} else {
 		log.Infof("New context '%s' was added to the config file; you can now run `swinch config use-context` to set it as current-context", fields["name"])
 	}

@@ -90,7 +90,7 @@ func changeCurrentContext(newContext string) {
 
 	err := viper.WriteConfig()
 	if err != nil {
-		log.Errorf("Error: %s", err)
+		log.Fatalf("Error: %s", err)
 	} else {
 		log.Infof("Current context is now set to: '%s'", newContext)
 	}
