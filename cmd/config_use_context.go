@@ -17,6 +17,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 	"swinch/cmd/config"
 )
 
@@ -24,7 +25,10 @@ import (
 var useContextCmd = &cobra.Command{
 	Use:   "use-context",
 	Short: "Switches between Spinnaker contexts",
-	Long:  `Switches between Spinnaker contexts`,
+	Long:  `Switches between Spinnaker contexts; works in both interactive or non-interactive way`,
+	Example: `Interactive vs non-interactive:
+	swinch config use-context (displays the prompt to select a context)
+	swinch config use-context spinnaker-dev (non-interactive, switches to the new context directly if it exists)`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
 		ValidateConfigFile()
@@ -52,15 +56,34 @@ func useContextPromptUI() string {
 		log.Fatalf("The config file does not have any valid contexts")
 	}
 
-	prompt := promptui.Select{
-		Label: "Set a new Spinnaker Context",
-		Items: ctxList,
+	_, args, _ := rootCmd.Find(os.Args)
+
+	// Allow 'swinch config use-context context-name' subcommand to run without promptui
+	if len(args) == 4 && args[1] == "config" && args[2] == "use-context" {
+		context := ""
+		for _, existingContext := range ctxList {
+			if args[3] == existingContext {
+				context = args[3]
+				break
+			}
+		}
+
+		if context == "" {
+			log.Fatalf("The specified context '%s' does not exist in the contexts list", args[3])
+		}
+
+		return context
+	} else {
+		prompt := promptui.Select{
+			Label: "Set a new Spinnaker Context",
+			Items: ctxList,
+		}
+		_, context, err := prompt.Run()
+		if err != nil {
+			log.Fatalf("Exiting %v\n", err)
+		}
+		return context
 	}
-	_, context, err := prompt.Run()
-	if err != nil {
-		log.Fatalf("Exiting %v\n", err)
-	}
-	return context
 }
 
 func changeCurrentContext(newContext string) {

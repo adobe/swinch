@@ -23,8 +23,9 @@ var configCmd = &cobra.Command{
 	Long:  `Tweak swinch config - setup is similar with kubernetes kubeconfig; one can easily define multiple contexts and switch between them`,
 	Example: `Steps to initialize a custom config:
 	swinch config generate (generates a mock config file with some example entries)
-	swinch config add-context (add a new real context)
-	swinch config use-context (select the real context to use)
+	swinch config add-context (add a new context to the list)
+	swinch config get-contexts (prints all contexts)
+	swinch config use-context (select a new current-context)
 	swinch config delete-context (delete the example entries)`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)

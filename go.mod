@@ -10,6 +10,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
+	github.com/jedib0t/go-pretty/v6 v6.2.4
 	github.com/manifoldco/promptui v0.8.0
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0

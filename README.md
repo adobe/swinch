@@ -84,42 +84,55 @@ swinch template -c samples/charts/pipeline  -o samples/manifests/pipeline
 
 
 ### Install 
-Downdload latest [swinch relase](https://github.com/adobe/swinch/releases) and unpack it:
+Download latest [swinch release](https://github.com/adobe/swinch/releases) and unpack it:
 
 ```
 tar zxvf swinch-*
 chmod +x
 mv swinch /usr/local/bin/swinch
-
 ```
-On MacOS make sure to allow swinch in `System Preferences` -> `Security and Privacy`
+
+On macOS make sure to allow swinch in `System Preferences` -> `Security and Privacy`
 
 ### Usage
 
 ```bash
 swinch help
 
-Available Commands:
-  apply       Apply or sync an Application or Pipeline from a manifest
-  completion  Generate shell completion script
-  config      Tweak swinch config
-  delete      Delete the Application or Pipeline form a manifest
-  help        Help about any command
-  import      Import a chart from spinnaker
-  install     Installs a swinch chart
-  plan        Plan
-  template    Generate manifests from chart domain
-  uninstall   Uninstalls a swinch chart
-  version     Print swinch version
+Available Commands/Subcommands:
+  apply              Apply or sync an Application or Pipeline from a manifest
+  completion         Generate shell completion script
+  config             Tweak swinch config
+    generate           Generates a mock swinch config file in '~/.swinch/config.yaml'
+    add-context        Adds a new Spinnaker context to the config file
+    get-contexts       Lists the available contexts present in the config file ~/.swinch/config.yaml
+    use-context        Switches between Spinnaker contexts
+    delete-context     Deletes a Spinnaker context from the config file
+  delete             Delete the Application or Pipeline form a manifest
+    application
+    pipeline
+  help               Help about any command
+  import             Imports an application or pipeline from Spinnaker and generates a swinch chart
+    application
+    pipeline
+  install            Installs a swinch chart
+  plan               Usefull before running apply or install
+    application
+    pipeline
+  template           Generate manifests from chart domain
+  uninstall          Uninstalls a swinch chart
+  version            Print swinch version
 ```
 
 ### Configuration file 
-In the swinch config file you will set up the spinnaker endpoint and authentication metod.  
-Run `swinch config` to get the full list of options and intructions.
+In the swinch config file you will set up the spinnaker endpoint and authentication method.
+Run `swinch config` to get the full list of options and instructions.
 
 ```bash
 swinch config generate
 swinch config add-context
+swinch config use-context   # make sure you run use-context command after adding a new context
+swinch config get-contexts
 ```
 
 Example configuration file located in `cd ${HOME}/.swinch`:  
@@ -197,7 +210,5 @@ Push a release commit:
 
 ```bash
 bump2version patch
-git push upstream master  --follow-tags  
+git push upstream master  --follow-tags
 ```
-
-
