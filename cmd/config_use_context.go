@@ -57,32 +57,32 @@ func useContextPromptUI() string {
 
 	_, args, _ := rootCmd.Find(os.Args)
 
+	context := new(string)
+
 	// Allow 'swinch config use-context context-name' subcommand to run without promptui
 	if len(args) == 4 && args[1] == "config" && args[2] == "use-context" {
-		context := ""
 		for _, existingContext := range ctxList {
 			if args[3] == existingContext {
-				context = args[3]
+				*context = args[3]
 				break
 			}
 		}
 
-		if context == "" {
+		if *context == "" {
 			log.Fatalf("The specified context '%s' does not exist in the contexts list", args[3])
 		}
-
-		return context
 	} else {
 		prompt := promptui.Select{
 			Label: "Set a new Spinnaker Context",
 			Items: ctxList,
 		}
-		_, context, err := prompt.Run()
+		_, ctx, err := prompt.Run()
+		*context = ctx
 		if err != nil {
 			log.Fatalf("Exiting %v\n", err)
 		}
-		return context
 	}
+	return *context
 }
 
 func changeCurrentContext(newContext string) {
