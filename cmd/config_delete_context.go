@@ -17,6 +17,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 	"swinch/cmd/config"
 )
 
@@ -25,10 +26,12 @@ var deleteContextCmd = &cobra.Command{
 	Use:   "delete-context",
 	Short: "Deletes a Spinnaker context from the config file",
 	Long:  `Deletes a Spinnaker context from the config file`,
+	Example: `Interactive vs non-interactive:
+	swinch config delete-context (displays the prompt to select a context for deletion)
+	swinch config delete-context spinnaker-dev (non-interactive, deletes the 'spinnaker-dev 'context if it exists)`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
 		ValidateConfigFile()
-		ValidateConfig()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := viper.ReadInConfig(); err == nil {
@@ -52,15 +55,34 @@ func deleteContextPromptUI() string {
 		log.Fatalf("The config file does not have any valid contexts")
 	}
 
-	prompt := promptui.Select{
-		Label: "Delete Spinnaker Context",
-		Items: ctxList,
+	_, args, _ := rootCmd.Find(os.Args)
+
+	context := new(string)
+
+	// Allow 'swinch config delete-context context-name' subcommand to run without promptui
+	if len(args) == 4 && args[1] == "config" && args[2] == "delete-context" {
+		for _, existingContext := range ctxList {
+			if args[3] == existingContext {
+				*context = args[3]
+				break
+			}
+		}
+
+		if *context == "" {
+			log.Fatalf("The specified context '%s' does not exist in the contexts list", args[3])
+		}
+	} else {
+		prompt := promptui.Select{
+			Label: "Delete Spinnaker Context",
+			Items: ctxList,
+		}
+		_, ctx, err := prompt.Run()
+		*context = ctx
+		if err != nil {
+			log.Fatalf("Exiting %v\n", err)
+		}
 	}
-	_, context, err := prompt.Run()
-	if err != nil {
-		log.Fatalf("Exiting %v\n", err)
-	}
-	return context
+	return *context
 }
 
 func deleteContext(context string) {
@@ -71,6 +93,10 @@ func deleteContext(context string) {
 	currentCtx := cc.GetCurrentContext()
 
 	var updatedCtx []config.ContextDefinition
+
+	if context == currentCtx {
+		log.Fatalf("Context '%s' selected for deletion is set as 'current-context'; run 'swinch config use-context' to select another current-context before attempting deletion", context)
+	}
 
 	// Removing the context selected for deletion from the contexts list in the new updatedCtx slice
 	for _, v := range ctx {
@@ -83,12 +109,8 @@ func deleteContext(context string) {
 
 	err := viper.WriteConfig()
 	if err != nil {
-		log.Errorf("Error: %s", err)
+		log.Fatalf("Error: %s", err)
 	} else {
-		if context == currentCtx {
-			log.Warnf("Context '%s' selected for deletion is set as 'current-context'; run 'swinch config use-context' to select another current-context", context)
-		} else {
-			log.Infof("Context '%s' was deleted from the config file", context)
-		}
+		log.Infof("Context '%s' was deleted from the config file", context)
 	}
 }
