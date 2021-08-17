@@ -30,12 +30,13 @@ type DeleteManifest struct {
 	App      string `yaml:"-" json:"app,omitempty"`
 	Location string `yaml:"-" json:"location,omitempty"`
 	// Namespace not in spinnaker json struct
-	Namespace      string          `yaml:"namespace,omitempty" json:"-"`
-	Kinds          []string        `yaml:"kinds,omitempty" json:"kinds,omitempty"`
-	LabelSelectors *LabelSelectors `yaml:"labelSelectors,omitempty" json:"labelSelectors,omitempty"`
-	Options        *Options        `yaml:"options,omitempty" json:"options,omitempty"`
-	Mode           string          `yaml:"mode,omitempty" json:"mode,omitempty"`
-	//Overrides      struct{}        `yaml:"overrides,omitempty" json:"overrides,omitempty"`
+	Namespace          string          `yaml:"namespace,omitempty" json:"-"`
+	Kinds              []string        `yaml:"kinds,omitempty" json:"kinds,omitempty"`
+	LabelSelectors     *LabelSelectors `yaml:"labelSelectors,omitempty" json:"labelSelectors,omitempty"`
+	Options            *Options        `yaml:"options,omitempty" json:"options,omitempty"`
+	Mode               string          `yaml:"mode,omitempty" json:"mode,omitempty"`
+	CloudProvider      string          `yaml:"cloudProvider,omitempty" json:"cloudProvider,omitempty"`
+	ManifestArtifactId *string         `json:"manifestArtifactId,omitempty"`
 }
 
 type LabelSelectors struct {

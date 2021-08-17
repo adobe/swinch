@@ -31,10 +31,10 @@ type BakeManifest struct {
 	OutputName         string              `json:"outputName"`
 	ExpectedArtifacts  []ExpectedArtifacts `yaml:"expectedArtifacts,omitempty" json:"expectedArtifacts,omitempty"`
 	InputArtifacts     []InputArtifacts    `yaml:"inputArtifacts,omitempty" json:"inputArtifacts,omitempty"`
-	ManifestArtifactId string              `json:"manifestArtifactId"`
+	ManifestArtifactId string             `json:"manifestArtifactId,omitempty"`
 	Namespace          string              `json:"namespace"`
 	TemplateRenderer   string              `json:"templateRenderer"`
-	Overrides          struct{}
+	Overrides          struct{}            `yaml:"overrides,omitempty" json:"overrides,omitempty"`
 }
 
 type ExpectedArtifacts struct {
@@ -106,7 +106,7 @@ func (bm *BakeManifest) expand(metadata *stage.Stage) {
 	inputArtifacts := &bm.InputArtifacts[0]
 	//Deduplicate ArtifactAccount name
 	inputArtifacts.Artifact.ArtifactAccount = inputArtifacts.Account
-	inputArtifacts.Artifact.Id = bm.newUUID(inputArtifacts.Artifact.Name + inputArtifacts.Artifact.Version).String()
+	//inputArtifacts.Artifact.Id = bm.newUUID(inputArtifacts.Artifact.Name + inputArtifacts.Artifact.Version).String()
 
 	// RefId is either specified by the user or generated based on the stage index
 	bm.RefId = metadata.RefId

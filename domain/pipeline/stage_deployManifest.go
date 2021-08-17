@@ -27,14 +27,15 @@ type DeployManifest struct {
 	RefId                string   `yaml:"refId,omitempty" json:"refId"`
 	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 
-	Account            string              `yaml:"account,omitempty" json:"account,omitempty"`
-	ExpectedArtifacts  []ExpectedArtifacts `yaml:"expectedArtifacts,omitempty" json:"expectedArtifacts,omitempty"`
-	CloudProvider      string              `json:"cloudProvider"`
-	ManifestArtifactId string              `json:"manifestArtifactId"`
-	Moniker            *Moniker            `yaml:"moniker,omitempty" json:"moniker,omitempty"`
-	NamespaceOverride  string              `json:"namespaceOverride"`
-	Overrides          struct{}            `json:"overrides"`
-	Source             string              `json:"source"`
+	Account                  string              `yaml:"account,omitempty" json:"account,omitempty"`
+	ExpectedArtifacts        []ExpectedArtifacts `yaml:"expectedArtifacts,omitempty" json:"expectedArtifacts,omitempty"`
+	CloudProvider            string              `json:"cloudProvider"`
+	ManifestArtifactId       string              `json:"manifestArtifactId"`
+	Moniker                  *Moniker            `yaml:"moniker,omitempty" json:"moniker,omitempty"`
+	NamespaceOverride        string              `json:"namespaceOverride"`
+	Overrides                struct{}            `yaml:"overrides,omitempty" json:"overrides,omitempty"`
+	Source                   string              `json:"source"`
+	SkipExpressionEvaluation bool                `yaml:"skipExpressionEvaluation,omitempty" json:"skipExpressionEvaluation,omitempty"`
 
 	// Swinch only field
 	BakeStageRefIds *int `yaml:"bakeStageRefIds,omitempty" json:"-"`
