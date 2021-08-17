@@ -93,7 +93,7 @@ func (bm *BakeManifest) decode(stage *map[string]interface{}) {
 	}
 }
 
-func (bm BakeManifest) expand(metadata *stage.Stage) {
+func (bm *BakeManifest) expand(metadata *stage.Stage) {
 	// TODO check that index on ExpectedArtifacts is always 0
 	expectArtifacts := &bm.ExpectedArtifacts[0]
 	// expectArtifacts ID is used by the deploy stage
@@ -106,7 +106,6 @@ func (bm BakeManifest) expand(metadata *stage.Stage) {
 	inputArtifacts := &bm.InputArtifacts[0]
 	//Deduplicate ArtifactAccount name
 	inputArtifacts.Artifact.ArtifactAccount = inputArtifacts.Account
-	// inputArtifacts.Artifact.Id not mandatory
 	//inputArtifacts.Artifact.Id = bm.newUUID(inputArtifacts.Artifact.Name + inputArtifacts.Artifact.Version).String()
 
 	// RefId is either specified by the user or generated based on the stage index

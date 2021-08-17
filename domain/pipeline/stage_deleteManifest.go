@@ -28,7 +28,7 @@ type DeleteManifest struct {
 
 	Account  string `yaml:"account,omitempty" json:"account,omitempty"`
 	App      string `yaml:"-" json:"app,omitempty"`
-	Location string `yaml:"-" json:"location"`
+	Location string `yaml:"-" json:"location,omitempty"`
 	// Namespace not in spinnaker json struct
 	Namespace          string          `yaml:"namespace,omitempty" json:"-"`
 	Kinds              []string        `yaml:"kinds,omitempty" json:"kinds,omitempty"`
@@ -52,12 +52,12 @@ type Options struct {
 }
 
 func (delm *DeleteManifest) ProcessDeleteManifest(p *Pipeline, stage *map[string]interface{}, metadata *stage.Stage) {
-	delm.decode(stage)
+	delm.decode(p, stage)
 	delm.expand(p, metadata)
 	delm.updateStage(stage)
 }
 
-func (delm *DeleteManifest) decode(stage *map[string]interface{}) {
+func (delm *DeleteManifest) decode(p *Pipeline, stage *map[string]interface{}) {
 	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &delm}
 	decoder, err := mapstructure.NewDecoder(&decoderConfig)
 	if err != nil {
@@ -70,7 +70,7 @@ func (delm *DeleteManifest) decode(stage *map[string]interface{}) {
 	}
 }
 
-func (delm DeleteManifest) expand(p *Pipeline, metadata *stage.Stage) {
+func (delm *DeleteManifest) expand(p *Pipeline, metadata *stage.Stage) {
 	delm.App = p.Manifest.Metadata.Application
 	if delm.Location != "" {
 		delm.Namespace = delm.Location
