@@ -31,10 +31,10 @@ type BakeManifest struct {
 	OutputName         string              `json:"outputName"`
 	ExpectedArtifacts  []ExpectedArtifacts `yaml:"expectedArtifacts,omitempty" json:"expectedArtifacts,omitempty"`
 	InputArtifacts     []InputArtifacts    `yaml:"inputArtifacts,omitempty" json:"inputArtifacts,omitempty"`
-	ManifestArtifactId string              `json:"manifestArtifactId"`
+	ManifestArtifactId string              `json:"manifestArtifactId,omitempty"`
 	Namespace          string              `json:"namespace"`
 	TemplateRenderer   string              `json:"templateRenderer"`
-	Overrides          struct{}
+	Overrides          struct{}            `yaml:"overrides,omitempty" json:"overrides,omitempty"`
 }
 
 type ExpectedArtifacts struct {
@@ -73,13 +73,13 @@ type InputArtifacts struct {
 	} `yaml:"artifact" json:"artifact"`
 }
 
-func (bm *BakeManifest) ProcessBakeManifest(p *Pipeline, stage *map[string]interface{}, metadata *stage.Stage) {
-	bm.decode(stage)
+func (bm BakeManifest) ProcessBakeManifest(p *Pipeline, stageMap *map[string]interface{}, metadata *stage.Stage) {
+	bm.decode(stageMap)
 	bm.expand(metadata)
-	bm.updateStage(stage)
+	bm.updateStage(stageMap)
 }
 
-func (bm *BakeManifest) decode(stage *map[string]interface{}) {
+func (bm *BakeManifest) decode(stageMap *map[string]interface{}) {
 	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &bm}
 	decoder, err := mapstructure.NewDecoder(&decoderConfig)
 
@@ -87,7 +87,7 @@ func (bm *BakeManifest) decode(stage *map[string]interface{}) {
 		log.Fatalf("err: %v", err)
 	}
 
-	err = decoder.Decode(stage)
+	err = decoder.Decode(stageMap)
 	if err != nil {
 		log.Fatalf("err: %v", err)
 	}
@@ -106,7 +106,8 @@ func (bm *BakeManifest) expand(metadata *stage.Stage) {
 	inputArtifacts := &bm.InputArtifacts[0]
 	//Deduplicate ArtifactAccount name
 	inputArtifacts.Artifact.ArtifactAccount = inputArtifacts.Account
-	inputArtifacts.Artifact.Id = bm.newUUID(inputArtifacts.Artifact.Name + inputArtifacts.Artifact.Version).String()
+	// inputArtifacts.Artifact.Id not mandatory
+	//inputArtifacts.Artifact.Id = bm.newUUID(inputArtifacts.Artifact.Name + inputArtifacts.Artifact.Version).String()
 
 	// RefId is either specified by the user or generated based on the stage index
 	bm.RefId = metadata.RefId
@@ -118,14 +119,12 @@ func (bm BakeManifest) newUUID(data string) uuid.UUID {
 	return uuid.NewSHA1(namespace, []byte(data))
 }
 
-func (bm *BakeManifest) updateStage(stage *map[string]interface{}) {
+func (bm *BakeManifest) updateStage(stageMap *map[string]interface{}) {
 	d := datastore.Datastore{}
-	buffer := d.MarshalJSON(bm)
-	stageMap := new(map[string]interface{})
-	err := json.Unmarshal(buffer, stageMap)
+	buffer := new(map[string]interface{})
+	err := json.Unmarshal(d.MarshalJSON(bm), buffer)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
-
-	*stage = *stageMap
+	*stageMap = *buffer
 }

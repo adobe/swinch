@@ -30,12 +30,13 @@ type DeleteManifest struct {
 	App      string `yaml:"-" json:"app,omitempty"`
 	Location string `yaml:"-" json:"location,omitempty"`
 	// Namespace not in spinnaker json struct
-	Namespace      string          `yaml:"namespace,omitempty" json:"-"`
-	Kinds          []string        `yaml:"kinds,omitempty" json:"kinds,omitempty"`
-	LabelSelectors *LabelSelectors `yaml:"labelSelectors,omitempty" json:"labelSelectors,omitempty"`
-	Options        *Options        `yaml:"options,omitempty" json:"options,omitempty"`
-	Mode           string          `yaml:"mode,omitempty" json:"mode,omitempty"`
-	//Overrides      struct{}        `yaml:"overrides,omitempty" json:"overrides,omitempty"`
+	Namespace          string          `yaml:"namespace,omitempty" json:"-"`
+	Kinds              []string        `yaml:"kinds,omitempty" json:"kinds,omitempty"`
+	LabelSelectors     *LabelSelectors `yaml:"labelSelectors,omitempty" json:"labelSelectors,omitempty"`
+	Options            *Options        `yaml:"options,omitempty" json:"options,omitempty"`
+	Mode               string          `yaml:"mode,omitempty" json:"mode,omitempty"`
+	CloudProvider      string          `yaml:"cloudProvider,omitempty" json:"cloudProvider,omitempty"`
+	ManifestArtifactId *string         `json:"manifestArtifactId,omitempty"`
 }
 
 type LabelSelectors struct {
@@ -50,20 +51,20 @@ type Options struct {
 	Cascading bool `yaml:"cascading" json:"cascading"`
 }
 
-func (delm *DeleteManifest) ProcessDeleteManifest(p *Pipeline, stage *map[string]interface{}, metadata *stage.Stage) {
-	delm.decode(p, stage)
+func (delm DeleteManifest) ProcessDeleteManifest(p *Pipeline, stageMap *map[string]interface{}, metadata *stage.Stage) {
+	delm.decode(stageMap)
 	delm.expand(p, metadata)
-	delm.updateStage(stage)
+	delm.updateStage(stageMap)
 }
 
-func (delm *DeleteManifest) decode(p *Pipeline, stage *map[string]interface{}) {
+func (delm *DeleteManifest) decode(stageMap *map[string]interface{}) {
 	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &delm}
 	decoder, err := mapstructure.NewDecoder(&decoderConfig)
 	if err != nil {
 		log.Fatalf("err: %v", err)
 	}
 
-	err = decoder.Decode(stage)
+	err = decoder.Decode(stageMap)
 	if err != nil {
 		log.Fatalf("err: %v", err)
 	}
@@ -76,19 +77,16 @@ func (delm *DeleteManifest) expand(p *Pipeline, metadata *stage.Stage) {
 	} else if delm.Namespace != "" {
 		delm.Location = delm.Namespace
 	}
-
 	// RefId is either specified by the user or generated based on the stage index
 	delm.RefId = metadata.RefId
 }
 
-func (delm *DeleteManifest) updateStage(stage *map[string]interface{}) {
+func (delm *DeleteManifest) updateStage(stageMap *map[string]interface{}) {
 	d := datastore.Datastore{}
-	buffer := d.MarshalJSON(delm)
-	stageMap := new(map[string]interface{})
-	err := json.Unmarshal(buffer, stageMap)
+	buffer := new(map[string]interface{})
+	err := json.Unmarshal(d.MarshalJSON(delm), buffer)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
-
-	*stage = *stageMap
+	*stageMap = *buffer
 }
