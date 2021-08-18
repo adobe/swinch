@@ -46,20 +46,20 @@ type Moniker struct {
 	App string `yaml:"app" json:"app"`
 }
 
-func (dm DeployManifest) ProcessDeployManifest(p *Pipeline, stage *map[string]interface{}, metadata *stage.Stage) {
-	dm.decode(p, stage)
+func (dm DeployManifest) ProcessDeployManifest(p *Pipeline, stageMap *map[string]interface{}, metadata *stage.Stage) {
+	dm.decode(p, stageMap)
 	dm.expand(p, metadata)
-	dm.updateStage(stage)
+	dm.updateStage(stageMap)
 }
 
-func (dm *DeployManifest) decode(p *Pipeline, stage *map[string]interface{}) {
+func (dm *DeployManifest) decode(p *Pipeline, stageMap *map[string]interface{}) {
 	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &dm}
 	decoder, err := mapstructure.NewDecoder(&decoderConfig)
 	if err != nil {
 		log.Fatalf("err: %v", err)
 	}
 
-	err = decoder.Decode(stage)
+	err = decoder.Decode(stageMap)
 	if err != nil {
 		log.Fatalf("err: %v", err)
 	}
@@ -94,14 +94,12 @@ func (dm *DeployManifest) expand(p *Pipeline, metadata *stage.Stage) {
 	dm.RefId = metadata.RefId
 }
 
-func (dm *DeployManifest) updateStage(stage *map[string]interface{}) {
+func (dm *DeployManifest) updateStage(stageMap *map[string]interface{}) {
 	d := datastore.Datastore{}
-	buffer := d.MarshalJSON(dm)
-	stageMap := new(map[string]interface{})
-	err := json.Unmarshal(buffer, stageMap)
+	buffer := new(map[string]interface{})
+	err := json.Unmarshal(d.MarshalJSON(dm), buffer)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
-
-	*stage = *stageMap
+	*stageMap = *buffer
 }
