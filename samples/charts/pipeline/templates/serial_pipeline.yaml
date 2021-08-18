@@ -4,6 +4,11 @@
   {{- $pipeline := .Values.serial_pipeline -}}
   {{- $lenBake := 1 -}}
   {{- $lenDeploy := len $pipeline.stages.deploy -}}
+
+  {{- $bake := $pipeline.stages.bake }}
+  {{- $manual_judgment := $pipeline.stages.manual_judgment }}
+  {{- $delete := $pipeline.stages.delete }}
+
 ---
 apiVersion: spinnaker.adobe.com/alpha1
 kind: Pipeline
@@ -17,7 +22,6 @@ spec:
   limitConcurrent: true
   spelEvaluator: v4
   stages:
-    {{- $bake := $pipeline.stages.bake }}
     - name: "{{ $bake.name }}"
       type: bakeManifest
       namespace: "{{ $bake.namespace }}"
@@ -49,10 +53,25 @@ spec:
       skipExpressionEvaluation: true
       source: artifact
     {{ end }}
-    {{- $delete := $pipeline.stages.delete }}
+    {{- if $manual_judgment.enabled }}
+    - name: {{ $manual_judgment.name }}
+      type: manualJudgment
+      failPipeline: true
+      isNew: true
+      judgmentInputs: [ ]
+      notifications: [ ]
+      sendNotifications: true
+      stageTimeoutMs: {{ $manual_judgment.stageTimeoutMs }}
+      requisiteStageRefIds:
+        - {{ add $lenBake $lenDeploy }}
+    {{ end }}
     - name: Delete (Manifest)
       requisiteStageRefIds:
-      - {{ add $lenBake $lenDeploy }}
+    {{- if $manual_judgment.enabled }}
+        - {{ add $lenBake $lenDeploy 1 }}
+    {{- else }}
+        - {{ add $lenBake $lenDeploy }}
+    {{- end }}
       type: deleteManifest
       account:  "{{ $delete.account }}"
       cloudProvider: kubernetes

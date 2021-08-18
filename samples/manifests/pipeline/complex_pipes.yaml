@@ -3,7 +3,7 @@ apiVersion: spinnaker.adobe.com/alpha1
 kind: Pipeline
 metadata:
   name: complexParallelPipe1
-  application: swinchuuidtest
+  application: sample-swinch-chart
 spec:
 # TODO auto index all pipelines in an application
   index: 0
@@ -69,7 +69,7 @@ apiVersion: spinnaker.adobe.com/alpha1
 kind: Pipeline
 metadata:
   name: complexParallelPipe2
-  application: swinchuuidtest
+  application: sample-swinch-chart
 spec:
 # TODO auto index all pipelines in an application
   index: 1

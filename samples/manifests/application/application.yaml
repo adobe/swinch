@@ -2,14 +2,14 @@
 apiVersion: spinnaker.adobe.com/alpha1
 kind: Application
 metadata:
-  name:  swinchuuidtest
+  name:  sample-swinch-chart
 spec:
   email: dcoman@adobe.com
   cloudProviders: ""
   permissions:
     EXECUTE:
-      - add_spinnaker_team_ldap
+      - ee_spinnaker_test
     READ:
-      - add_spinnaker_team_ldap
+      - ee_spinnaker_test
     WRITE:
-      - add_spinnaker_team_ldap
+      - ee_spinnaker_test

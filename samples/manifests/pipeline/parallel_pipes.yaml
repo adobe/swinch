@@ -3,7 +3,7 @@ apiVersion: spinnaker.adobe.com/alpha1
 kind: Pipeline
 metadata:
   name: parallelPipes
-  application: swinchuuidtest
+  application: sample-swinch-chart
 spec:
 # TODO auto index all pipelines in an application
   index: 3

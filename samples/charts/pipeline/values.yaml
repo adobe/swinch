@@ -1,7 +1,7 @@
 application:
-  name: swinchuuidtest
+  name: sample-swinch-chart
   email: dcoman@adobe.com
-  ldap: "add_spinnaker_team_ldap"
+  ldap: "ee_spinnaker_all"
 
 global:
   bake:
@@ -52,6 +52,10 @@ serial_pipeline:
         cluster: MyCluster2
         namespace: swinch
         account: test
+    manual_judgment:
+      enabled: true
+      name: "Manual Judgment before Delete"
+      stageTimeoutMs: 1800000
     delete:
       name: "Delete 1"
       namespace: swinch
