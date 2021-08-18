@@ -70,7 +70,7 @@ func (delm *DeleteManifest) decode(stageMap *map[string]interface{}) {
 	}
 }
 
-func (delm *DeleteManifest) expand(p *Pipeline, metadata *stage.Stage){
+func (delm *DeleteManifest) expand(p *Pipeline, metadata *stage.Stage) {
 	delm.App = p.Manifest.Metadata.Application
 	if delm.Location != "" {
 		delm.Namespace = delm.Location
@@ -80,7 +80,6 @@ func (delm *DeleteManifest) expand(p *Pipeline, metadata *stage.Stage){
 	// RefId is either specified by the user or generated based on the stage index
 	delm.RefId = metadata.RefId
 }
-
 
 func (delm *DeleteManifest) updateStage(stageMap *map[string]interface{}) {
 	d := datastore.Datastore{}

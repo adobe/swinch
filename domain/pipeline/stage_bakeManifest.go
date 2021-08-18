@@ -31,7 +31,7 @@ type BakeManifest struct {
 	OutputName         string              `json:"outputName"`
 	ExpectedArtifacts  []ExpectedArtifacts `yaml:"expectedArtifacts,omitempty" json:"expectedArtifacts,omitempty"`
 	InputArtifacts     []InputArtifacts    `yaml:"inputArtifacts,omitempty" json:"inputArtifacts,omitempty"`
-	ManifestArtifactId string             `json:"manifestArtifactId,omitempty"`
+	ManifestArtifactId string              `json:"manifestArtifactId,omitempty"`
 	Namespace          string              `json:"namespace"`
 	TemplateRenderer   string              `json:"templateRenderer"`
 	Overrides          struct{}            `yaml:"overrides,omitempty" json:"overrides,omitempty"`
