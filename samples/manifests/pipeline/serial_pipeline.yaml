@@ -1,9 +1,11 @@
+# stages
+
 ---
 apiVersion: spinnaker.adobe.com/alpha1
 kind: Pipeline
 metadata:
   name: simplePipe
-  application: swinchuuidtest
+  application: sample-swinch-chart
 spec:
 # TODO auto index all pipelines in an application
   index: 1
@@ -53,9 +55,20 @@ spec:
       skipExpressionEvaluation: true
       source: artifact
     
+    - name: Manual Judgment before Delete
+      type: manualJudgment
+      failPipeline: true
+      isNew: true
+      judgmentInputs: [ ]
+      notifications: [ ]
+      sendNotifications: true
+      stageTimeoutMs: 1800000
+      requisiteStageRefIds:
+        - 3
+    
     - name: Delete (Manifest)
       requisiteStageRefIds:
-      - 3
+        - 4
       type: deleteManifest
       account:  "test"
       cloudProvider: kubernetes

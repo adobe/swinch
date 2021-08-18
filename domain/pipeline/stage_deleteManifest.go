@@ -54,7 +54,7 @@ type Options struct {
 func (delm DeleteManifest) ProcessDeleteManifest(p *Pipeline, stageMap *map[string]interface{}, metadata *stage.Stage) {
 	delm.decode(stageMap)
 	delm.expand(p, metadata)
-	delm.updateStage(stageMap)
+	delm.update(stageMap)
 }
 
 func (delm *DeleteManifest) decode(stageMap *map[string]interface{}) {
@@ -81,7 +81,7 @@ func (delm *DeleteManifest) expand(p *Pipeline, metadata *stage.Stage) {
 	delm.RefId = metadata.RefId
 }
 
-func (delm *DeleteManifest) updateStage(stageMap *map[string]interface{}) {
+func (delm *DeleteManifest) update(stageMap *map[string]interface{}) {
 	d := datastore.Datastore{}
 	buffer := new(map[string]interface{})
 	err := json.Unmarshal(d.MarshalJSON(delm), buffer)

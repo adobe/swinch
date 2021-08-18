@@ -47,12 +47,12 @@ type Moniker struct {
 }
 
 func (dm DeployManifest) ProcessDeployManifest(p *Pipeline, stageMap *map[string]interface{}, metadata *stage.Stage) {
-	dm.decode(p, stageMap)
+	dm.decode(stageMap)
 	dm.expand(p, metadata)
-	dm.updateStage(stageMap)
+	dm.update(stageMap)
 }
 
-func (dm *DeployManifest) decode(p *Pipeline, stageMap *map[string]interface{}) {
+func (dm *DeployManifest) decode(stageMap *map[string]interface{}) {
 	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &dm}
 	decoder, err := mapstructure.NewDecoder(&decoderConfig)
 	if err != nil {
@@ -94,7 +94,7 @@ func (dm *DeployManifest) expand(p *Pipeline, metadata *stage.Stage) {
 	dm.RefId = metadata.RefId
 }
 
-func (dm *DeployManifest) updateStage(stageMap *map[string]interface{}) {
+func (dm *DeployManifest) update(stageMap *map[string]interface{}) {
 	d := datastore.Datastore{}
 	buffer := new(map[string]interface{})
 	err := json.Unmarshal(d.MarshalJSON(dm), buffer)

@@ -12,9 +12,52 @@ governing permissions and limitations under the License.
 
 package pipeline
 
+import (
+	"encoding/json"
+	"github.com/mitchellh/mapstructure"
+	log "github.com/sirupsen/logrus"
+	"swinch/domain/datastore"
+	"swinch/domain/stage"
+)
+
 type ManualJudgment struct {
-	FailPipeline   bool          `yaml:"failPipeline" json:"failPipeline"`
-	IsNew          bool          `yaml:"isNew" json:"isNew"`
-	JudgmentInputs []interface{} `yaml:"judgmentInputs" json:"judgmentInputs"`
-	Notifications  []interface{} `yaml:"notifications" json:"notifications"`
+	Name                 string        `yaml:"name" json:"name"`
+	Type                 string        `yaml:"type,omitempty" json:"type,omitempty"`
+	RefId                string        `yaml:"refId,omitempty" json:"refId"`
+	RequisiteStageRefIds []string      `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
+
+	FailPipeline         bool          `yaml:"failPipeline" json:"failPipeline"`
+	IsNew                bool          `yaml:"isNew" json:"isNew"`
+	JudgmentInputs       []interface{} `yaml:"judgmentInputs" json:"judgmentInputs"`
+	Notifications        []interface{} `yaml:"notifications" json:"notifications"`
+	StageTimeoutMs       int           `yaml:"stageTimeoutMs" json:"stageTimeoutMs"`
+}
+
+func (mj ManualJudgment) ProcessManualJudgment(stageMap *map[string]interface{}, metadata *stage.Stage) {
+	mj.decode(stageMap)
+	mj.RefId = metadata.RefId
+	mj.update(stageMap)
+}
+
+func (mj *ManualJudgment) decode(stageMap *map[string]interface{}) {
+	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &mj}
+	decoder, err := mapstructure.NewDecoder(&decoderConfig)
+	if err != nil {
+		log.Fatalf("err: %v", err)
+	}
+
+	err = decoder.Decode(stageMap)
+	if err != nil {
+		log.Fatalf("err: %v", err)
+	}
+}
+
+func (mj *ManualJudgment) update(stageMap *map[string]interface{}) {
+	d := datastore.Datastore{}
+	buffer := new(map[string]interface{})
+	err := json.Unmarshal(d.MarshalJSON(mj), buffer)
+	if err != nil {
+		log.Fatalf("Failed to unmarshal JSON:  %v", err)
+	}
+	*stageMap = *buffer
 }

@@ -76,7 +76,7 @@ type InputArtifacts struct {
 func (bm BakeManifest) ProcessBakeManifest(p *Pipeline, stageMap *map[string]interface{}, metadata *stage.Stage) {
 	bm.decode(stageMap)
 	bm.expand(metadata)
-	bm.updateStage(stageMap)
+	bm.update(stageMap)
 }
 
 func (bm *BakeManifest) decode(stageMap *map[string]interface{}) {
@@ -119,7 +119,7 @@ func (bm BakeManifest) newUUID(data string) uuid.UUID {
 	return uuid.NewSHA1(namespace, []byte(data))
 }
 
-func (bm *BakeManifest) updateStage(stageMap *map[string]interface{}) {
+func (bm *BakeManifest) update(stageMap *map[string]interface{}) {
 	d := datastore.Datastore{}
 	buffer := new(map[string]interface{})
 	err := json.Unmarshal(d.MarshalJSON(bm), buffer)

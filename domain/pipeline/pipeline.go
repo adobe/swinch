@@ -24,6 +24,7 @@ type Pipeline struct {
 	BakeManifest
 	DeployManifest
 	DeleteManifest
+	ManualJudgment
 	stage.Stage
 }
 
@@ -46,6 +47,8 @@ func (p *Pipeline) ProcessStages() {
 			p.ProcessDeployManifest(p, stageMap, &metadata)
 		case deleteManifest:
 			p.ProcessDeleteManifest(p, stageMap, &metadata)
+		case manualJudgment:
+			p.ProcessManualJudgment(stageMap, &metadata)
 		default:
 			log.Fatalf("Failed to detect stage type: %v", metadata.Type)
 		}
