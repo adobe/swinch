@@ -73,7 +73,7 @@ type InputArtifacts struct {
 	} `yaml:"artifact" json:"artifact"`
 }
 
-func (bm *BakeManifest) ProcessBakeManifest(p *Pipeline, stage *map[string]interface{}, metadata *stage.Stage) {
+func (bm BakeManifest) ProcessBakeManifest(p *Pipeline, stage *map[string]interface{}, metadata *stage.Stage) {
 	bm.decode(stage)
 	bm.expand(metadata)
 	bm.updateStage(stage)

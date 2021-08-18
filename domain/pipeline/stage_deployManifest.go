@@ -46,7 +46,7 @@ type Moniker struct {
 	App string `yaml:"app" json:"app"`
 }
 
-func (dm *DeployManifest) ProcessDeployManifest(p *Pipeline, stage *map[string]interface{}, metadata *stage.Stage) {
+func (dm DeployManifest) ProcessDeployManifest(p *Pipeline, stage *map[string]interface{}, metadata *stage.Stage) {
 	dm.decode(p, stage)
 	dm.expand(p, metadata)
 	dm.updateStage(stage)

@@ -51,7 +51,7 @@ type Options struct {
 	Cascading bool `yaml:"cascading" json:"cascading"`
 }
 
-func (delm *DeleteManifest) ProcessDeleteManifest(p *Pipeline, stage *map[string]interface{}, metadata *stage.Stage) {
+func (delm DeleteManifest) ProcessDeleteManifest(p *Pipeline, stage *map[string]interface{}, metadata *stage.Stage) {
 	delm.decode(p, stage)
 	delm.expand(p, metadata)
 	delm.updateStage(stage)
