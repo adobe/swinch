@@ -44,13 +44,13 @@ func init() {
 	// import flags
 	ImportPipeCmd.Flags().StringVarP(&applicationName, "application", "a", "", "Application name")
 	ImportPipeCmd.Flags().StringVarP(&pipelineName, "pipeline", "p", "", "Pipeline name")
-	ImportPipeCmd.Flags().StringVarP(&filePath, "filePath", "f", "", "JSON file input")
-	ImportPipeCmd.Flags().StringVarP(&outputPath, "outputPath", "o", "", "Generated chart output path")
-	ImportPipeCmd.Flags().StringVarP(&chartName, "chartName", "n", "", "Specify chart name for imported pipeline")
-	ImportPipeCmd.Flags().BoolVarP(&protectedImport, "protectedImport", "", false, "Protect already created chart from overwriting")
+	ImportPipeCmd.Flags().StringVarP(&filePath, "file", "f", "", "JSON file input")
+	ImportPipeCmd.Flags().StringVarP(&outputPath, "output", "o", "", "Generated chart output path")
+	ImportPipeCmd.Flags().StringVarP(&chartName, "chart", "n", "", "Specify chart name for imported pipeline")
+	ImportPipeCmd.Flags().BoolVarP(&protectedImport, "protected-import", "", false, "Protect already created chart from overwriting")
 	ImportPipeCmd.MarkFlagRequired("application")
 	ImportPipeCmd.MarkFlagRequired("pipeline")
-	ImportPipeCmd.MarkFlagRequired("outputPath")
+	ImportPipeCmd.MarkFlagRequired("output")
 	importCmd.AddCommand(&ImportPipeCmd)
 
 	// delete flags

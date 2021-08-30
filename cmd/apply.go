@@ -33,9 +33,9 @@ var applyCmd = &cobra.Command{
 }
 
 func init() {
-	applyCmd.Flags().StringVarP(&filePath, "filePath", "f", "", "Manifest file or directory, non recursive")
+	applyCmd.Flags().StringVarP(&filePath, "file", "f", "", "Manifest file or directory, non recursive")
 	applyCmd.Flags().BoolVarP(&plan, "plan", "p", true, "Display plan before apply, no user input.")
-	applyCmd.MarkFlagRequired("filePath")
+	applyCmd.MarkFlagRequired("file")
 	rootCmd.AddCommand(applyCmd)
 }
 

@@ -43,7 +43,7 @@ var uninstallCmd = &cobra.Command{
 }
 
 func init() {
-	uninstallCmd.Flags().StringVarP(&chartPath, "chartPath", "c", "", "Dir path for chart")
-	uninstallCmd.MarkFlagRequired("chartPath")
+	uninstallCmd.Flags().StringVarP(&chartPath, "chart", "c", "", "Dir path for chart")
+	uninstallCmd.MarkFlagRequired("chart")
 	rootCmd.AddCommand(uninstallCmd)
 }

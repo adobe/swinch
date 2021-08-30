@@ -33,12 +33,12 @@ var templateCmd = &cobra.Command{
 }
 
 func init() {
-	templateCmd.Flags().StringVarP(&chartPath, "chartPath", "c", "", "Dir path for chart")
-	templateCmd.Flags().StringVarP(&valuesFilePath, "valuesFilePath", "f", "", "Overwrite chart values file")
-	templateCmd.Flags().StringVarP(&outputPath, "outputPath", "o", "", "Dir path for writing templated manifests")
-	templateCmd.Flags().BoolVarP(&fullRender, "fullRender", "r", false, "Full render templates, including UUID's, RefID's and other data required in spinnaker.")
-	templateCmd.MarkFlagRequired("chartPath")
-	templateCmd.MarkFlagRequired("outputPath")
+	templateCmd.Flags().StringVarP(&chartPath, "chart", "c", "", "Dir path for chart")
+	templateCmd.Flags().StringVarP(&valuesFilePath, "values", "f", "", "Overwrite chart values file")
+	templateCmd.Flags().StringVarP(&outputPath, "output", "o", "", "Dir path for writing templated manifests")
+	templateCmd.Flags().BoolVarP(&fullRender, "full-render", "r", false, "Full render templates, including UUID's, RefID's and other data required in spinnaker.")
+	templateCmd.MarkFlagRequired("chart")
+	templateCmd.MarkFlagRequired("output")
 	rootCmd.AddCommand(templateCmd)
 }
 
