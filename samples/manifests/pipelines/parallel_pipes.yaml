@@ -1,0 +1,190 @@
+---
+apiVersion: spinnaker.adobe.com/alpha1
+kind: Pipeline
+metadata:
+  name: Parallel Stages Pipeline
+  application: swinch-demo-application
+spec:
+  index: 0
+  keepWaitingPipelines: false
+  limitConcurrent: true
+  spelEvaluator: v4
+  stages:
+    # Presume 1:1 bake to deploy stage ratio
+    - name: "Bake Cluster 1 - ns1"
+      type: bakeManifest
+      namespace: "ns1"
+      outputName: redis
+      requisiteStageRefIds: []
+      templateRenderer: HELM2
+      inputArtifacts:
+        - account: stable
+          artifact:
+            name: redis
+            type: helm/chart
+            version: 10.5.7
+      expectedArtifacts:
+        - displayName: redis
+          matchArtifact:
+            artifactAccount: embedded-artifact
+            name: redis
+            type: embedded/base64
+    
+    - name: "Bake Cluster 2 - ns2"
+      type: bakeManifest
+      namespace: "ns2"
+      outputName: redis
+      requisiteStageRefIds: []
+      templateRenderer: HELM2
+      inputArtifacts:
+        - account: stable
+          artifact:
+            name: redis
+            type: helm/chart
+            version: 10.5.7
+      expectedArtifacts:
+        - displayName: redis
+          matchArtifact:
+            artifactAccount: embedded-artifact
+            name: redis
+            type: embedded/base64
+    
+    - name: "Bake Cluster 3 - ns3"
+      type: bakeManifest
+      namespace: "ns3"
+      outputName: redis
+      requisiteStageRefIds: []
+      templateRenderer: HELM2
+      inputArtifacts:
+        - account: stable
+          artifact:
+            name: redis
+            type: helm/chart
+            version: 10.5.7
+      expectedArtifacts:
+        - displayName: redis
+          matchArtifact:
+            artifactAccount: embedded-artifact
+            name: redis
+            type: embedded/base64
+    
+    # We loop over the deploy stages, but as we presume a 1:1 ratio to bake we can use the deploy index to refer back to the bake index
+    # Add one to the index, go template starts from 0, spinnaker starts from 1
+    - name: "Deploy Cluster 1 - ns1"
+      type: deployManifest
+      requisiteStageRefIds:
+        - 1
+      account: "cluster1-swinch"
+      cloudProvider: kubernetes
+      namespaceOverride: "ns1"
+      skipExpressionEvaluation: true
+      source: artifact
+    
+    # We loop over the deploy stages, but as we presume a 1:1 ratio to bake we can use the deploy index to refer back to the bake index
+    # Add one to the index, go template starts from 0, spinnaker starts from 1
+    - name: "Deploy Cluster 2 - ns2"
+      type: deployManifest
+      requisiteStageRefIds:
+        - 2
+      account: "cluster2-swinch"
+      cloudProvider: kubernetes
+      namespaceOverride: "ns2"
+      skipExpressionEvaluation: true
+      source: artifact
+    
+    # We loop over the deploy stages, but as we presume a 1:1 ratio to bake we can use the deploy index to refer back to the bake index
+    # Add one to the index, go template starts from 0, spinnaker starts from 1
+    - name: "Deploy Cluster 3 - ns3"
+      type: deployManifest
+      requisiteStageRefIds:
+        - 3
+      account: "cluster3-swinch"
+      cloudProvider: kubernetes
+      namespaceOverride: "ns3"
+      skipExpressionEvaluation: true
+      source: artifact
+    
+    - name: Human approval before cleanup
+      type: manualJudgment
+      failPipeline: true
+      isNew: true
+      judgmentInputs: [ ]
+      notifications: [ ]
+      sendNotifications: true
+      stageTimeoutMs: 1800000
+      requisiteStageRefIds:
+      - 4
+      - 5
+      - 6
+    
+    - name: "Delete Cluster 1 - ns1"
+      type: deleteManifest
+      requisiteStageRefIds:
+      - 7
+      account:  "cluster1-swinch"
+      namespace: "ns1"
+      cloudProvider: kubernetes
+      kinds:
+        - statefulSet
+        - configMap
+        - secret
+        - persistentVolumeClaim
+        - service
+      labelSelectors:
+        selectors:
+          - key: app
+            kind: EQUALS
+            values:
+              - redis
+      mode: label
+      options:
+        cascading: true
+    
+    - name: "Delete Cluster 2 - ns2"
+      type: deleteManifest
+      requisiteStageRefIds:
+      - 7
+      account:  "cluster2-swinch"
+      namespace: "ns2"
+      cloudProvider: kubernetes
+      kinds:
+        - statefulSet
+        - configMap
+        - secret
+        - persistentVolumeClaim
+        - service
+      labelSelectors:
+        selectors:
+          - key: app
+            kind: EQUALS
+            values:
+              - redis
+      mode: label
+      options:
+        cascading: true
+    
+    - name: "Delete Cluster 3 - ns3"
+      type: deleteManifest
+      requisiteStageRefIds:
+      - 7
+      account:  "cluster3-swinch"
+      namespace: "ns3"
+      cloudProvider: kubernetes
+      kinds:
+        - statefulSet
+        - configMap
+        - secret
+        - persistentVolumeClaim
+        - service
+      labelSelectors:
+        selectors:
+          - key: app
+            kind: EQUALS
+            values:
+              - redis
+      mode: label
+      options:
+        cascading: true
+    
+  triggers: []
+  

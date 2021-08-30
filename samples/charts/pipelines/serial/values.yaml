@@ -1,0 +1,37 @@
+application:
+  name: sample-swinch-chart
+  email: dcoman@adobe.com
+
+global:
+  bake:
+    inputArtifacts:
+      account: stable
+      name: redis
+      version: 10.5.7
+
+# Note stages.bake and stages.delete are not lists
+# deploy stages ar mapped to the single bake stage with bakeStageRefIds key
+serial_pipeline:
+  enabled: true
+  name: simplePipe
+  stages:
+    bake:
+      name: "Bake 1"
+      namespace: swinch
+    deploy:
+      - name: "Deploy 1"
+        cluster: MyCluster1
+        namespace: swinch
+        account: test
+      - name: "Deploy 2"
+        cluster: MyCluster2
+        namespace: swinch
+        account: test
+    manual_judgment:
+      enabled: true
+      name: "Manual Judgment before Delete"
+      stageTimeoutMs: 1800000
+    delete:
+      name: "Delete 1"
+      namespace: swinch
+      account: test
