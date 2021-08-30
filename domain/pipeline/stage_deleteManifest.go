@@ -37,6 +37,10 @@ type DeleteManifest struct {
 	Mode               string          `yaml:"mode,omitempty" json:"mode,omitempty"`
 	CloudProvider      string          `yaml:"cloudProvider,omitempty" json:"cloudProvider,omitempty"`
 	ManifestArtifactId *string         `json:"manifestArtifactId,omitempty"`
+
+	ContinuePipeline              bool `yaml:"continuePipeline,omitempty" json:"continuePipeline,omitempty"`
+	FailPipeline                  bool `yaml:"failPipeline,omitempty" json:"failPipeline,omitempty"`
+	CompleteOtherBranchesThenFail bool `yaml:"completeOtherBranchesThenFail,omitempty" json:"completeOtherBranchesThenFail,omitempty"`
 }
 
 type LabelSelectors struct {
@@ -48,7 +52,8 @@ type LabelSelectors struct {
 }
 
 type Options struct {
-	Cascading bool `yaml:"cascading" json:"cascading"`
+	Cascading          bool `yaml:"cascading" json:"cascading"`
+	GracePeriodSeconds int  `yaml:"gracePeriodSeconds" json:"gracePeriodSeconds"`
 }
 
 func (delm DeleteManifest) ProcessDeleteManifest(p *Pipeline, stageMap *map[string]interface{}, metadata *stage.Stage) {

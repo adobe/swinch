@@ -25,6 +25,9 @@ type Pipeline struct {
 	DeployManifest
 	DeleteManifest
 	ManualJudgment
+	Wait
+	Jenkins
+	RunJobManifest
 	stage.Stage
 }
 
@@ -33,6 +36,9 @@ const (
 	deployManifest = "deployManifest"
 	deleteManifest = "deleteManifest"
 	manualJudgment = "manualJudgment"
+	wait           = "wait"
+	jenkins        = "jenkins"
+	runJobManifest = "runJobManifest"
 )
 
 func (p *Pipeline) ProcessStages() {
@@ -49,6 +55,12 @@ func (p *Pipeline) ProcessStages() {
 			p.ProcessDeleteManifest(p, stageMap, &metadata)
 		case manualJudgment:
 			p.ProcessManualJudgment(stageMap, &metadata)
+		case wait:
+			p.ProcessWait(stageMap, &metadata)
+		case jenkins:
+			p.ProcessJenkins(stageMap, &metadata)
+		case runJobManifest:
+			p.ProcessRunJobManifest(p, stageMap, &metadata)
 		default:
 			log.Fatalf("Failed to detect stage type: %v", metadata.Type)
 		}
