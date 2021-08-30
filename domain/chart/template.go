@@ -13,11 +13,13 @@ governing permissions and limitations under the License.
 package chart
 
 import (
+	"bytes"
 	"github.com/Masterminds/sprig"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"path"
 	"swinch/domain/datastore"
+	"swinch/domain/manifest"
 	"text/template"
 )
 
@@ -26,52 +28,65 @@ const (
 )
 
 type Template struct {
-	chartPath string
 	Values
 }
 
-func (t Template) RenderChart(chartPath, valuesFile, outputPath string) {
-	t.chartPath = chartPath
-	if valuesFile == "" {
-		valuesFile = path.Join(t.chartPath, "/values.yaml")
-	}
-	values := t.loadValuesFile(valuesFile)
+func (t *Template) TemplateChart(chartPath, valuesFile, outputPath string, fullRender bool) {
+	values := t.loadValuesFile(chartPath, valuesFile)
+	for _, chartTemplate := range t.discoverTemplates(chartPath) {
+		log.Debugf("Found chart template: %v", chartTemplate)
 
-	for _, chartFile := range t.discoverTemplates() {
-		log.Debugf("Found chart template: %v", chartFile.Name())
+		buffer := t.templateFile(chartPath, chartTemplate.Name(), values)
 
-		templatePath := path.Join(t.chartPath, TemplatesFolder, chartFile.Name())
-		tpl := template.New(chartFile.Name()).Funcs(template.FuncMap(sprig.FuncMap()))
-		tpl, err := tpl.ParseFiles(templatePath)
-		if err != nil {
-			log.Fatalf("Error in parsing: %v", err)
+		if fullRender != false {
+			buffer = t.fullRender(buffer)
 		}
 
-		d := datastore.Datastore{}
-		d.Mkdir(path.Join(outputPath), FilePerm)
-		outFile, err := os.Create(path.Join(outputPath, chartFile.Name()))
-		if err != nil {
-			log.Fatalf("Error in output files: %v", err)
-		}
-
-		err = tpl.Execute(outFile, values)
-		if err != nil {
-			log.Fatalf("Error templating: %v", err)
-		}
-
-		err = outFile.Close()
-		if err != nil {
-			log.Fatalf("File error: %v", err)
-		}
+		t.writeTemplateFile(outputPath, chartTemplate.Name(), buffer)
 	}
 }
 
-func (t Template) discoverTemplates() []os.DirEntry {
-	chartTemplates, err := os.ReadDir(path.Join(t.chartPath, TemplatesFolder))
-
+func (t Template) discoverTemplates(chartPath string) []os.DirEntry {
+	chartTemplates, err := os.ReadDir(path.Join(chartPath, TemplatesFolder))
 	if err != nil {
 		log.Fatalf("Error dicovering Chart templates: %v", err)
 	}
 
 	return chartTemplates
+}
+
+func (t Template) templateFile(chartPath, chartTemplate string, values Values) *bytes.Buffer {
+	// Create a named template for each file
+	templatePath := path.Join(chartPath, TemplatesFolder, chartTemplate)
+	tpl := template.New(chartTemplate).Funcs(template.FuncMap(sprig.FuncMap()))
+	tpl, err := tpl.ParseFiles(templatePath)
+	if err != nil {
+		log.Fatalf("Error in parsing: %v", err)
+	}
+
+	buffer := new(bytes.Buffer)
+	err = tpl.Execute(buffer, values)
+	if err != nil {
+		log.Fatalf("Error templating: %v", err)
+	}
+
+	return buffer
+}
+
+func (t *Template) fullRender(buffer *bytes.Buffer) *bytes.Buffer{
+		m := manifest.Manifest{}
+		d := datastore.Datastore{}
+		pipe, app := m.ReadManifest(buffer)
+		if len(pipe) > 0{
+			buffer = bytes.NewBuffer(d.MarshalYAML(pipe))
+		} else if len(app) > 0{
+			buffer = bytes.NewBuffer(d.MarshalYAML(app))
+		}
+	return buffer
+}
+
+func (t *Template) writeTemplateFile(outputPath, chartTemplate string, buffer *bytes.Buffer) {
+	d := datastore.Datastore{}
+	d.Mkdir(path.Join(outputPath), FilePerm)
+	d.WriteFile(path.Join(outputPath, chartTemplate), buffer.Bytes(), FilePerm)
 }

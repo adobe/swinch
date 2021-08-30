@@ -32,6 +32,7 @@ var (
 	applicationName string
 	pipelineName    string
 	chartPath       string
+	fullRender      bool
 )
 
 const (

@@ -89,15 +89,6 @@ func (d Datastore) MarshalJSON(data interface{}) []byte {
 	return byteData
 }
 
-func (d Datastore) UnmarshalJSON(data []byte) []byte {
-	buffer := new([]byte)
-	err := json.Unmarshal(data, buffer)
-	if err != nil {
-		log.Fatalf("Failed to unmarshal JSON:  %v", err)
-	}
-	return *buffer
-}
-
 func (d *Datastore) MarshalYAML(data interface{}) []byte {
 	byteData := new(bytes.Buffer)
 	yamlEncoder := yaml.NewEncoder(byteData)
@@ -107,15 +98,6 @@ func (d *Datastore) MarshalYAML(data interface{}) []byte {
 		log.Fatalf("Error marshal YAML:  %v", err)
 	}
 	return byteData.Bytes()
-}
-
-func (d Datastore) UnmarshalYAML(data []byte) []byte {
-	buffer := new([]byte)
-	err := yaml.Unmarshal(data, buffer)
-	if err != nil {
-		log.Fatalf("Error reading YAML: %v", err)
-	}
-	return *buffer
 }
 
 func (d *Datastore) CreateTmpFolder() string {
