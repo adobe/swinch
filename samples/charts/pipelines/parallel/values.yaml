@@ -1,0 +1,42 @@
+application:
+  name: swinch-demo-application
+  email: dcoman@adobe.com
+
+global:
+  bake:
+    inputArtifacts:
+      account: stable
+      name: redis
+      version: 10.5.7
+
+# Presume 1:1 bake/deploy/delete stage ratio
+clusters:
+  - name: "Cluster 1"
+    cluster: cluster1
+    namespace: ns1
+    account: cluster1-swinch
+  - name: "Cluster 2"
+    cluster: cluster2
+    namespace: ns2
+    account: cluster2-swinch
+  - name: "Cluster 3"
+    cluster: cluster3
+    namespace: ns3
+    account: cluster3-swinch
+
+parallel_pipeline:
+  enabled: true
+  name: Parallel Stages Pipeline
+  stages:
+    bake:
+      enabled: true
+    deploy:
+      enabled: true
+    manual_judgment:
+      enabled: true
+      name: "Human approval before cleanup"
+      stageTimeoutMs: 1800000
+    delete:
+      enabled: true
+
+
