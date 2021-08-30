@@ -42,9 +42,9 @@ var installCmd = &cobra.Command{
 }
 
 func init() {
-	installCmd.Flags().StringVarP(&chartPath, "chartPath", "c", "", "Dir path for chart")
-	installCmd.Flags().StringVarP(&valuesFilePath, "valuesFilePath", "f", "", "Overwrite chart values file")
+	installCmd.Flags().StringVarP(&chartPath, "chart", "c", "", "Dir path for chart")
+	installCmd.Flags().StringVarP(&valuesFilePath, "values", "f", "", "Overwrite chart values file")
 	installCmd.Flags().BoolVarP(&plan, "plan", "p", true, "Display plan while installing, no user input.")
-	installCmd.MarkFlagRequired("chartPath")
+	installCmd.MarkFlagRequired("chart")
 	rootCmd.AddCommand(installCmd)
 }

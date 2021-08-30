@@ -33,8 +33,8 @@ var deleteCmd = &cobra.Command{
 }
 
 func init() {
-	deleteCmd.Flags().StringVarP(&filePath, "filePath", "f", "", "Manifest file")
-	deleteCmd.MarkFlagRequired("filePath")
+	deleteCmd.Flags().StringVarP(&filePath, "file", "f", "", "Manifest file")
+	deleteCmd.MarkFlagRequired("file")
 	rootCmd.AddCommand(deleteCmd)
 }
 

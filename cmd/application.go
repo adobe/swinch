@@ -43,12 +43,12 @@ var DeleteAppCmd = *applicationCmd
 func init() {
 	// import flags
 	ImportAppCmd.Flags().StringVarP(&applicationName, "application", "a", "", "Application name")
-	ImportAppCmd.Flags().StringVarP(&filePath, "filePath", "f", "", "JSON file input")
-	ImportAppCmd.Flags().StringVarP(&outputPath, "outputPath", "o", "", "Generated chart output path")
-	ImportAppCmd.Flags().StringVarP(&chartName, "chartName", "n", "", "Specify chart name for imported pipeline")
-	ImportAppCmd.Flags().BoolVarP(&protectedImport, "protectedImport", "", false, "Protect already created chart from overwriting")
+	ImportAppCmd.Flags().StringVarP(&filePath, "file", "f", "", "JSON file input")
+	ImportAppCmd.Flags().StringVarP(&outputPath, "output", "o", "", "Generated chart output path")
+	ImportAppCmd.Flags().StringVarP(&chartName, "chart", "n", "", "Specify chart name for imported pipeline")
+	ImportAppCmd.Flags().BoolVarP(&protectedImport, "protected-import", "", false, "Protect already created chart from overwriting")
 	ImportAppCmd.MarkFlagRequired("application")
-	ImportAppCmd.MarkFlagRequired("outputPath")
+	ImportAppCmd.MarkFlagRequired("output")
 	importCmd.AddCommand(&ImportAppCmd)
 
 	// delete flags
