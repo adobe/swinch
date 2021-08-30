@@ -27,14 +27,14 @@ type DeployManifest struct {
 	RefId                string   `yaml:"refId,omitempty" json:"refId"`
 	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 
-	Account                  string              `yaml:"account,omitempty" json:"account,omitempty"`
-	CloudProvider            string              `json:"cloudProvider"`
-	ManifestArtifactId       string              `json:"manifestArtifactId"`
-	Moniker                  *Moniker            `yaml:"moniker,omitempty" json:"moniker,omitempty"`
-	NamespaceOverride        string              `json:"namespaceOverride"`
-	Overrides                struct{}            `yaml:"overrides,omitempty" json:"overrides,omitempty"`
-	Source                   string              `json:"source"`
-	SkipExpressionEvaluation bool `yaml:"skipExpressionEvaluation,omitempty" json:"skipExpressionEvaluation,omitempty"`
+	Account                  string   `yaml:"account,omitempty" json:"account,omitempty"`
+	CloudProvider            string   `json:"cloudProvider"`
+	ManifestArtifactId       string   `json:"manifestArtifactId"`
+	Moniker                  *Moniker `yaml:"moniker,omitempty" json:"moniker,omitempty"`
+	NamespaceOverride        string   `json:"namespaceOverride"`
+	Overrides                struct{} `yaml:"overrides,omitempty" json:"overrides,omitempty"`
+	Source                   string   `json:"source"`
+	SkipExpressionEvaluation bool     `yaml:"skipExpressionEvaluation,omitempty" json:"skipExpressionEvaluation,omitempty"`
 
 	ContinuePipeline              bool `yaml:"continuePipeline,omitempty" json:"continuePipeline,omitempty"`
 	FailPipeline                  bool `yaml:"failPipeline,omitempty" json:"failPipeline,omitempty"`

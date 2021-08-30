@@ -26,13 +26,13 @@ type ManualJudgment struct {
 	RefId                string   `yaml:"refId,omitempty" json:"refId"`
 	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 
-	IsNew              bool          `yaml:"isNew" json:"isNew"`
-	JudgmentInputs     []interface{} `yaml:"judgmentInputs" json:"judgmentInputs"`
-	Notifications      []interface{} `yaml:"notifications" json:"notifications"`
-	PropagateAuthenticationContext              bool          `yaml:"propagateAuthenticationContext" json:"propagateAuthenticationContext"`
-	StageTimeoutMs     int           `yaml:"stageTimeoutMs" json:"stageTimeoutMs"`
-	SelectedStageRoles []string `yaml:"selectedStageRoles" json:"selectedStageRoles"`
-	Instructions                 string   `yaml:"instructions" json:"instructions"`
+	IsNew                          bool          `yaml:"isNew" json:"isNew"`
+	JudgmentInputs                 []interface{} `yaml:"judgmentInputs" json:"judgmentInputs"`
+	Notifications                  []interface{} `yaml:"notifications" json:"notifications"`
+	PropagateAuthenticationContext bool          `yaml:"propagateAuthenticationContext" json:"propagateAuthenticationContext"`
+	StageTimeoutMs                 int           `yaml:"stageTimeoutMs" json:"stageTimeoutMs"`
+	SelectedStageRoles             []string      `yaml:"selectedStageRoles" json:"selectedStageRoles"`
+	Instructions                   string        `yaml:"instructions" json:"instructions"`
 
 	ContinuePipeline              bool `yaml:"continuePipeline,omitempty" json:"continuePipeline,omitempty"`
 	FailPipeline                  bool `yaml:"failPipeline,omitempty" json:"failPipeline,omitempty"`
