@@ -28,14 +28,17 @@ type DeployManifest struct {
 	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 
 	Account                  string              `yaml:"account,omitempty" json:"account,omitempty"`
-	ExpectedArtifacts        []ExpectedArtifacts `yaml:"expectedArtifacts,omitempty" json:"expectedArtifacts,omitempty"`
 	CloudProvider            string              `json:"cloudProvider"`
 	ManifestArtifactId       string              `json:"manifestArtifactId"`
 	Moniker                  *Moniker            `yaml:"moniker,omitempty" json:"moniker,omitempty"`
 	NamespaceOverride        string              `json:"namespaceOverride"`
 	Overrides                struct{}            `yaml:"overrides,omitempty" json:"overrides,omitempty"`
 	Source                   string              `json:"source"`
-	SkipExpressionEvaluation bool                `yaml:"skipExpressionEvaluation,omitempty" json:"skipExpressionEvaluation,omitempty"`
+	SkipExpressionEvaluation bool `yaml:"skipExpressionEvaluation,omitempty" json:"skipExpressionEvaluation,omitempty"`
+
+	ContinuePipeline              bool `yaml:"continuePipeline,omitempty" json:"continuePipeline,omitempty"`
+	FailPipeline                  bool `yaml:"failPipeline,omitempty" json:"failPipeline,omitempty"`
+	CompleteOtherBranchesThenFail bool `yaml:"completeOtherBranchesThenFail,omitempty" json:"completeOtherBranchesThenFail,omitempty"`
 
 	// Swinch only field
 	BakeStageRefIds *int `yaml:"bakeStageRefIds,omitempty" json:"-"`
@@ -82,7 +85,7 @@ func (dm *DeployManifest) expand(p *Pipeline, metadata *stage.Stage) {
 	*bakeStageIndex -= 1
 
 	//TODO get the bake stage without decoding
-	bake := new(DeployManifest)
+	bake := new(BakeManifest)
 	err := mapstructure.Decode(p.Manifest.Spec.Stages[*bakeStageIndex], bake)
 	if err != nil {
 		log.Fatalf("err: %v", err)

@@ -20,33 +20,32 @@ import (
 	"swinch/domain/stage"
 )
 
-type ManualJudgment struct {
+type Jenkins struct {
 	Name                 string   `yaml:"name" json:"name"`
 	Type                 string   `yaml:"type,omitempty" json:"type,omitempty"`
 	RefId                string   `yaml:"refId,omitempty" json:"refId"`
 	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 
-	IsNew              bool          `yaml:"isNew" json:"isNew"`
-	JudgmentInputs     []interface{} `yaml:"judgmentInputs" json:"judgmentInputs"`
-	Notifications      []interface{} `yaml:"notifications" json:"notifications"`
-	PropagateAuthenticationContext              bool          `yaml:"propagateAuthenticationContext" json:"propagateAuthenticationContext"`
-	StageTimeoutMs     int           `yaml:"stageTimeoutMs" json:"stageTimeoutMs"`
-	SelectedStageRoles []string `yaml:"selectedStageRoles" json:"selectedStageRoles"`
-	Instructions                 string   `yaml:"instructions" json:"instructions"`
+	IsNew                    bool     `yaml:"isNew" json:"isNew"`
+	Master                   string   `yaml:"master" json:"master"`
+	Job                      string   `yaml:"job" json:"job"`
+	Parameters               struct{} `yaml:"parameters" json:"parameters"`
+	MarkUnstableAsSuccessful bool     `yaml:"markUnstableAsSuccessful" json:"markUnstableAsSuccessful"`
+	WaitForCompletion        bool     `yaml:"waitForCompletion" json:"waitForCompletion"`
 
 	ContinuePipeline              bool `yaml:"continuePipeline,omitempty" json:"continuePipeline,omitempty"`
 	FailPipeline                  bool `yaml:"failPipeline,omitempty" json:"failPipeline,omitempty"`
 	CompleteOtherBranchesThenFail bool `yaml:"completeOtherBranchesThenFail,omitempty" json:"completeOtherBranchesThenFail,omitempty"`
 }
 
-func (mj ManualJudgment) ProcessManualJudgment(stageMap *map[string]interface{}, metadata *stage.Stage) {
-	mj.decode(stageMap)
-	mj.RefId = metadata.RefId
-	mj.update(stageMap)
+func (jks Jenkins) ProcessJenkins(stageMap *map[string]interface{}, metadata *stage.Stage) {
+	jks.decode(stageMap)
+	jks.RefId = metadata.RefId
+	jks.update(stageMap)
 }
 
-func (mj *ManualJudgment) decode(stageMap *map[string]interface{}) {
-	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &mj}
+func (jks *Jenkins) decode(stageMap *map[string]interface{}) {
+	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &jks}
 	decoder, err := mapstructure.NewDecoder(&decoderConfig)
 	if err != nil {
 		log.Fatalf("err: %v", err)
@@ -58,10 +57,10 @@ func (mj *ManualJudgment) decode(stageMap *map[string]interface{}) {
 	}
 }
 
-func (mj *ManualJudgment) update(stageMap *map[string]interface{}) {
+func (jks *Jenkins) update(stageMap *map[string]interface{}) {
 	d := datastore.Datastore{}
 	buffer := new(map[string]interface{})
-	err := json.Unmarshal(d.MarshalJSON(mj), buffer)
+	err := json.Unmarshal(d.MarshalJSON(jks), buffer)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
