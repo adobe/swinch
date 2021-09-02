@@ -36,9 +36,24 @@ type DeployManifest struct {
 	Source                   string   `json:"source"`
 	SkipExpressionEvaluation bool     `yaml:"skipExpressionEvaluation,omitempty" json:"skipExpressionEvaluation,omitempty"`
 
-	ContinuePipeline              bool `yaml:"continuePipeline,omitempty" json:"continuePipeline,omitempty"`
-	FailPipeline                  bool `yaml:"failPipeline,omitempty" json:"failPipeline,omitempty"`
-	CompleteOtherBranchesThenFail bool `yaml:"completeOtherBranchesThenFail,omitempty" json:"completeOtherBranchesThenFail,omitempty"`
+	// From here to the end the fields are common except stageTimeoutMs (fail stage after specified time) and BakeStageRefIds
+	ContinuePipeline                  bool `yaml:"continuePipeline,omitempty" json:"continuePipeline,omitempty"`
+	FailPipeline                      bool `yaml:"failPipeline,omitempty" json:"failPipeline,omitempty"`
+	CompleteOtherBranchesThenFail     bool `yaml:"completeOtherBranchesThenFail,omitempty" json:"completeOtherBranchesThenFail,omitempty"`
+	RestrictExecutionDuringTimeWindow bool `yaml:"restrictExecutionDuringTimeWindow,omitempty" json:"restrictExecutionDuringTimeWindow,omitempty"`
+
+	RestrictedExecutionWindow *RestrictedExecutionWindow `yaml:"restrictedExecutionWindow,omitempty" json:"restrictedExecutionWindow,omitempty"`
+	SkipWindowText            string                     `yaml:"skipWindowText,omitempty" json:"skipWindowText,omitempty"`
+	// StageTimeoutMs applies only to select stages (Deploy, Manual Judgement, Run Job etc.)
+	StageTimeoutMs          *int `yaml:"stageTimeoutMs,omitempty" json:"stageTimeoutMs,omitempty"`
+	FailOnFailedExpressions bool `yaml:"failOnFailedExpressions,omitempty" json:"failOnFailedExpressions,omitempty"`
+
+	StageEnabled *StageEnabled `yaml:"stageEnabled,omitempty" json:"stageEnabled,omitempty"`
+
+	SendNotifications bool           `yaml:"sendNotifications,omitempty" json:"sendNotifications,omitempty"`
+	Notifications     *Notifications `yaml:"notifications,omitempty" json:"notifications,omitempty"`
+
+	Comments string `yaml:"comments,omitempty" json:"comments,omitempty"`
 
 	// Swinch only field
 	BakeStageRefIds *int `yaml:"bakeStageRefIds,omitempty" json:"-"`
@@ -47,6 +62,47 @@ type DeployManifest struct {
 // Moniker is part of Stages
 type Moniker struct {
 	App string `yaml:"app" json:"app"`
+}
+
+type RestrictedExecutionWindow struct {
+	Days      []int `yaml:"days,omitempty" json:"days,omitempty"`
+	Whitelist []struct {
+		EndHour   string `yaml:"endHour,omitempty" json:"endHour,omitempty"`
+		EndMin    string `yaml:"endMin,omitempty" json:"endMin,omitempty"`
+		StartHour string `yaml:"startHour,omitempty" json:"startHour,omitempty"`
+		StartMin  string `yaml:"startMin,omitempty" json:"startMin,omitempty"`
+	} `yaml:"whitelist,omitempty" json:"whitelist,omitempty"`
+	Jitter struct {
+		Enabled    bool   `yaml:"enabled,omitempty" json:"enabled,omitempty"`
+		MaxDelay   string `yaml:"maxDelay,omitempty" json:"maxDelay,omitempty"`
+		MinDelay   string `yaml:"minDelay,omitempty" json:"minDelay,omitempty"`
+		SkipManual bool   `yaml:"skipManual,omitempty" json:"skipManual,omitempty"`
+	} `yaml:"jitter,omitempty" json:"jitter,omitempty"`
+}
+
+type StageEnabled struct {
+	Expression string `yaml:"expression,omitempty" json:"expression,omitempty"`
+	Type       string `yaml:"type,omitempty" json:"type,omitempty"`
+}
+
+type Notifications []struct {
+	Address string   `yaml:"address,omitempty" json:"address,omitempty"`
+	Level   string   `yaml:"level,omitempty" json:"level,omitempty"`
+	Type    string   `yaml:"type,omitempty" json:"type,omitempty"`
+	When    []string `yaml:"when,omitempty" json:"when,omitempty"`
+	Message *Message `yaml:"message,omitempty" json:"message,omitempty"`
+}
+
+type Message struct {
+	StageComplete struct {
+		Text string `yaml:"text,omitempty" json:"text,omitempty"`
+	} `yaml:"stageComplete,omitempty" json:"stage.complete,omitempty"`
+	StageFailed struct {
+		Text string `yaml:"text,omitempty" json:"text,omitempty"`
+	} `yaml:"stageFailed,omitempty" json:"stage.failed,omitempty"`
+	StageStarting struct {
+		Text string `yaml:"text,omitempty" json:"text,omitempty"`
+	} `yaml:"stageStarting,omitempty" json:"stage.starting,omitempty"`
 }
 
 func (dm DeployManifest) ProcessDeployManifest(p *Pipeline, stageMap *map[string]interface{}, metadata *stage.Stage) {
