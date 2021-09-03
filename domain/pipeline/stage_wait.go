@@ -26,7 +26,7 @@ type Wait struct {
 	RefId                string   `yaml:"refId,omitempty" json:"refId"`
 	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 
-	IsNew        bool   `yaml:"isNew" json:"isNew"`
+	IsNew        bool   `yaml:"isNew,omitempty" json:"isNew,omitempty"`
 	SkipWaitText string `yaml:"skipWaitText" json:"skipWaitText"`
 	WaitTime     int    `yaml:"waitTime" json:"waitTime"`
 

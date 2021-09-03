@@ -27,7 +27,7 @@ type RunJobManifest struct {
 	RefId                string   `yaml:"refId,omitempty" json:"refId"`
 	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 
-	IsNew                 bool   `yaml:"isNew" json:"isNew"`
+	IsNew                 bool   `yaml:"isNew,omitempty" json:"isNew,omitempty"`
 	Account               string `yaml:"account" json:"account"`
 	Credentials           string `yaml:"credentials" json:"credentials"`
 	Alias                 string `yaml:"alias" json:"alias"`
