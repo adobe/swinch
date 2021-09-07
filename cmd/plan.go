@@ -47,7 +47,6 @@ func Plan() {
 
 	manifests := m.GetManifests(filePath)
 	for _, manifest := range manifests {
-
 		switch manifest.Kind {
 		case a.Manifest.Kind:
 			a.LoadManifest(manifest)

@@ -36,9 +36,7 @@ var (
 )
 
 const (
-	planAction   = "plan"
 	importAction = "import"
-	applyAction  = "apply"
 	deleteAction = "delete"
 )
 
