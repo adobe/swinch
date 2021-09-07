@@ -19,7 +19,7 @@ import (
 )
 
 type ApplicationAPI struct {
-	App string
+	appName string
 	SpinCLI
 }
 
@@ -29,37 +29,40 @@ var baseArgs = []string{
 }
 
 func (a *ApplicationAPI) NotFound() error {
-	return fmt.Errorf("Application '%v' not found\n", a.App)
+	return fmt.Errorf("Application '%v' not found\n", a.appName)
 }
 
 func (a *ApplicationAPI) deleteNotFound() error {
-	return fmt.Errorf("attempting to delete application '%v' which does not exist, exiting", a.App)
+	return fmt.Errorf("attempting to delete application '%v' which does not exist, exiting", a.appName)
 }
 
-func (a *ApplicationAPI) Get() []byte {
-	args := []string{"application", "get", a.App}
+func (a *ApplicationAPI) Get(appName string) []byte {
+	a.appName = appName
+	args := []string{"application", "get", a.appName}
 	buffer, err := a.executeAppCmd(append(baseArgs, args...))
 	a.status(err)
 	return buffer.Bytes()
 }
 
-func (a ApplicationAPI) Save(filePath string) {
+func (a ApplicationAPI) Save(appName, filePath string) {
+	a.appName = appName
 	args := []string{"application", "save", "--file", filePath}
 	_, err := a.executeAppCmd(append(baseArgs, args...))
 	a.status(err)
 	if err == nil {
-		log.Infof("Application '%v' updated successfuly", a.App)
+		log.Infof("Application '%v' updated successfuly", a.appName)
 	}
 	defer a.rmTmp(filePath)
 }
 
-func (a ApplicationAPI) Del() {
-	args := []string{"application", "delete", a.App}
+func (a ApplicationAPI) Delete(appName string) {
+	a.appName = appName
+	args := []string{"application", "delete", a.appName}
 	_, err := a.executeAppCmd(append(baseArgs, args...))
 	if err != nil {
 		a.status(err)
 	} else {
-		log.Infof("Delete application '%v' success", a.App)
+		log.Infof("Delete application '%v' success", a.appName)
 	}
 }
 

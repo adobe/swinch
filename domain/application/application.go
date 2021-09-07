@@ -14,7 +14,6 @@ package application
 
 import (
 	log "github.com/sirupsen/logrus"
-	"swinch/domain/chart"
 	"swinch/domain/datastore"
 	"swinch/domain/util"
 	"swinch/spincli"
@@ -25,7 +24,6 @@ type Application struct {
 	Metadata
 	Spec
 	spincli.ApplicationAPI
-	chart.Chart
 	util.Util
 	datastore.Datastore
 }
@@ -35,7 +33,7 @@ func (a *Application) Plan(){
 }
 
 func (a *Application) Apply(dryRun, plan bool) {
-	existingApp := a.Get()
+	existingApp := a.Get(a.Metadata.Name)
 	changes := false
 	newApp := false
 	if len(existingApp) == 0 {
@@ -51,13 +49,12 @@ func (a *Application) Apply(dryRun, plan bool) {
 
 	if !dryRun && (changes || newApp) {
 		log.Infof("Saving application '%v'", a.Metadata.Name)
-		a.Save(a.WriteJSONTmp(a.Spec))
+		a.Save(a.Metadata.Name, a.WriteJSONTmp(a.Spec))
 	}
 }
 
-func (a *Application) Delete() {
-	a.App = a.Metadata.Name
-	a.Del()
+func (a *Application) Destroy() {
+	a.Delete(a.Metadata.Name)
 }
 
 // Import TBA

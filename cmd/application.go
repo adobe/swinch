@@ -16,7 +16,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"swinch/spincli"
+	"swinch/domain/application"
 )
 
 // applicationCmd represents the application command
@@ -60,11 +60,10 @@ func init() {
 }
 
 func cmdAppAction(action string) {
-	a := spincli.ApplicationAPI{}
+	a := application.Application{}
 	switch action {
 	case deleteAction:
-		a.App = applicationName
-		a.Del()
+		a.Delete(applicationName)
 	case importAction:
 		fmt.Println("Import TBA")
 	default:

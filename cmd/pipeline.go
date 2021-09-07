@@ -16,7 +16,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"swinch/spincli"
+	"swinch/domain/pipeline"
 )
 
 // pipelineCmd represents the pipeline command
@@ -64,12 +64,10 @@ func init() {
 }
 
 func cmdPipeAction(app, pipe, action string) {
-	p := spincli.PipelineAPI{}
-	p.App = app
-	p.Pipe = pipe
+	p := pipeline.Pipeline{}
 	switch action {
 	case deleteAction:
-		p.Delete()
+		p.Delete(app, pipe)
 	case importAction:
 		fmt.Println("Import TBA")
 	default:

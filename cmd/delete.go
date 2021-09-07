@@ -50,7 +50,7 @@ func Delete() {
 		switch manifest.Kind {
 		case a.Manifest.Kind:
 			a.LoadManifest(manifest)
-			a.Delete()
+			a.Destroy()
 		case p.Manifest.Kind:
 			p.LoadManifest(manifest)
 		}
