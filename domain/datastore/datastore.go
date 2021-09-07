@@ -29,8 +29,8 @@ const (
 type Datastore struct {
 }
 
-// DiscoverYAMLFiles receives a folder path, reads all yaml files, merges them in a buffer and returns it
-func (d Datastore) DiscoverYAMLFiles(path string) *bytes.Buffer {
+// LoadYAMLFiles receives a folder path, reads all yaml files, merges them in a buffer and returns it
+func (d Datastore) LoadYAMLFiles(path string) *bytes.Buffer {
 	yamlFilesBuffer := new(bytes.Buffer)
 
 	switch location, err := os.Stat(path); {

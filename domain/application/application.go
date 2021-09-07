@@ -12,7 +12,74 @@ governing permissions and limitations under the License.
 
 package application
 
+import (
+	log "github.com/sirupsen/logrus"
+	"swinch/domain/chart"
+	"swinch/domain/datastore"
+	"swinch/domain/util"
+	"swinch/spincli"
+)
+
 type Application struct {
 	Manifest
+	Metadata
 	Spec
+	spincli.ApplicationAPI
+	chart.Chart
+	util.Util
+	datastore.Datastore
 }
+
+func (a *Application) Plan(){
+	a.Apply(true, true)
+}
+
+func (a *Application) Apply(dryRun, plan bool) {
+	existingApp := a.Get()
+	changes := false
+	newApp := false
+	if len(existingApp) == 0 {
+		newApp = true
+	} else {
+		changes = a.Changes(a.MarshalJSON(a.LoadSpec(existingApp)), a.MarshalJSON(a.Spec))
+	}
+
+	if changes && plan {
+		log.Infof("Planing changes for application '%v'", a.Metadata.Name)
+		a.DiffChanges(a.MarshalJSON(a.LoadSpec(existingApp)), a.MarshalJSON(a.Spec))
+	}
+
+	if !dryRun && (changes || newApp) {
+		log.Infof("Saving application '%v'", a.Metadata.Name)
+		a.Save(a.WriteJSONTmp(a.Spec))
+	}
+}
+
+func (a *Application) Delete() {
+	a.App = a.Metadata.Name
+	a.Del()
+}
+
+// Import TBA
+//func (a *Application) importChart() {
+//	a.OutputPath = outputPath
+//	a.ProtectedImport = protectedImport
+//	a.Kind = "application"
+//
+//	data := new([]byte)
+//	if filePath != "" {
+//		*data = a.ReadFile(filePath)
+//	} else {
+//		*data = a.Get()
+//	}
+//
+//	manifest := a.MakeManifest(a.LoadSpec(*data))
+//	a.Metadata.Name = chartName
+//	if a.Metadata.Name == "" {
+//		a.Metadata.Name = manifest.Metadata.Name
+//	}
+//
+//	a.Values.Values = map[interface{}]interface{}{a.Kind: map[string]string{"name": manifest.Metadata.Name}}
+//
+//	a.GenerateChart(manifest)
+//}

@@ -48,18 +48,22 @@ func (m *Manifest) MakeManifest(spec Spec) *Manifest {
 	return m
 }
 
+
 func (m *Manifest) LoadManifest(manifest interface{}) {
+	m.decode(manifest)
+	m.inferFromManifest()
+
+	err := m.validate()
+	if err != nil {
+		log.Fatalf("Application manifest validation failed: %v", err)
+	}
+}
+
+func (m *Manifest) decode(manifest interface{}) {
 	d := datastore.Datastore{}
 	err := yaml.Unmarshal(d.MarshalYAML(manifest), &m)
 	if err != nil {
 		log.Fatalf("Error LoadManifest: %v", err)
-	}
-
-	m.inferFromManifest()
-
-	err = m.Validate()
-	if err != nil {
-		log.Fatalf("Application manifest validation failed: %v", err)
 	}
 }
 
@@ -68,7 +72,7 @@ func (m *Manifest) inferFromManifest() {
 	m.Spec.Name = strings.ToLower(m.Metadata.Name)
 }
 
-func (m Manifest) Validate() error {
+func (m *Manifest) validate() error {
 	if len(m.Spec.Name) < 3 {
 		return AppNameLen
 	}

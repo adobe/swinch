@@ -13,11 +13,10 @@ governing permissions and limitations under the License.
 package cmd
 
 import (
-	"bytes"
-	"github.com/danielcoman/diff"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"swinch/domain/application"
 	"swinch/domain/manifest"
+	"swinch/domain/pipeline"
 )
 
 // planCmd represents the plan command
@@ -31,7 +30,7 @@ var planCmd = &cobra.Command{
 		ValidateConfig()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		PlanCmd()
+		Plan()
 	},
 }
 
@@ -41,30 +40,21 @@ func init() {
 	rootCmd.AddCommand(planCmd)
 }
 
-func PlanCmd() {
+func Plan() {
 	m := manifest.Manifest{}
-	a := Application{}
-	p := Pipeline{}
-	a.manifests, p.manifests = m.GetManifests(filePath)
+	a := application.Application{}
+	p := pipeline.Pipeline{}
 
-	if len(a.manifests) > 0 {
-		a.manifestActions(planAction)
-	}
-	if len(p.manifests) > 0 {
-		p.manifestActions(planAction)
+	manifests := m.GetManifests(filePath)
+	for _, manifest := range manifests {
+
+		switch manifest.Kind {
+		case a.Manifest.Kind:
+			a.LoadManifest(manifest)
+			a.Plan()
+		case p.Manifest.Kind:
+			p.LoadManifest(manifest)
+		}
 	}
 }
 
-func Changes(oldData, newData []byte) bool {
-	changes := bytes.Compare(oldData, newData)
-	if changes == 0 {
-		log.Infof("No changes detected")
-		return false
-	}
-
-	return true
-}
-
-func DiffChanges(oldData, newData []byte) {
-	log.Infof(diff.LineDiff(string(oldData), string(newData)))
-}

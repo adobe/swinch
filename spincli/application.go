@@ -53,7 +53,7 @@ func (a ApplicationAPI) Save(filePath string) {
 	defer a.rmTmp(filePath)
 }
 
-func (a ApplicationAPI) Delete() {
+func (a ApplicationAPI) Del() {
 	args := []string{"application", "delete", a.App}
 	_, err := a.executeAppCmd(append(baseArgs, args...))
 	if err != nil {

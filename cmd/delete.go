@@ -14,6 +14,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"swinch/domain/application"
 	"swinch/domain/manifest"
 )
 
@@ -40,14 +41,18 @@ func init() {
 
 func Delete() {
 	m := manifest.Manifest{}
-	a := Application{}
+	a := application.Application{}
 	p := Pipeline{}
-	a.manifests, p.manifests = m.GetManifests(filePath)
 
-	if len(a.manifests) > 0 {
-		a.manifestActions(deleteAction)
-	}
-	if len(p.manifests) > 0 {
-		p.manifestActions(deleteAction)
+	manifests := m.GetManifests(filePath)
+	for _, manifest := range manifests {
+
+		switch manifest.Kind {
+		case a.Manifest.Kind:
+			a.LoadManifest(manifest)
+			a.Delete()
+		case p.Manifest.Kind:
+			p.LoadManifest(manifest)
+		}
 	}
 }

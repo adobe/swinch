@@ -30,10 +30,10 @@ type Permissions struct {
 	WRITE   []string `yaml:"WRITE" json:"WRITE"`
 }
 
-func (a Spec) LoadSpec(spec []byte) Spec {
-	err := json.Unmarshal(spec, &a)
+func (s Spec) LoadSpec(spec []byte) Spec {
+	err := json.Unmarshal(spec, &s)
 	if err != nil {
 		log.Fatalf("Error LoadSpec: %v", err)
 	}
-	return a
+	return s
 }

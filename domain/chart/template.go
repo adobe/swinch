@@ -18,17 +18,16 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os"
 	"path"
+	"swinch/domain/application"
 	"swinch/domain/datastore"
 	"swinch/domain/manifest"
+	"swinch/domain/pipeline"
 	"text/template"
-)
-
-const (
-	FilePerm = 0775
 )
 
 type Template struct {
 	Values
+	datastore.Datastore
 }
 
 func (t *Template) TemplateChart(chartPath, valuesFile, outputPath string, fullRender bool) {
@@ -73,20 +72,29 @@ func (t Template) templateFile(chartPath, chartTemplate string, values Values) *
 	return buffer
 }
 
-func (t *Template) fullRender(buffer *bytes.Buffer) *bytes.Buffer{
-		m := manifest.Manifest{}
-		d := datastore.Datastore{}
-		pipe, app := m.ReadManifest(buffer)
-		if len(pipe) > 0{
-			buffer = bytes.NewBuffer(d.MarshalYAML(pipe))
-		} else if len(app) > 0{
-			buffer = bytes.NewBuffer(d.MarshalYAML(app))
+func (t *Template) fullRender(buffer *bytes.Buffer) *bytes.Buffer {
+	m := manifest.Manifest{}
+	a := application.Application{}
+	p := pipeline.Pipeline{}
+
+	manifests := m.DecodeManifests(buffer)
+	buffer.Reset()
+
+	for _, manifest := range manifests {
+		switch manifest.Kind {
+		case a.Manifest.Kind:
+			a.LoadManifest(manifest)
+			buffer.Write(t.MarshalYAML(a))
+		case p.Manifest.Kind:
+			p.LoadManifest(manifest)
+			buffer.Write(t.MarshalYAML(p))
 		}
+	}
+
 	return buffer
 }
 
 func (t *Template) writeTemplateFile(outputPath, chartTemplate string, buffer *bytes.Buffer) {
-	d := datastore.Datastore{}
-	d.Mkdir(path.Join(outputPath), FilePerm)
-	d.WriteFile(path.Join(outputPath, chartTemplate), buffer.Bytes(), FilePerm)
+	t.Mkdir(path.Join(outputPath), FilePerm)
+	t.WriteFile(path.Join(outputPath, chartTemplate), buffer.Bytes(), FilePerm)
 }
