@@ -1,4 +1,4 @@
 application:
   name: sample-swinch-chart
   email: dcoman@adobe.com
-  ldap: "ee_spinnaker_test"
+  ldap: "ee_spinnaker_all"

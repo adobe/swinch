@@ -10,21 +10,19 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package pipeline
+package stages
 
 import (
 	"encoding/json"
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 	"swinch/domain/datastore"
-	"swinch/domain/stage"
 )
 
+const deleteManifest = "deleteManifest"
+
 type DeleteManifest struct {
-	Name                 string   `yaml:"name" json:"name"`
-	Type                 string   `yaml:"type,omitempty" json:"type,omitempty"`
-	RefId                string   `yaml:"refId,omitempty" json:"refId"`
-	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
+	Metadata `mapstructure:",squash"`
 
 	Account  string `yaml:"account,omitempty" json:"account,omitempty"`
 	App      string `yaml:"-" json:"app,omitempty"`
@@ -56,42 +54,48 @@ type Options struct {
 	GracePeriodSeconds int  `yaml:"gracePeriodSeconds" json:"gracePeriodSeconds"`
 }
 
-func (delm DeleteManifest) ProcessDeleteManifest(p *Pipeline, stageMap *map[string]interface{}, metadata *stage.Stage) {
-	delm.decode(stageMap)
-	delm.expand(p, metadata)
-	delm.update(stageMap)
+func (delm DeleteManifest) GetStageType() string {
+	return deleteManifest
 }
 
-func (delm *DeleteManifest) decode(stageMap *map[string]interface{}) {
+func (delm DeleteManifest) Process(stage *Stage) {
+	delm.decode(stage)
+	delm.expand(stage)
+	delm.update(stage)
+}
+
+func (delm *DeleteManifest) decode(stage *Stage) {
 	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &delm}
 	decoder, err := mapstructure.NewDecoder(&decoderConfig)
 	if err != nil {
 		log.Fatalf("err: %v", err)
 	}
 
-	err = decoder.Decode(stageMap)
+	err = decoder.Decode(stage.Metadata)
 	if err != nil {
-		log.Fatalf("err: %v", err)
+		log.Fatalf("error decoding stage metadata: %v", err)
+	}
+	err = decoder.Decode(stage.Spec)
+	if err != nil {
+		log.Fatalf("error decoding stage spec: %v", err)
 	}
 }
 
-func (delm *DeleteManifest) expand(p *Pipeline, metadata *stage.Stage) {
-	delm.App = p.Manifest.Metadata.Application
+func (delm *DeleteManifest) expand(stage *Stage) {
+	delm.App = stage.ManifestMetadata.Application
 	if delm.Location != "" {
 		delm.Namespace = delm.Location
 	} else if delm.Namespace != "" {
 		delm.Location = delm.Namespace
 	}
-	// RefId is either specified by the user or generated based on the stage index
-	delm.RefId = metadata.RefId
 }
 
-func (delm *DeleteManifest) update(stageMap *map[string]interface{}) {
+func (delm *DeleteManifest) update(stage *Stage) {
 	d := datastore.Datastore{}
-	buffer := new(map[string]interface{})
-	err := json.Unmarshal(d.MarshalJSON(delm), buffer)
+	tmpStage := new(map[string]interface{})
+	err := json.Unmarshal(d.MarshalJSON(delm), tmpStage)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
-	*stageMap = *buffer
+	*stage.RawStage = *tmpStage
 }

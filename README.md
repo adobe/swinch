@@ -2,11 +2,10 @@
 
 <img src="./img/winch.jpeg" width="400"/>
 
-Manage your Spinnaker pipelines with Kubernetes manifest and objects.    
 Swinch is a CLI tool that aims at functionality similar to kubectl and helm, but for Spinnaker.  
 
-Our goal is to make using Spinnaker friendly for users already familiar with the Kubernetes way of deploying by provide the same language and format used for managing Kubernetes asset, but for Spinnaker.   
-Create, delete, edit and manage your Spinnaker CD pipelines reliably, programmatically and sourced controlled, from Helm like templated charts, with built in support for dry-run, diff and validation.
+Our goal is to make using Spinnaker friendly for users already familiar with the Kubernetes way of deploying by provide the same language and format used for managing Kubernetes asset.
+Manage your Spinnaker pipelines with Kubernetes manifest and object, programmatically and sourced controlled, from templated Charts, with built in support for dry-run and validation.
 
 **Swinch is at an alpha stage and under active development**   
 
@@ -84,15 +83,15 @@ swinch template -c samples/charts/pipeline  -o samples/manifests/pipeline
 
 
 ### Install 
-Download latest [swinch release](https://github.com/adobe/swinch/releases) and unpack it:
+Downdload latest [swinch relase](https://github.com/adobe/swinch/releases) and unpack it:
 
 ```
 tar zxvf swinch-*
 chmod +x
 mv swinch /usr/local/bin/swinch
-```
 
-On macOS make sure to allow swinch in `System Preferences` -> `Security and Privacy`
+```
+On MacOS allow swinch in `System Preferences` -> `Security and Privacy`
 
 ### Usage
 
@@ -114,14 +113,12 @@ Available Commands:
 ```
 
 ### Configuration file 
-In the swinch config file you will set up the spinnaker endpoint and authentication method.
-Run `swinch config` to get the full list of options and instructions.
+In the swinch config file you will set up the spinnaker endpoint and authentication metod.  
+Run `swinch config` to get the full list of options and intructions.
 
 ```bash
 swinch config generate
 swinch config add-context
-swinch config use-context   # make sure you run use-context command after adding a new context
-swinch config get-contexts
 ```
 
 Example configuration file located in `cd ${HOME}/.swinch`:  
@@ -199,5 +196,5 @@ Push a release commit:
 
 ```bash
 bump2version patch
-git push upstream master  --follow-tags
+git push upstream master  --follow-tags  
 ```

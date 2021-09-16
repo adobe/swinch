@@ -17,6 +17,7 @@ import (
 	"swinch/domain/application"
 	"swinch/domain/manifest"
 	"swinch/domain/pipeline"
+	"swinch/domain/stages"
 )
 
 // planCmd represents the plan command
@@ -51,9 +52,11 @@ func Plan() {
 		case a.Manifest.Kind:
 			a.LoadManifest(manifest)
 			a.Plan()
-		case p.Manifest.Kind:
+		case p.GetKind():
 			p.LoadManifest(manifest)
+			s := stages.Processor{}
+			s.Process(&p.Manifest)
+			p.Plan()
 		}
 	}
 }
-

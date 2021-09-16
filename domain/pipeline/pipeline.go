@@ -15,7 +15,6 @@ package pipeline
 import (
 	log "github.com/sirupsen/logrus"
 	"swinch/domain/datastore"
-	"swinch/domain/stage"
 	"swinch/domain/util"
 	"swinch/spincli"
 )
@@ -23,28 +22,10 @@ import (
 type Pipeline struct {
 	Manifest
 	Spec
-	BakeManifest
-	DeployManifest
-	DeleteManifest
-	ManualJudgment
-	Wait
-	Jenkins
-	RunJobManifest
-	stage.Stage
 	util.Util
 	spincli.PipelineAPI
 	datastore.Datastore
 }
-
-const (
-	bakeManifest   = "bakeManifest"
-	deployManifest = "deployManifest"
-	deleteManifest = "deleteManifest"
-	manualJudgment = "manualJudgment"
-	wait           = "wait"
-	jenkins        = "jenkins"
-	runJobManifest = "runJobManifest"
-)
 
 func (p *Pipeline) Plan() {
 	p.Apply(true, true)
