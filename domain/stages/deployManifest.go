@@ -23,7 +23,7 @@ import (
 const deployManifest = "deployManifest"
 
 type DeployManifest struct {
-	Metadata           `mapstructure:",squash"`
+	Metadata                 `mapstructure:",squash"`
 	Account                  string   `yaml:"account,omitempty" json:"account,omitempty"`
 	CloudProvider            string   `json:"cloudProvider"`
 	ManifestArtifactId       string   `json:"manifestArtifactId"`

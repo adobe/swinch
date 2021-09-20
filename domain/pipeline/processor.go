@@ -1,29 +1,29 @@
-package stages
+package pipeline
 
 import (
 	log "github.com/sirupsen/logrus"
 	"strconv"
-	"swinch/domain/pipeline"
+	"swinch/domain/stages"
 )
 
 type Processor struct {
-	Stage
-	pipeline.Manifest
-	BakeManifest
-	DeployManifest
-	DeleteManifest
-	ManualJudgment
-	Wait
-	Jenkins
-	RunJobManifest
+	Manifest
+	stages.Stage
+	stages.BakeManifest
+	stages.DeployManifest
+	stages.DeleteManifest
+	stages.ManualJudgment
+	stages.Wait
+	stages.Jenkins
+	stages.RunJobManifest
 }
 
 type stage interface {
-	Process(*Stage)
+	Process(*stages.Stage)
 	GetStageType() string
 }
 
-func (ps *Processor) Process(manifest *pipeline.Manifest) {
+func (ps Processor) process(manifest *Manifest) {
 	ps.Manifest = *manifest
 	ps.Stages = &ps.Manifest.Spec.Stages
 	for i := 0; i < len(ps.Manifest.Spec.Stages); i++ {

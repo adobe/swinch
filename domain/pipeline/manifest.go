@@ -40,41 +40,46 @@ type Metadata struct {
 	Application string `yaml:"application" json:"application"`
 }
 
-func (m *Manifest) GetKind() string{
+func (p *Pipeline) GetKind() string {
 	return Kind
 }
 
-func (m *Manifest) MakeManifest(spec Spec) *Manifest {
-	m.ApiVersion = API
-	m.Kind = Kind
-	m.Metadata.Name = spec.Name
-	m.Metadata.Application = spec.Application
-	m.Spec = spec
-	return m
+func (p *Pipeline) MakeManifest(spec Spec) *Pipeline {
+	p.ApiVersion = API
+	p.Kind = Kind
+	p.Metadata.Name = spec.Name
+	p.Metadata.Application = spec.Application
+	p.Spec = spec
+	return p
 }
 
-func (m *Manifest) LoadManifest(manifest interface{}) {
-	d := datastore.Datastore{}
-	err := yaml.Unmarshal(d.MarshalYAML(manifest), &m)
-	if err != nil {
-		log.Fatalf("Error LoadManifest: %v", err)
-	}
+func (p *Pipeline) Load(manifest interface{}) *Pipeline {
+	p.decode(manifest)
+	p.inferFromMetadata()
+	p.process(&p.Manifest)
 
-	m.inferFromMetadata()
-
-	err = m.Validate()
+	err := p.Validate()
 	if err != nil {
 		log.Fatalf("Pipeline manifest validation failed: %v", err)
 	}
+	return p
 }
 
-func (m *Manifest) inferFromMetadata() {
-	m.Spec.Name = m.Metadata.Name
-	m.Spec.Application = m.Metadata.Application
+func (p *Pipeline) decode(manifest interface{}) {
+	d := datastore.Datastore{}
+	err := yaml.Unmarshal(d.MarshalYAML(manifest), &p)
+	if err != nil {
+		log.Fatalf("Error Load: %v", err)
+	}
 }
 
-func (m *Manifest) Validate() error {
-	if len(m.Spec.Name) < 3 {
+func (p *Pipeline) inferFromMetadata() {
+	p.Spec.Name = p.Metadata.Name
+	p.Spec.Application = p.Metadata.Application
+}
+
+func (p *Pipeline) Validate() error {
+	if len(p.Spec.Name) < 3 {
 		return PipeNameLen
 	}
 	return nil

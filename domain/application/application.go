@@ -28,7 +28,7 @@ type Application struct {
 	datastore.Datastore
 }
 
-func (a *Application) Plan(){
+func (a *Application) Plan() {
 	a.Apply(true, true)
 }
 

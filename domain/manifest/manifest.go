@@ -29,6 +29,26 @@ var Kinds = map[string]string{
 	pipeline.Kind:    pipeline.API,
 }
 
+type Kind interface {
+	GetKind() string
+}
+
+type M interface {
+	Plan()
+	Apply(bool, bool)
+	Destroy()
+}
+
+func Plan(m M) {
+	m.Plan()
+}
+
+type NewManifest struct {
+	Manifest
+	application.Application
+	pipeline.Pipeline
+}
+
 type Manifest struct {
 	ApiVersion string      `yaml:"apiVersion" json:"apiVersion"`
 	Kind       string      `yaml:"kind" json:"kind"`

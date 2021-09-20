@@ -14,10 +14,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"swinch/domain/application"
 	"swinch/domain/manifest"
-	"swinch/domain/pipeline"
-	"swinch/domain/stages"
 )
 
 // planCmd represents the plan command
@@ -31,7 +28,7 @@ var planCmd = &cobra.Command{
 		ValidateConfig()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		Plan()
+		runPlan()
 	},
 }
 
@@ -41,22 +38,21 @@ func init() {
 	rootCmd.AddCommand(planCmd)
 }
 
-func Plan() {
-	m := manifest.Manifest{}
-	a := application.Application{}
-	p := pipeline.Pipeline{}
+func Plan(m manifest.M) {
+	m.Plan()
+}
 
+func runPlan() {
+	m := manifest.NewManifest{}
 	manifests := m.GetManifests(filePath)
-	for _, manifest := range manifests {
-		switch manifest.Kind {
-		case a.Manifest.Kind:
-			a.LoadManifest(manifest)
-			a.Plan()
-		case p.GetKind():
-			p.LoadManifest(manifest)
-			s := stages.Processor{}
-			s.Process(&p.Manifest)
-			p.Plan()
+	for _, newManifest := range manifests {
+		switch newManifest.Kind {
+		case m.Application.GetKind():
+			application := m.Application.Load(newManifest)
+			Plan(application)
+		case m.Pipeline.GetKind():
+			pipeline := m.Pipeline.Load(newManifest)
+			Plan(pipeline)
 		}
 	}
 }

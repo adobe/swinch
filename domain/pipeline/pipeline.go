@@ -21,6 +21,7 @@ import (
 
 type Pipeline struct {
 	Manifest
+	Processor
 	Spec
 	util.Util
 	spincli.PipelineAPI

@@ -14,16 +14,12 @@ package chart
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/Masterminds/sprig"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"path"
-	"swinch/domain/application"
 	"swinch/domain/datastore"
 	"swinch/domain/manifest"
-	"swinch/domain/pipeline"
-	"swinch/domain/stages"
 	"text/template"
 )
 
@@ -38,11 +34,6 @@ func (t *Template) TemplateChart(chartPath, valuesFile, outputPath string, fullR
 		log.Debugf("Found chart template: %v", chartTemplate)
 
 		buffer := t.templateFile(chartPath, chartTemplate.Name(), values)
-		fmt.Println(buffer)
-		fmt.Println("---")
-		buffer = t.fullRender(buffer)
-		fmt.Println(buffer)
-		os.Exit(1)
 
 		if fullRender != false {
 			buffer = t.fullRender(buffer)
@@ -80,26 +71,19 @@ func (t Template) templateFile(chartPath, chartTemplate string, values Values) *
 }
 
 func (t *Template) fullRender(buffer *bytes.Buffer) *bytes.Buffer {
-	m := manifest.Manifest{}
-	a := application.Application{}
-	p := pipeline.Pipeline{}
-
+	m := manifest.NewManifest{}
 	manifests := m.DecodeManifests(buffer)
 	buffer.Reset()
-	fmt.Println("Full render")
-	for _, manifest := range manifests {
-		switch manifest.Kind {
-		case a.Manifest.Kind:
-			a.LoadManifest(manifest)
-			buffer.Write(t.MarshalYAML(a))
-		case p.GetKind():
-			p.LoadManifest(manifest)
-			s := stages.Processor{}
-			s.Process(&p.Manifest)
-			buffer.Write(t.MarshalYAML(p.Manifest))
+	for _, newManifest := range manifests {
+		switch newManifest.Kind {
+		case m.Application.GetKind():
+			application := m.Application.Load(newManifest)
+			buffer.Write(t.MarshalYAML(application.Manifest))
+		case m.Pipeline.GetKind():
+			pipeline := m.Pipeline.Load(newManifest)
+			buffer.Write(t.MarshalYAML(pipeline.Manifest))
 		}
 	}
-
 	return buffer
 }
 
