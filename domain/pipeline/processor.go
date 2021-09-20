@@ -1,3 +1,15 @@
+/*
+Copyright 2021 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+
 package pipeline
 
 import (
@@ -10,56 +22,50 @@ type Processor struct {
 	Manifest
 	stages.Stage
 	stages.BakeManifest
-	stages.DeployManifest
 	stages.DeleteManifest
+	stages.DeployManifest
 	stages.ManualJudgment
-	stages.Wait
-	stages.Jenkins
 	stages.RunJobManifest
+	stages.Jenkins
+	stages.Wait
 }
 
-type stage interface {
-	Process(*stages.Stage)
+type S interface {
+	MakeStage(*stages.Stage) *map[string]interface{}
 	GetStageType() string
 }
 
-func (ps Processor) process(manifest *Manifest) {
+func (ps *Processor) processStage(stage S) {
+	// Propagate the manifest metadata to the stage
+	ps.Stage.ManifestMetadata.Name = ps.Manifest.Metadata.Name
+	ps.Stage.ManifestMetadata.Application = ps.Manifest.Metadata.Application
+	*ps.InitStage = *stage.MakeStage(&ps.Stage)
+}
+
+func (ps Processor) processManifest(manifest *Manifest) {
 	ps.Manifest = *manifest
-	ps.Stages = &ps.Manifest.Spec.Stages
 	for i := 0; i < len(ps.Manifest.Spec.Stages); i++ {
-		ps.RawStage = &ps.Manifest.Spec.Stages[i]
-		// Decode the raws stage from the manifest into an internal stage struct
-		ps.Stage = ps.GetStage(ps.RawStage)
+		ps.Stage = ps.Decode(&ps.Manifest.Spec.Stages[i])
+		ps.InitStage = &ps.Manifest.Spec.Stages[i]
+		ps.Stages = &ps.Manifest.Spec.Stages
 
 		// Set some stage metadata
 		ps.Stage.Metadata.RefId = strconv.Itoa(i + 1)
-
-		// Propagate the manifest metadata to the stage
-		ps.Stage.ManifestMetadata.Name = ps.Manifest.Metadata.Name
-		ps.Stage.ManifestMetadata.Application = ps.Manifest.Metadata.Application
-
 		switch ps.Stage.Type {
 		case ps.BakeManifest.GetStageType():
-			var s stage = ps.BakeManifest
-			s.Process(&ps.Stage)
+			ps.processStage(ps.BakeManifest)
 		case ps.DeleteManifest.GetStageType():
-			var s stage = ps.DeleteManifest
-			s.Process(&ps.Stage)
+			ps.processStage(ps.DeleteManifest)
 		case ps.DeployManifest.GetStageType():
-			var s stage = ps.DeployManifest
-			s.Process(&ps.Stage)
-		case ps.Jenkins.GetStageType():
-			var s stage = ps.Jenkins
-			s.Process(&ps.Stage)
+			ps.processStage(ps.DeployManifest)
 		case ps.ManualJudgment.GetStageType():
-			var s stage = ps.ManualJudgment
-			s.Process(&ps.Stage)
+			ps.processStage(ps.ManualJudgment)
 		case ps.RunJobManifest.GetStageType():
-			var s stage = ps.RunJobManifest
-			s.Process(&ps.Stage)
+			ps.processStage(ps.RunJobManifest)
+		case ps.Jenkins.GetStageType():
+			ps.processStage(ps.Jenkins)
 		case ps.Wait.GetStageType():
-			var s stage = ps.RunJobManifest
-			s.Process(&ps.Stage)
+			ps.processStage(ps.Wait)
 		default:
 			log.Fatalf("Failed to detect stage type: %v", ps.Stage.Metadata.Type)
 		}

@@ -41,9 +41,9 @@ func (mj ManualJudgment) GetStageType() string {
 	return manualJudgment
 }
 
-func (mj ManualJudgment) Process(stage *Stage) {
+func (mj ManualJudgment) MakeStage(stage *Stage) *map[string]interface{} {
 	mj.decode(stage)
-	mj.update(stage)
+	return mj.encode()
 }
 
 func (mj *ManualJudgment) decode(stage *Stage) {
@@ -60,12 +60,12 @@ func (mj *ManualJudgment) decode(stage *Stage) {
 	}
 }
 
-func (mj *ManualJudgment) update(stage *Stage) {
+func (mj *ManualJudgment) encode() *map[string]interface{} {
 	d := datastore.Datastore{}
-	tmpStage := new(map[string]interface{})
-	err := json.Unmarshal(d.MarshalJSON(mj), tmpStage)
+	stage := new(map[string]interface{})
+	err := json.Unmarshal(d.MarshalJSON(mj), stage)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
-	*stage.RawStage = *tmpStage
+	return stage
 }

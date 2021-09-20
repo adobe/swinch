@@ -58,10 +58,10 @@ func (delm DeleteManifest) GetStageType() string {
 	return deleteManifest
 }
 
-func (delm DeleteManifest) Process(stage *Stage) {
+func (delm DeleteManifest) MakeStage(stage *Stage) *map[string]interface{} {
 	delm.decode(stage)
 	delm.expand(stage)
-	delm.update(stage)
+	return delm.encode()
 }
 
 func (delm *DeleteManifest) decode(stage *Stage) {
@@ -90,12 +90,12 @@ func (delm *DeleteManifest) expand(stage *Stage) {
 	}
 }
 
-func (delm *DeleteManifest) update(stage *Stage) {
+func (delm *DeleteManifest) encode() *map[string]interface{} {
 	d := datastore.Datastore{}
-	tmpStage := new(map[string]interface{})
-	err := json.Unmarshal(d.MarshalJSON(delm), tmpStage)
+	stage := new(map[string]interface{})
+	err := json.Unmarshal(d.MarshalJSON(delm), stage)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
-	*stage.RawStage = *tmpStage
+	return stage
 }

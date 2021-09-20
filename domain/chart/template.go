@@ -72,16 +72,14 @@ func (t Template) templateFile(chartPath, chartTemplate string, values Values) *
 
 func (t *Template) fullRender(buffer *bytes.Buffer) *bytes.Buffer {
 	m := manifest.NewManifest{}
-	manifests := m.DecodeManifests(buffer)
+	manifests := m.Decode(buffer)
 	buffer.Reset()
 	for _, newManifest := range manifests {
 		switch newManifest.Kind {
 		case m.Application.GetKind():
-			application := m.Application.Load(newManifest)
-			buffer.Write(t.MarshalYAML(application.Manifest))
+			buffer.Write(t.MarshalYAML(m.Application.Load(newManifest).Manifest))
 		case m.Pipeline.GetKind():
-			pipeline := m.Pipeline.Load(newManifest)
-			buffer.Write(t.MarshalYAML(pipeline.Manifest))
+			buffer.Write(t.MarshalYAML(m.Pipeline.Load(newManifest).Manifest))
 		}
 	}
 	return buffer

@@ -14,7 +14,6 @@ package stages
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 	"swinch/domain/datastore"
@@ -82,11 +81,10 @@ func (bm BakeManifest) GetStageType() string {
 	return StageType
 }
 
-func (bm BakeManifest) Process(stage *Stage) {
-	fmt.Println("good")
+func (bm BakeManifest) MakeStage(stage *Stage) *map[string]interface{} {
 	bm.decode(stage)
 	bm.expand()
-	bm.update(stage)
+	return bm.encode()
 }
 
 func (bm *BakeManifest) decode(stage *Stage) {
@@ -123,15 +121,14 @@ func (bm *BakeManifest) expand() {
 	inputArtifacts.Artifact.ArtifactAccount = inputArtifacts.Account
 	// inputArtifacts.Artifact.Id not mandatory
 	//inputArtifacts.Artifact.Id = bm.newUUID(inputArtifacts.Artifact.Name + inputArtifacts.Artifact.Version).String()
-	fmt.Println(bm)
 }
 
-func (bm *BakeManifest) update(stage *Stage) {
+func (bm *BakeManifest) encode() *map[string]interface{} {
 	d := datastore.Datastore{}
-	tmpStage := new(map[string]interface{})
-	err := json.Unmarshal(d.MarshalJSON(bm), tmpStage)
+	stage := new(map[string]interface{})
+	err := json.Unmarshal(d.MarshalJSON(bm), stage)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
-	*stage.RawStage = *tmpStage
+	return stage
 }

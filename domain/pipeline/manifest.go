@@ -13,6 +13,7 @@ governing permissions and limitations under the License.
 package pipeline
 
 import (
+	"encoding/json"
 	"errors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
@@ -40,25 +41,27 @@ type Metadata struct {
 	Application string `yaml:"application" json:"application"`
 }
 
-func (p *Pipeline) GetKind() string {
-	return Kind
+type Spec struct {
+	Application          string                   `yaml:"-" json:"application"`
+	Name                 string                   `yaml:"-" json:"name"`
+	Index                int                      `yaml:"index" json:"index"`
+	KeepWaitingPipelines bool                     `yaml:"keepWaitingPipelines,omitempty" json:"keepWaitingPipelines,omitempty"`
+	LimitConcurrent      bool                     `yaml:"limitConcurrent,omitempty" json:"limitConcurrent,omitempty"`
+	SpelEvaluator        string                   `yaml:"spelEvaluator,omitempty" json:"spelEvaluator,omitempty"`
+	Stages               []map[string]interface{} `yaml:"stages" json:"stages"`
+	Triggers             []interface{}            `yaml:"triggers,omitempty" json:"triggers,omitempty""`
 }
 
-func (p *Pipeline) MakeManifest(spec Spec) *Pipeline {
-	p.ApiVersion = API
-	p.Kind = Kind
-	p.Metadata.Name = spec.Name
-	p.Metadata.Application = spec.Application
-	p.Spec = spec
-	return p
+func (p *Pipeline) GetKind() string {
+	return Kind
 }
 
 func (p *Pipeline) Load(manifest interface{}) *Pipeline {
 	p.decode(manifest)
 	p.inferFromMetadata()
-	p.process(&p.Manifest)
+	p.processManifest(&p.Manifest)
 
-	err := p.Validate()
+	err := p.validate()
 	if err != nil {
 		log.Fatalf("Pipeline manifest validation failed: %v", err)
 	}
@@ -67,20 +70,30 @@ func (p *Pipeline) Load(manifest interface{}) *Pipeline {
 
 func (p *Pipeline) decode(manifest interface{}) {
 	d := datastore.Datastore{}
-	err := yaml.Unmarshal(d.MarshalYAML(manifest), &p)
+	err := yaml.Unmarshal(d.MarshalYAML(manifest), &p.Manifest)
 	if err != nil {
 		log.Fatalf("Error Load: %v", err)
 	}
 }
 
 func (p *Pipeline) inferFromMetadata() {
-	p.Spec.Name = p.Metadata.Name
-	p.Spec.Application = p.Metadata.Application
+	p.Manifest.Spec.Name = p.Manifest.Metadata.Name
+	p.Manifest.Spec.Application = p.Manifest.Metadata.Application
 }
 
-func (p *Pipeline) Validate() error {
+func (p *Pipeline) validate() error {
 	if len(p.Spec.Name) < 3 {
 		return PipeNameLen
 	}
 	return nil
+}
+
+func (p Pipeline) loadSpec(spec []byte) Spec {
+	tmpSpec := new(Spec)
+	err := json.Unmarshal(spec, tmpSpec)
+
+	if err != nil {
+		log.Fatalf("Error loading spec: %v", err)
+	}
+	return *tmpSpec
 }

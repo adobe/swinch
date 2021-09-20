@@ -49,11 +49,9 @@ func runApply() {
 	for _, newManifest := range manifests {
 		switch newManifest.Kind {
 		case m.Application.GetKind():
-			application := m.Application.Load(newManifest)
-			Apply(application, false, plan)
+			Apply(m.Application.Load(newManifest), false, plan)
 		case m.Pipeline.GetKind():
-			pipeline := m.Pipeline.Load(newManifest)
-			Apply(pipeline, false, plan)
+			Apply(m.Pipeline.Load(newManifest), false, plan)
 		}
 	}
 }

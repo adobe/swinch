@@ -29,18 +29,10 @@ var Kinds = map[string]string{
 	pipeline.Kind:    pipeline.API,
 }
 
-type Kind interface {
-	GetKind() string
-}
-
 type M interface {
 	Plan()
 	Apply(bool, bool)
 	Destroy()
-}
-
-func Plan(m M) {
-	m.Plan()
 }
 
 type NewManifest struct {
@@ -58,10 +50,10 @@ type Manifest struct {
 
 func (m *Manifest) GetManifests(filePath string) []Manifest {
 	d := datastore.Datastore{}
-	return m.DecodeManifests(d.LoadYAMLFiles(filePath))
+	return m.Decode(d.LoadYAMLFiles(filePath))
 }
 
-func (m *Manifest) DecodeManifests(buffer *bytes.Buffer) []Manifest {
+func (m *Manifest) Decode(buffer *bytes.Buffer) []Manifest {
 	decoder := yaml.NewDecoder(buffer)
 	manifests := make([]Manifest, 0)
 	for {

@@ -13,6 +13,7 @@ governing permissions and limitations under the License.
 package application
 
 import (
+	"encoding/json"
 	"errors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
@@ -40,16 +41,21 @@ type Metadata struct {
 	Name string `yaml:"name" json:"name"`
 }
 
-func (a *Application) GetKind() string {
-	return Kind
+type Spec struct {
+	CloudProviders string      `yaml:"cloudProviders" json:"cloudProviders"`
+	Email          string      `yaml:"email" json:"email"`
+	Name           string      `yaml:"-" json:"name"`
+	Permissions    Permissions `yaml:"permissions" json:"permissions"`
 }
 
-func (a *Application) MakeManifest(spec Spec) *Application {
-	a.ApiVersion = API
-	a.Kind = Kind
-	a.Metadata.Name = spec.Name
-	a.Spec = spec
-	return a
+type Permissions struct {
+	EXECUTE []string `yaml:"EXECUTE" json:"EXECUTE"`
+	READ    []string `yaml:"READ" json:"READ"`
+	WRITE   []string `yaml:"WRITE" json:"WRITE"`
+}
+
+func (a *Application) GetKind() string {
+	return Kind
 }
 
 func (a *Application) Load(manifest interface{}) *Application {
@@ -81,4 +87,14 @@ func (a *Application) validate() error {
 		return AppNameLen
 	}
 	return nil
+}
+
+func (a *Application) LoadSpec(spec []byte) Spec {
+	tmpSpec := new(Spec)
+	err := json.Unmarshal(spec, tmpSpec)
+
+	if err != nil {
+		log.Fatalf("Error loading spec: %v", err)
+	}
+	return *tmpSpec
 }
