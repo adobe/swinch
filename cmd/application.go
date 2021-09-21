@@ -13,11 +13,10 @@ governing permissions and limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"swinch/domain/application"
-	"swinch/domain/chart"
-	"swinch/spincli"
 )
 
 // applicationCmd represents the application command
@@ -32,7 +31,7 @@ var applicationCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		action := cmd.Parent().Use
-		Application{}.cmdActions(applicationName, action)
+		cmdAppAction(action)
 	},
 }
 
@@ -60,84 +59,14 @@ func init() {
 	planCmd.AddCommand(&PlanAppCmd)
 }
 
-type Application struct {
-	manifests []application.Manifest
-	application.Application
-	spincli.ApplicationAPI
-	chart.Chart
-}
-
-func (a Application) cmdActions(app, action string) {
-	a.App = app
+func cmdAppAction(action string) {
+	a := application.Application{}
 	switch action {
 	case deleteAction:
-		a.Delete()
+		a.Delete(applicationName)
 	case importAction:
-		a.importChart()
+		fmt.Println("Import TBA")
 	default:
 		log.Fatalf("Bad application action")
 	}
-}
-
-func (a Application) manifestActions(action string) {
-	for i := 0; i < len(a.manifests); i++ {
-		manifest := &a.manifests[i]
-		a.App = a.manifests[i].Metadata.Name
-		switch action {
-		case applyAction:
-			dryRun := false
-			a.save(manifest.Spec, dryRun)
-		case deleteAction:
-			a.Delete()
-		case planAction:
-			dryRun := true
-			a.save(manifest.Spec, dryRun)
-		default:
-			log.Fatalf("Bad application action")
-		}
-	}
-}
-
-func (a *Application) save(spec application.Spec, dryRun bool) {
-	app := a.Get()
-	changes := false
-	newApp := false
-	if len(app) == 0 {
-		newApp = true
-	} else {
-		changes = Changes(a.MarshalJSON(a.LoadSpec(app)), a.MarshalJSON(spec))
-	}
-
-	if changes && plan {
-		log.Infof("Planing changes for application '%v'", a.App)
-		DiffChanges(a.MarshalJSON(a.LoadSpec(app)), a.MarshalJSON(spec))
-	}
-
-	if !dryRun && (changes || newApp) {
-		log.Infof("Saving application '%v'", a.App)
-		a.Save(a.WriteJSONTmp(spec))
-	}
-}
-
-func (a *Application) importChart() {
-	a.OutputPath = outputPath
-	a.ProtectedImport = protectedImport
-	a.Kind = "application"
-
-	data := new([]byte)
-	if filePath != "" {
-		*data = a.ReadFile(filePath)
-	} else {
-		*data = a.Get()
-	}
-
-	manifest := a.MakeManifest(a.LoadSpec(*data))
-	a.Metadata.Name = chartName
-	if a.Metadata.Name == "" {
-		a.Metadata.Name = manifest.Metadata.Name
-	}
-
-	a.Values.Values = map[interface{}]interface{}{a.Kind: map[string]string{"name": manifest.Metadata.Name}}
-
-	a.GenerateChart(manifest)
 }

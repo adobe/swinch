@@ -18,8 +18,8 @@ import (
 )
 
 type PipelineAPI struct {
-	App  string `json:"application"`
-	Pipe string `json:"name"`
+	appName  string
+	pipeName string
 	SpinCLI
 }
 
@@ -43,31 +43,37 @@ func (p *PipelineAPI) renameNotAllowed() error {
 	return errors.New("400 ")
 }
 
-func (p *PipelineAPI) Get() []byte {
-	args := []string{"pipeline", "get", "--application", p.App, "--name", p.Pipe}
+func (p *PipelineAPI) Get(appName, pipeName string) []byte {
+	p.appName = appName
+	p.pipeName = pipeName
+	args := []string{"pipeline", "get", "--application", p.appName, "--name", p.pipeName}
 	buffer, err := p.executePipeCmd(append(baseArgs, args...))
 	log.Debugf("Spinnaker get response: %v", err)
 	p.status(err)
 	return buffer.Bytes()
 }
 
-func (p PipelineAPI) Save(filePath string) {
+func (p PipelineAPI) Save(appName, pipeName, filePath string) {
+	p.appName = appName
+	p.pipeName = pipeName
 	args := []string{"pipeline", "save", "--file", filePath}
 	_, err := p.executePipeCmd(append(baseArgs, args...))
 	p.status(err)
 	if err == nil {
-		log.Infof("Pipeline '%v' in application '%v' updated successfuly", p.Pipe, p.App)
+		log.Infof("Pipeline '%v' in application '%v' updated successfuly", p.pipeName, p.appName)
 	}
 	defer p.rmTmp(filePath)
 }
 
-func (p PipelineAPI) Delete() {
-	args := []string{"pipeline", "delete", "--application", p.App, "--name", p.Pipe}
+func (p PipelineAPI) Delete(appName, pipeName string) {
+	p.appName = appName
+	p.pipeName = pipeName
+	args := []string{"pipeline", "delete", "--application", p.appName, "--name", p.pipeName}
 	_, err := p.executePipeCmd(append(baseArgs, args...))
 	if err != nil {
 		p.status(err)
 	} else {
-		log.Infof("Delete pipeline '%v' success", p.Pipe)
+		log.Infof("Delete pipeline '%v' success", p.pipeName)
 	}
 }
 
@@ -75,9 +81,9 @@ func (p *PipelineAPI) status(err error) {
 	if err != nil {
 		switch err.Error() {
 		case p.NotFound().Error():
-			log.Infof("Pipeline '%v' not found", p.Pipe)
+			log.Infof("Pipeline '%v' not found", p.pipeName)
 		case p.NotAllowed().Error():
-			log.Fatalf("Attempting action on pipeline '%v' from application '%v' which does not exist", p.Pipe, p.App)
+			log.Fatalf("Attempting action on pipeline '%v' from application '%v' which does not exist", p.pipeName, p.appName)
 		case p.unhandledNotFound().Error():
 			log.Fatalf("Request repeated too quickly")
 		case p.unhandledNotAllowed().Error():

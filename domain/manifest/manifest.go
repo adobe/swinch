@@ -36,24 +36,21 @@ type Manifest struct {
 	Spec       interface{} `yaml:"spec" json:"spec"`
 }
 
-func (m *Manifest) GetManifests(filePath string) ([]application.Manifest, []pipeline.Manifest) {
-	d := datastore.Datastore{}
-	discoveredYAMLDocs := d.DiscoverYAMLFiles(filePath)
-	return m.ReadManifest(discoveredYAMLDocs)
+type M interface {
+	LoadManifest(manifest interface{})
 }
 
-// ReadManifest used to load all m types
-func (m *Manifest) ReadManifest(yamlFilesBuffer *bytes.Buffer) ([]application.Manifest, []pipeline.Manifest) {
-	decoder := yaml.NewDecoder(yamlFilesBuffer)
+func (m *Manifest) GetManifests(filePath string) []Manifest {
+	d := datastore.Datastore{}
+	return m.DecodeManifests(d.LoadYAMLFiles(filePath))
+}
 
-	applications := make([]application.Manifest, 0)
-	pipelines := make([]pipeline.Manifest, 0)
-
+func (m *Manifest) DecodeManifests(buffer *bytes.Buffer) []Manifest {
+	decoder := yaml.NewDecoder(buffer)
+	manifests := make([]Manifest, 0)
 	for {
-		manifest := new(Manifest)
-		errDecode := decoder.Decode(&manifest)
-
-		if manifest == nil {
+		errDecode := decoder.Decode(&m)
+		if m == nil {
 			continue
 		}
 		if errors.Is(errDecode, io.EOF) {
@@ -62,39 +59,28 @@ func (m *Manifest) ReadManifest(yamlFilesBuffer *bytes.Buffer) ([]application.Ma
 		if errDecode != nil {
 			log.Fatalf("Error reading YAML: %v", errDecode)
 		}
-
-		err := manifest.Validate()
+		// Basic manifest kind and version validation
+		err := m.validate()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		switch manifest.Kind {
-		case application.Kind:
-			app := application.Application{}
-			app.LoadManifest(manifest)
-			applications = append(applications, app.Manifest)
-		case pipeline.Kind:
-			pipe := pipeline.Pipeline{}
-			pipe.LoadManifest(manifest)
-			pipe.ProcessStages()
-			pipelines = append(pipelines, pipe.Manifest)
-		default:
-			log.Fatalf("Error detecting manifest Kind")
-		}
+		manifests = append(manifests, *m)
 	}
-	return applications, pipelines
+
+	return manifests
 }
 
-func (m *Manifest) Validate() error {
+func (m *Manifest) validate() error {
 	_, ok := Kinds[m.Kind]
 	if ok {
 		kindApiVersion := Kinds[m.Kind]
 		if m.ApiVersion != kindApiVersion {
 			return fmt.Errorf("bad api version, expected: %v, got: %v", kindApiVersion, m.ApiVersion)
-		} else {
-			return nil
 		}
 	} else {
 		return fmt.Errorf("unknown manifest Kind: %v", m.Kind)
 	}
+
+	return nil
 }

@@ -13,11 +13,10 @@ governing permissions and limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"swinch/domain/chart"
 	"swinch/domain/pipeline"
-	"swinch/spincli"
 )
 
 // pipelineCmd represents the pipeline command
@@ -32,7 +31,7 @@ var pipelineCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		action := cmd.Parent().Use
-		Pipeline{}.cmdActions(applicationName, pipelineName, action)
+		cmdPipeAction(applicationName, pipelineName, action)
 	},
 }
 
@@ -64,86 +63,14 @@ func init() {
 	planCmd.AddCommand(&PlanPipeCmd)
 }
 
-type Pipeline struct {
-	manifests []pipeline.Manifest
-	pipeline.Pipeline
-	spincli.PipelineAPI
-	chart.Chart
-}
-
-func (p Pipeline) cmdActions(app, pipe, action string) {
-	p.App = app
-	p.Pipe = pipe
+func cmdPipeAction(app, pipe, action string) {
+	p := pipeline.Pipeline{}
 	switch action {
 	case deleteAction:
-		p.Delete()
+		p.Delete(app, pipe)
 	case importAction:
-		p.importChart()
+		fmt.Println("Import TBA")
 	default:
 		log.Fatalf("Bad application action")
 	}
-}
-
-func (p Pipeline) manifestActions(action string) {
-	for i := 0; i < len(p.manifests); i++ {
-		manifest := &p.manifests[i]
-		p.App = manifest.Metadata.Application
-		p.Pipe = manifest.Metadata.Name
-		switch action {
-		case applyAction:
-			dryRun := false
-			p.save(manifest.Spec, dryRun)
-		case deleteAction:
-			p.Delete()
-		case planAction:
-			dryRun := true
-			p.save(manifest.Spec, dryRun)
-		default:
-			log.Fatalf("Bad application action")
-		}
-	}
-}
-
-func (p *Pipeline) save(spec pipeline.Spec, dryRun bool) {
-	pipe := p.Get()
-	changes := false
-	newPipe := false
-	if len(pipe) == 0 {
-		newPipe = true
-	} else {
-		changes = Changes(p.MarshalJSON(p.LoadSpec(pipe)), p.MarshalJSON(spec))
-	}
-
-	if changes && plan {
-		log.Infof("Planing changes for pipeline '%v' in application '%v'", p.Pipe, p.App)
-		DiffChanges(p.MarshalJSON(p.LoadSpec(pipe)), p.MarshalJSON(spec))
-	}
-
-	if !dryRun && (changes || newPipe) {
-		log.Infof("Saving pipeline '%v' in application '%v'", p.Pipe, p.App)
-		p.Save(p.WriteJSONTmp(spec))
-	}
-}
-
-func (p *Pipeline) importChart() {
-	p.OutputPath = outputPath
-	p.ProtectedImport = protectedImport
-	p.Kind = "pipeline"
-
-	data := new([]byte)
-	if filePath != "" {
-		*data = p.ReadFile(filePath)
-	} else {
-		*data = p.Get()
-	}
-
-	manifest := p.MakeManifest(p.LoadSpec(*data))
-	p.Chart.Metadata.Name = chartName
-	if p.Chart.Metadata.Name == "" {
-		p.Chart.Metadata.Name = manifest.Metadata.Name
-	}
-
-	p.Values.Values = map[interface{}]interface{}{p.Kind: map[string]string{"name": manifest.Metadata.Name}}
-
-	p.GenerateChart(manifest)
 }

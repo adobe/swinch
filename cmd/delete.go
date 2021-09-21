@@ -14,7 +14,9 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"swinch/domain/application"
 	"swinch/domain/manifest"
+	"swinch/domain/pipeline"
 )
 
 // deleteCmd represents the delete command
@@ -40,14 +42,17 @@ func init() {
 
 func Delete() {
 	m := manifest.Manifest{}
-	a := Application{}
-	p := Pipeline{}
-	a.manifests, p.manifests = m.GetManifests(filePath)
+	a := application.Application{}
+	p := pipeline.Pipeline{}
 
-	if len(a.manifests) > 0 {
-		a.manifestActions(deleteAction)
-	}
-	if len(p.manifests) > 0 {
-		p.manifestActions(deleteAction)
+	manifests := m.GetManifests(filePath)
+	for _, manifest := range manifests {
+		switch manifest.Kind {
+		case a.Manifest.Kind:
+			a.LoadManifest(manifest)
+			a.Destroy()
+		case p.Manifest.Kind:
+			p.LoadManifest(manifest)
+		}
 	}
 }

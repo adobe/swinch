@@ -14,8 +14,10 @@ package pipeline
 
 import (
 	log "github.com/sirupsen/logrus"
-	"strconv"
+	"swinch/domain/datastore"
 	"swinch/domain/stage"
+	"swinch/domain/util"
+	"swinch/spincli"
 )
 
 type Pipeline struct {
@@ -29,6 +31,9 @@ type Pipeline struct {
 	Jenkins
 	RunJobManifest
 	stage.Stage
+	util.Util
+	spincli.PipelineAPI
+	datastore.Datastore
 }
 
 const (
@@ -41,28 +46,55 @@ const (
 	runJobManifest = "runJobManifest"
 )
 
-func (p *Pipeline) ProcessStages() {
-	for i := 0; i < len(p.Manifest.Spec.Stages); i++ {
-		stageMap := &p.Manifest.Spec.Stages[i]
-		metadata := p.GetStageMetadata(stageMap)
-		metadata.RefId = strconv.Itoa(i + 1)
-		switch metadata.Type {
-		case bakeManifest:
-			p.ProcessBakeManifest(p, stageMap, &metadata)
-		case deployManifest:
-			p.ProcessDeployManifest(p, stageMap, &metadata)
-		case deleteManifest:
-			p.ProcessDeleteManifest(p, stageMap, &metadata)
-		case manualJudgment:
-			p.ProcessManualJudgment(stageMap, &metadata)
-		case wait:
-			p.ProcessWait(stageMap, &metadata)
-		case jenkins:
-			p.ProcessJenkins(stageMap, &metadata)
-		case runJobManifest:
-			p.ProcessRunJobManifest(p, stageMap, &metadata)
-		default:
-			log.Fatalf("Failed to detect stage type: %v", metadata.Type)
-		}
+func (p *Pipeline) Plan() {
+	p.Apply(true, true)
+}
+
+func (p *Pipeline) Apply(dryRun, plan bool) {
+	existingPipe := p.Get(p.Metadata.Application, p.Metadata.Name)
+	changes := false
+	newPipe := false
+	if len(existingPipe) == 0 {
+		newPipe = true
+	} else {
+		changes = p.Changes(p.MarshalJSON(p.LoadSpec(existingPipe)), p.MarshalJSON(p.Spec))
+	}
+
+	if changes && plan {
+		log.Infof("Planing changes for pipeline '%v' in application '%v'", p.Metadata.Name, p.Metadata.Application)
+		p.DiffChanges(p.MarshalJSON(p.LoadSpec(existingPipe)), p.MarshalJSON(p.Spec))
+	}
+
+	if !dryRun && (changes || newPipe) {
+		log.Infof("Saving pipeline '%v' in application '%v'", p.Metadata.Name, p.Metadata.Application)
+		p.Save(p.Metadata.Application, p.Metadata.Name, p.WriteJSONTmp(p.Spec))
 	}
 }
+
+func (p *Pipeline) Destroy() {
+	p.Delete(p.Metadata.Name, p.Metadata.Application)
+}
+
+// Import TBA
+//func (p *Pipeline) importChart() {
+//	p.OutputPath = outputPath
+//	p.ProtectedImport = protectedImport
+//	p.Kind = "pipeline"
+//
+//	data := new([]byte)
+//	if filePath != "" {
+//		*data = p.ReadFile(filePath)
+//	} else {
+//		*data = p.Get()
+//	}
+//
+//	manifest := p.MakeManifest(p.LoadSpec(*data))
+//	p.Chart.Metadata.Name = chartName
+//	if p.Chart.Metadata.Name == "" {
+//		p.Chart.Metadata.Name = manifest.Metadata.Name
+//	}
+//
+//	p.Values.Values = map[interface{}]interface{}{p.Kind: map[string]string{"name": manifest.Metadata.Name}}
+//
+//	p.GenerateChart(manifest)
+//}
