@@ -22,7 +22,7 @@ const (
 	TemplatesFolder = "templates"
 	ValuesFile      = "values.yaml"
 	MetadataFile    = "Chart.yaml"
-	FilePerm = 0775
+	FilePerm        = 0775
 )
 
 type Chart struct {

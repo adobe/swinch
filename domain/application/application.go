@@ -21,14 +21,12 @@ import (
 
 type Application struct {
 	Manifest
-	Metadata
-	Spec
 	spincli.ApplicationAPI
 	util.Util
 	datastore.Datastore
 }
 
-func (a *Application) Plan(){
+func (a *Application) Plan() {
 	a.Apply(true, true)
 }
 
@@ -56,27 +54,3 @@ func (a *Application) Apply(dryRun, plan bool) {
 func (a *Application) Destroy() {
 	a.Delete(a.Metadata.Name)
 }
-
-// Import TBA
-//func (a *Application) importChart() {
-//	a.OutputPath = outputPath
-//	a.ProtectedImport = protectedImport
-//	a.Kind = "application"
-//
-//	data := new([]byte)
-//	if filePath != "" {
-//		*data = a.ReadFile(filePath)
-//	} else {
-//		*data = a.Get()
-//	}
-//
-//	manifest := a.MakeManifest(a.LoadSpec(*data))
-//	a.Metadata.Name = chartName
-//	if a.Metadata.Name == "" {
-//		a.Metadata.Name = manifest.Metadata.Name
-//	}
-//
-//	a.Values.Values = map[interface{}]interface{}{a.Kind: map[string]string{"name": manifest.Metadata.Name}}
-//
-//	a.GenerateChart(manifest)
-//}

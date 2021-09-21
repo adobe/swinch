@@ -13,6 +13,7 @@ governing permissions and limitations under the License.
 package pipeline
 
 import (
+	"encoding/json"
 	"errors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
@@ -40,42 +41,59 @@ type Metadata struct {
 	Application string `yaml:"application" json:"application"`
 }
 
-func (m *Manifest) GetKind() string{
+type Spec struct {
+	Application          string                   `yaml:"-" json:"application"`
+	Name                 string                   `yaml:"-" json:"name"`
+	Index                int                      `yaml:"index" json:"index"`
+	KeepWaitingPipelines bool                     `yaml:"keepWaitingPipelines,omitempty" json:"keepWaitingPipelines,omitempty"`
+	LimitConcurrent      bool                     `yaml:"limitConcurrent,omitempty" json:"limitConcurrent,omitempty"`
+	SpelEvaluator        string                   `yaml:"spelEvaluator,omitempty" json:"spelEvaluator,omitempty"`
+	Stages               []map[string]interface{} `yaml:"stages" json:"stages"`
+	Triggers             []interface{}            `yaml:"triggers,omitempty" json:"triggers,omitempty""`
+}
+
+func (p *Pipeline) GetKind() string {
 	return Kind
 }
 
-func (m *Manifest) MakeManifest(spec Spec) *Manifest {
-	m.ApiVersion = API
-	m.Kind = Kind
-	m.Metadata.Name = spec.Name
-	m.Metadata.Application = spec.Application
-	m.Spec = spec
-	return m
-}
+func (p *Pipeline) Load(manifest interface{}) *Pipeline {
+	p.decode(manifest)
+	p.inferFromMetadata()
+	p.processManifest(&p.Manifest)
 
-func (m *Manifest) LoadManifest(manifest interface{}) {
-	d := datastore.Datastore{}
-	err := yaml.Unmarshal(d.MarshalYAML(manifest), &m)
-	if err != nil {
-		log.Fatalf("Error LoadManifest: %v", err)
-	}
-
-	m.inferFromMetadata()
-
-	err = m.Validate()
+	err := p.validate()
 	if err != nil {
 		log.Fatalf("Pipeline manifest validation failed: %v", err)
 	}
+	return p
 }
 
-func (m *Manifest) inferFromMetadata() {
-	m.Spec.Name = m.Metadata.Name
-	m.Spec.Application = m.Metadata.Application
+func (p *Pipeline) decode(manifest interface{}) {
+	d := datastore.Datastore{}
+	err := yaml.Unmarshal(d.MarshalYAML(manifest), &p.Manifest)
+	if err != nil {
+		log.Fatalf("Error Load: %v", err)
+	}
 }
 
-func (m *Manifest) Validate() error {
-	if len(m.Spec.Name) < 3 {
+func (p *Pipeline) inferFromMetadata() {
+	p.Manifest.Spec.Name = p.Manifest.Metadata.Name
+	p.Manifest.Spec.Application = p.Manifest.Metadata.Application
+}
+
+func (p *Pipeline) validate() error {
+	if len(p.Spec.Name) < 3 {
 		return PipeNameLen
 	}
 	return nil
+}
+
+func (p Pipeline) loadSpec(spec []byte) Spec {
+	tmpSpec := new(Spec)
+	err := json.Unmarshal(spec, tmpSpec)
+
+	if err != nil {
+		log.Fatalf("Error loading spec: %v", err)
+	}
+	return *tmpSpec
 }

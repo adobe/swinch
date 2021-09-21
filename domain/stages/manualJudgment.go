@@ -22,12 +22,13 @@ import (
 const manualJudgment = "manualJudgment"
 
 type ManualJudgment struct {
-	Stage `mapstructure:",squash"`
+	Metadata  `mapstructure:",squash"`
+	Common `mapstructure:",squash"`
 
 	IsNew                          bool          `yaml:"isNew,omitempty" json:"isNew,omitempty"`
 	JudgmentInputs                 []interface{} `yaml:"judgmentInputs" json:"judgmentInputs"`
 	PropagateAuthenticationContext bool          `yaml:"propagateAuthenticationContext" json:"propagateAuthenticationContext"`
-	SelectedStageRoles             []string      `yaml:"selectedStageRoles" json:"selectedStageRoles"`
+	SelectedStageRoles             []string      `yaml:"selectedStageRoles,omitempty" json:"selectedStageRoles,omitempty"`
 	Instructions                   string        `yaml:"instructions" json:"instructions"`
 
 	ContinuePipeline              bool          `yaml:"continuePipeline,omitempty" json:"continuePipeline,omitempty"`
@@ -41,14 +42,17 @@ func (mj ManualJudgment) GetStageType() string {
 	return manualJudgment
 }
 
-func (mj ManualJudgment) Process(stage *Stage) {
+func (mj ManualJudgment) MakeStage(stage *Stage) *map[string]interface{} {
 	mj.decode(stage)
-	mj.update(stage)
+	return mj.encode()
 }
 
 func (mj *ManualJudgment) decode(stage *Stage) {
 	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &mj}
 	decoder, err := mapstructure.NewDecoder(&decoderConfig)
+	if err != nil {
+		log.Fatalf("err: %v", err)
+	}
 
 	err = decoder.Decode(stage.Metadata)
 	if err != nil {
@@ -60,12 +64,12 @@ func (mj *ManualJudgment) decode(stage *Stage) {
 	}
 }
 
-func (mj *ManualJudgment) update(stage *Stage) {
+func (mj *ManualJudgment) encode() *map[string]interface{} {
 	d := datastore.Datastore{}
-	tmpStage := new(map[string]interface{})
-	err := json.Unmarshal(d.MarshalJSON(mj), tmpStage)
+	stage := new(map[string]interface{})
+	err := json.Unmarshal(d.MarshalJSON(mj), stage)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
-	*stage.RawStage = *tmpStage
+	return stage
 }

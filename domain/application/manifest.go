@@ -13,6 +13,7 @@ governing permissions and limitations under the License.
 package application
 
 import (
+	"encoding/json"
 	"errors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
@@ -40,41 +41,60 @@ type Metadata struct {
 	Name string `yaml:"name" json:"name"`
 }
 
-func (m *Manifest) MakeManifest(spec Spec) *Manifest {
-	m.ApiVersion = API
-	m.Kind = Kind
-	m.Metadata.Name = spec.Name
-	m.Spec = spec
-	return m
+type Spec struct {
+	CloudProviders string      `yaml:"cloudProviders" json:"cloudProviders"`
+	Email          string      `yaml:"email" json:"email"`
+	Name           string      `yaml:"-" json:"name"`
+	Permissions    Permissions `yaml:"permissions" json:"permissions"`
 }
 
+type Permissions struct {
+	EXECUTE []string `yaml:"EXECUTE" json:"EXECUTE"`
+	READ    []string `yaml:"READ" json:"READ"`
+	WRITE   []string `yaml:"WRITE" json:"WRITE"`
+}
 
-func (m *Manifest) LoadManifest(manifest interface{}) {
-	m.decode(manifest)
-	m.inferFromManifest()
+func (a *Application) GetKind() string {
+	return Kind
+}
 
-	err := m.validate()
+func (a *Application) Load(manifest interface{}) *Application {
+	a.decode(manifest)
+	a.inferFromManifest()
+
+	err := a.validate()
 	if err != nil {
 		log.Fatalf("Application manifest validation failed: %v", err)
 	}
+	return a
 }
 
-func (m *Manifest) decode(manifest interface{}) {
+func (a *Application) decode(manifest interface{}) {
 	d := datastore.Datastore{}
-	err := yaml.Unmarshal(d.MarshalYAML(manifest), &m)
+	err := yaml.Unmarshal(d.MarshalYAML(manifest), &a)
 	if err != nil {
-		log.Fatalf("Error LoadManifest: %v", err)
+		log.Fatalf("Error Load: %v", err)
 	}
 }
 
-func (m *Manifest) inferFromManifest() {
+func (a *Application) inferFromManifest() {
 	// Spinnaker requires lower case application name
-	m.Spec.Name = strings.ToLower(m.Metadata.Name)
+	a.Spec.Name = strings.ToLower(a.Metadata.Name)
 }
 
-func (m *Manifest) validate() error {
-	if len(m.Spec.Name) < 3 {
+func (a *Application) validate() error {
+	if len(a.Spec.Name) < 3 {
 		return AppNameLen
 	}
 	return nil
+}
+
+func (a *Application) LoadSpec(spec []byte) Spec {
+	tmpSpec := new(Spec)
+	err := json.Unmarshal(spec, tmpSpec)
+
+	if err != nil {
+		log.Fatalf("Error loading spec: %v", err)
+	}
+	return *tmpSpec
 }

@@ -54,7 +54,7 @@ spec:
 
     {{- $manual_judgment := $pipeline.stages.manual_judgment -}}
     {{- if $manual_judgment.enabled }}
-    - name: {{ $manual_judgment.name }}
+    - name: "{{ $manual_judgment.name }}"
       type: manualJudgment
       failPipeline: true
       isNew: true

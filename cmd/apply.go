@@ -14,10 +14,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"swinch/domain/application"
 	"swinch/domain/manifest"
-	"swinch/domain/pipeline"
-	"swinch/domain/stages"
 )
 
 // applyCmd represents the apply command
@@ -31,7 +28,7 @@ var applyCmd = &cobra.Command{
 		ValidateConfig()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		Apply()
+		runApply()
 	},
 }
 
@@ -42,22 +39,19 @@ func init() {
 	rootCmd.AddCommand(applyCmd)
 }
 
-func Apply() {
-	m := manifest.Manifest{}
-	a := application.Application{}
-	p := pipeline.Pipeline{}
+func Apply(m manifest.M, dryRun, plan bool) {
+	m.Apply(dryRun, plan)
+}
 
+func runApply() {
+	m := manifest.NewManifest{}
 	manifests := m.GetManifests(filePath)
-	for _, manifest := range manifests {
-		switch manifest.Kind {
-		case a.Manifest.Kind:
-			a.LoadManifest(manifest)
-			a.Apply(true, plan)
-		case p.GetKind():
-			p.LoadManifest(manifest)
-			s := stages.Processor{}
-			s.Process(&p.Manifest)
-			p.Apply(true, plan)
+	for _, newManifest := range manifests {
+		switch newManifest.Kind {
+		case m.Application.GetKind():
+			Apply(m.Application.Load(newManifest), false, plan)
+		case m.Pipeline.GetKind():
+			Apply(m.Pipeline.Load(newManifest), false, plan)
 		}
 	}
 }

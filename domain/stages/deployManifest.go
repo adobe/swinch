@@ -23,7 +23,9 @@ import (
 const deployManifest = "deployManifest"
 
 type DeployManifest struct {
-	Metadata           `mapstructure:",squash"`
+	Metadata `mapstructure:",squash"`
+	Common   `mapstructure:",squash"`
+
 	Account                  string   `yaml:"account,omitempty" json:"account,omitempty"`
 	CloudProvider            string   `json:"cloudProvider"`
 	ManifestArtifactId       string   `json:"manifestArtifactId"`
@@ -45,10 +47,10 @@ func (dm DeployManifest) GetStageType() string {
 	return deployManifest
 }
 
-func (dm DeployManifest) Process(stage *Stage) {
+func (dm DeployManifest) MakeStage(stage *Stage) *map[string]interface{} {
 	dm.decode(stage)
 	dm.expand(stage)
-	dm.update(stage)
+	return dm.encode()
 }
 
 func (dm *DeployManifest) decode(stage *Stage) {
@@ -78,7 +80,6 @@ func (dm *DeployManifest) expand(stage *Stage) {
 	if err != nil {
 		log.Fatalf("err: %v", err)
 	}
-
 	dm.ManifestArtifactId = bake.ExpectedArtifacts[0].Id
 }
 
@@ -97,12 +98,12 @@ func (dm *DeployManifest) getBakeIndex() int {
 	return *bakeStageIndex
 }
 
-func (dm *DeployManifest) update(stage *Stage) {
+func (dm *DeployManifest) encode() *map[string]interface{} {
 	d := datastore.Datastore{}
-	tmpStage := new(map[string]interface{})
-	err := json.Unmarshal(d.MarshalJSON(dm), tmpStage)
+	stage := new(map[string]interface{})
+	err := json.Unmarshal(d.MarshalJSON(dm), stage)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
-	*stage.RawStage = *tmpStage
+	return stage
 }

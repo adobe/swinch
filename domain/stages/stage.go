@@ -22,9 +22,18 @@ type Stage struct {
 	Metadata `mapstructure:",squash"`
 	// Separate maps that will get decoded into proper stage struct and discarded
 	ManifestMetadata
-	Spec     map[string]interface{} `mapstructure:",remain"`
-	RawStage *map[string]interface{}
-	Stages   *[]map[string]interface{}
+	// Stage specific fields
+	Spec map[string]interface{} `mapstructure:",remain"`
+	// Map for lookup on other referenced stages
+	Stages *[]map[string]interface{}
+	// After processing the stage overwrite it's initial state
+	InitStage *map[string]interface{}
+}
+
+// ManifestMetadata propagates the metadata from the manifest in the stage
+type ManifestMetadata struct {
+	Name        string
+	Application string
 }
 
 type Metadata struct {
@@ -34,14 +43,7 @@ type Metadata struct {
 	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 }
 
-type ManifestMetadata struct {
-	// ManifestMetadata
-	Name        string
-	Application string
-}
-
 type Common struct {
-	// From here to the end the fields are common except stageTimeoutMs (fail stage after specified time) and BakeStageRefIds
 	ContinuePipeline                  bool `yaml:"continuePipeline,omitempty" json:"continuePipeline,omitempty"`
 	FailPipeline                      bool `yaml:"failPipeline,omitempty" json:"failPipeline,omitempty"`
 	CompleteOtherBranchesThenFail     bool `yaml:"completeOtherBranchesThenFail,omitempty" json:"completeOtherBranchesThenFail,omitempty"`
@@ -102,14 +104,9 @@ type Message struct {
 	} `yaml:"stageStarting,omitempty" json:"stage.starting,omitempty"`
 }
 
-func (s *Stage) GetStage(stage *map[string]interface{}) Stage {
-	s.RawStage = stage
-	s.decode(stage)
-	return *s
-}
-
-func (s *Stage) decode(stage *map[string]interface{}) {
-	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &s}
+func (s Stage) Decode(stage *map[string]interface{}) Stage {
+	tmp := new(Stage)
+	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &tmp}
 	decoder, err := mapstructure.NewDecoder(&decoderConfig)
 	if err != nil {
 		log.Fatalf("err: %v", err)
@@ -119,4 +116,5 @@ func (s *Stage) decode(stage *map[string]interface{}) {
 	if err != nil {
 		log.Fatalf("err: %v", err)
 	}
+	return *tmp
 }

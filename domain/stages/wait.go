@@ -22,7 +22,8 @@ import (
 const wait = "wait"
 
 type Wait struct {
-	Stage `mapstructure:",squash"`
+	Metadata `mapstructure:",squash"`
+	Common   `mapstructure:",squash"`
 
 	IsNew        bool   `yaml:"isNew,omitempty" json:"isNew,omitempty"`
 	SkipWaitText string `yaml:"skipWaitText" json:"skipWaitText"`
@@ -37,14 +38,17 @@ func (wt Wait) GetStageType() string {
 	return wait
 }
 
-func (wt Wait) Process(stage *Stage) {
+func (wt Wait) MakeStage(stage *Stage) *map[string]interface{} {
 	wt.decode(stage)
-	wt.update(stage)
+	return wt.encode()
 }
 
 func (wt *Wait) decode(stage *Stage) {
 	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &wt}
 	decoder, err := mapstructure.NewDecoder(&decoderConfig)
+	if err != nil {
+		log.Fatalf("err: %v", err)
+	}
 
 	err = decoder.Decode(stage.Metadata)
 	if err != nil {
@@ -56,12 +60,12 @@ func (wt *Wait) decode(stage *Stage) {
 	}
 }
 
-func (wt *Wait) update(stage *Stage) {
+func (wt *Wait) encode() *map[string]interface{} {
 	d := datastore.Datastore{}
-	tmpStage := new(map[string]interface{})
-	err := json.Unmarshal(d.MarshalJSON(wt), tmpStage)
+	stage := new(map[string]interface{})
+	err := json.Unmarshal(d.MarshalJSON(wt), stage)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
-	*stage.RawStage = *tmpStage
+	return stage
 }

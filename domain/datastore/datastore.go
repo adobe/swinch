@@ -79,9 +79,7 @@ func (d Datastore) WriteYAML(data interface{}, outputPath string) {
 	d.WriteFile(outputPath, byteData, FilePerm)
 }
 
-// Utils
-
-func (d Datastore) MarshalJSON(data interface{}) []byte {
+func (d *Datastore) MarshalJSON(data interface{}) []byte {
 	byteData, err := json.MarshalIndent(data, "", " ")
 	if err != nil {
 		log.Fatalf("Failed to marshal JSON:  %v", err)
@@ -99,6 +97,8 @@ func (d *Datastore) MarshalYAML(data interface{}) []byte {
 	}
 	return byteData.Bytes()
 }
+
+// Utils
 
 func (d *Datastore) CreateTmpFolder() string {
 	w, err := os.MkdirTemp("", "tempfolder")

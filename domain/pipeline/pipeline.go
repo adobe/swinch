@@ -21,7 +21,7 @@ import (
 
 type Pipeline struct {
 	Manifest
-	Spec
+	Processor
 	util.Util
 	spincli.PipelineAPI
 	datastore.Datastore
@@ -38,12 +38,12 @@ func (p *Pipeline) Apply(dryRun, plan bool) {
 	if len(existingPipe) == 0 {
 		newPipe = true
 	} else {
-		changes = p.Changes(p.MarshalJSON(p.LoadSpec(existingPipe)), p.MarshalJSON(p.Spec))
+		changes = p.Changes(p.MarshalJSON(p.loadSpec(existingPipe)), p.MarshalJSON(p.Spec))
 	}
 
 	if changes && plan {
 		log.Infof("Planing changes for pipeline '%v' in application '%v'", p.Metadata.Name, p.Metadata.Application)
-		p.DiffChanges(p.MarshalJSON(p.LoadSpec(existingPipe)), p.MarshalJSON(p.Spec))
+		p.DiffChanges(p.MarshalJSON(p.loadSpec(existingPipe)), p.MarshalJSON(p.Spec))
 	}
 
 	if !dryRun && (changes || newPipe) {
@@ -55,27 +55,3 @@ func (p *Pipeline) Apply(dryRun, plan bool) {
 func (p *Pipeline) Destroy() {
 	p.Delete(p.Metadata.Name, p.Metadata.Application)
 }
-
-// Import TBA
-//func (p *Pipeline) importChart() {
-//	p.OutputPath = outputPath
-//	p.ProtectedImport = protectedImport
-//	p.Kind = "pipeline"
-//
-//	data := new([]byte)
-//	if filePath != "" {
-//		*data = p.ReadFile(filePath)
-//	} else {
-//		*data = p.Get()
-//	}
-//
-//	manifest := p.MakeManifest(p.LoadSpec(*data))
-//	p.Chart.Metadata.Name = chartName
-//	if p.Chart.Metadata.Name == "" {
-//		p.Chart.Metadata.Name = manifest.Metadata.Name
-//	}
-//
-//	p.Values.Values = map[interface{}]interface{}{p.Kind: map[string]string{"name": manifest.Metadata.Name}}
-//
-//	p.GenerateChart(manifest)
-//}

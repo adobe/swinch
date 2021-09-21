@@ -23,7 +23,8 @@ import (
 const runJobManifest = "runJobManifest"
 
 type RunJobManifest struct {
-	Stage `mapstructure:",squash"`
+	Metadata `mapstructure:",squash"`
+	Common   `mapstructure:",squash"`
 
 	IsNew                 bool   `yaml:"isNew,omitempty" json:"isNew,omitempty"`
 	Account               string `yaml:"account" json:"account"`
@@ -45,10 +46,10 @@ func (rjm RunJobManifest) GetStageType() string {
 	return runJobManifest
 }
 
-func (rjm RunJobManifest) Process(stage *Stage) {
+func (rjm RunJobManifest) MakeStage(stage *Stage) *map[string]interface{} {
 	rjm.decode(stage)
 	rjm.expand(stage)
-	rjm.update(stage)
+	return rjm.encode()
 }
 
 func (rjm *RunJobManifest) decode(stage *Stage) {
@@ -95,12 +96,12 @@ func (rjm *RunJobManifest) getBakeIndex() int {
 	return *bakeStageIndex
 }
 
-func (rjm *RunJobManifest) update(stage *Stage) {
+func (rjm *RunJobManifest) encode() *map[string]interface{} {
 	d := datastore.Datastore{}
-	tmpStage := new(map[string]interface{})
-	err := json.Unmarshal(d.MarshalJSON(rjm), tmpStage)
+	stage := new(map[string]interface{})
+	err := json.Unmarshal(d.MarshalJSON(rjm), stage)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
-	*stage.RawStage = *tmpStage
+	return stage
 }

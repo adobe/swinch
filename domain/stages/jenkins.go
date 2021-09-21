@@ -22,7 +22,8 @@ import (
 const jenkins = "jenkins"
 
 type Jenkins struct {
-	Stage `mapstructure:",squash"`
+	Metadata  `mapstructure:",squash"`
+	Common `mapstructure:",squash"`
 
 	IsNew                    bool     `yaml:"isNew" json:"isNew"`
 	Master                   string   `yaml:"master" json:"master"`
@@ -40,9 +41,9 @@ func (jks Jenkins) GetStageType() string {
 	return jenkins
 }
 
-func (jks Jenkins) Process(stage *Stage) {
+func (jks Jenkins) MakeStage(stage *Stage) *map[string]interface{} {
 	jks.decode(stage)
-	jks.update(stage)
+	return jks.encode()
 }
 
 func (jks *Jenkins) decode(stage *Stage) {
@@ -62,12 +63,12 @@ func (jks *Jenkins) decode(stage *Stage) {
 	}
 }
 
-func (jks *Jenkins) update(stage *Stage) {
+func (jks *Jenkins) encode() *map[string]interface{} {
 	d := datastore.Datastore{}
-	tmpStage := new(map[string]interface{})
-	err := json.Unmarshal(d.MarshalJSON(jks), tmpStage)
+	stage := new(map[string]interface{})
+	err := json.Unmarshal(d.MarshalJSON(jks), stage)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
-	*stage.RawStage = *tmpStage
+	return stage
 }
