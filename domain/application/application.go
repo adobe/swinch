@@ -37,12 +37,12 @@ func (a *Application) Apply(dryRun, plan bool) {
 	if len(existingApp) == 0 {
 		newApp = true
 	} else {
-		changes = a.Changes(a.MarshalJSON(a.LoadSpec(existingApp)), a.MarshalJSON(a.Spec))
+		changes = a.Changes(a.MarshalJSON(a.loadSpec(existingApp)), a.MarshalJSON(a.Spec))
 	}
 
 	if changes && plan {
 		log.Infof("Planing changes for application '%v'", a.Metadata.Name)
-		a.DiffChanges(a.MarshalJSON(a.LoadSpec(existingApp)), a.MarshalJSON(a.Spec))
+		a.DiffChanges(a.MarshalJSON(a.loadSpec(existingApp)), a.MarshalJSON(a.Spec))
 	}
 
 	if !dryRun && (changes || newApp) {

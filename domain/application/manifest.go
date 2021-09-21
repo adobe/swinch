@@ -71,7 +71,7 @@ func (a *Application) Load(manifest interface{}) *Application {
 
 func (a *Application) decode(manifest interface{}) {
 	d := datastore.Datastore{}
-	err := yaml.Unmarshal(d.MarshalYAML(manifest), &a)
+	err := yaml.Unmarshal(d.MarshalYAML(manifest), &a.Manifest)
 	if err != nil {
 		log.Fatalf("Error Load: %v", err)
 	}
@@ -89,7 +89,7 @@ func (a *Application) validate() error {
 	return nil
 }
 
-func (a *Application) LoadSpec(spec []byte) Spec {
+func (a *Application) loadSpec(spec []byte) Spec {
 	tmpSpec := new(Spec)
 	err := json.Unmarshal(spec, tmpSpec)
 

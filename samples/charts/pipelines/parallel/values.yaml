@@ -12,17 +12,16 @@ global:
 # Presume 1:1 bake/deploy/delete stage ratio
 clusters:
   - name: "Cluster 1"
-    cluster: cluster1
-    namespace: ns1
-    account: cluster1-swinch
-#  - name: "Cluster 2"
-#    cluster: cluster2
-#    namespace: ns2
-#    account: cluster2-swinch
-#  - name: "Cluster 3"
-#    cluster: cluster3
-#    namespace: ns3
-#    account: cluster3-swinch
+    namespace: ns-team-cluster1-ns1
+    account: cluster1-ethos11-va7-swinch
+  - name: "Cluster 2"
+    cluster: cluster2
+    namespace: ns-team-cluster1-ns2
+    account: cluster1-ethos11-va7-swinch
+  - name: "Cluster 3"
+    cluster: cluster3
+    namespace: ns-team-cluster2-ns1
+    account: cluster2-ethos11-va7-swinch
 
 parallel_pipeline:
   enabled: true
@@ -33,10 +32,10 @@ parallel_pipeline:
     deploy:
       enabled: true
     manual_judgment:
-      enabled: false
+      enabled: true
       name: "Human approval before cleanup"
       stageTimeoutMs: 1800000
     delete:
-      enabled: false
+      enabled: true
 
 
