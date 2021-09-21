@@ -83,7 +83,7 @@ swinch template -c samples/charts/pipeline  -o samples/manifests/pipeline
 
 
 ### Install 
-Downdload latest [swinch relase](https://github.com/adobe/swinch/releases) and unpack it:
+Download latest [swinch release](https://github.com/adobe/swinch/releases) and unpack it:
 
 ```bash
 tar zxvf swinch-*
