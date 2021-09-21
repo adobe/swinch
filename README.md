@@ -83,9 +83,9 @@ swinch template -c samples/charts/pipeline  -o samples/manifests/pipeline
 
 
 ### Install 
-Downdload latest [swinch relase](https://github.com/adobe/swinch/releases) and unpack it:
+Download latest [swinch release](https://github.com/adobe/swinch/releases) and unpack it:
 
-```
+```bash
 tar zxvf swinch-*
 chmod +x
 mv swinch /usr/local/bin/swinch
@@ -113,8 +113,8 @@ Available Commands:
 ```
 
 ### Configuration file 
-In the swinch config file you will set up the spinnaker endpoint and authentication metod.  
-Run `swinch config` to get the full list of options and intructions.
+In the swinch config file you will set up the spinnaker endpoint and authentication method.  
+Run `swinch config` to get the full list of options and instructions.
 
 ```bash
 swinch config generate
