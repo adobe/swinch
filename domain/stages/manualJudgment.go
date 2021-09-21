@@ -22,7 +22,8 @@ import (
 const manualJudgment = "manualJudgment"
 
 type ManualJudgment struct {
-	Stage `mapstructure:",squash"`
+	Stage  `mapstructure:",squash"`
+	Common `mapstructure:",squash"`
 
 	IsNew                          bool          `yaml:"isNew,omitempty" json:"isNew,omitempty"`
 	JudgmentInputs                 []interface{} `yaml:"judgmentInputs" json:"judgmentInputs"`

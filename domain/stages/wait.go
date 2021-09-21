@@ -22,7 +22,8 @@ import (
 const wait = "wait"
 
 type Wait struct {
-	Stage `mapstructure:",squash"`
+	Metadata `mapstructure:",squash"`
+	Common   `mapstructure:",squash"`
 
 	IsNew        bool   `yaml:"isNew,omitempty" json:"isNew,omitempty"`
 	SkipWaitText string `yaml:"skipWaitText" json:"skipWaitText"`

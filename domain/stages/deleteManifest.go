@@ -23,6 +23,7 @@ const deleteManifest = "deleteManifest"
 
 type DeleteManifest struct {
 	Metadata `mapstructure:",squash"`
+	Common   `mapstructure:",squash"`
 
 	Account  string `yaml:"account,omitempty" json:"account,omitempty"`
 	App      string `yaml:"-" json:"app,omitempty"`

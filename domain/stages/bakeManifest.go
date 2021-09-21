@@ -24,6 +24,7 @@ const StageType = "bakeManifest"
 
 type BakeManifest struct {
 	Metadata `mapstructure:",squash"`
+	Common   `mapstructure:",squash"`
 
 	Account                     string              `yaml:"account,omitempty" json:"account,omitempty"`
 	OutputName                  string              `json:"outputName"`

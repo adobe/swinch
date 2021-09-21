@@ -23,7 +23,8 @@ import (
 const runJobManifest = "runJobManifest"
 
 type RunJobManifest struct {
-	Stage `mapstructure:",squash"`
+	Metadata `mapstructure:",squash"`
+	Common   `mapstructure:",squash"`
 
 	IsNew                 bool   `yaml:"isNew,omitempty" json:"isNew,omitempty"`
 	Account               string `yaml:"account" json:"account"`
