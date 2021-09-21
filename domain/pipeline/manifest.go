@@ -88,7 +88,7 @@ func (p *Pipeline) validate() error {
 	return nil
 }
 
-func (p Pipeline) loadSpec(spec []byte) Spec {
+func (p *Pipeline) loadSpec(spec []byte) Spec {
 	tmpSpec := new(Spec)
 	err := json.Unmarshal(spec, tmpSpec)
 

@@ -22,8 +22,8 @@ import (
 const manualJudgment = "manualJudgment"
 
 type ManualJudgment struct {
-	Metadata  `mapstructure:",squash"`
-	Common `mapstructure:",squash"`
+	Metadata `mapstructure:",squash"`
+	Common   `mapstructure:",squash"`
 
 	IsNew                          bool          `yaml:"isNew,omitempty" json:"isNew,omitempty"`
 	JudgmentInputs                 []interface{} `yaml:"judgmentInputs" json:"judgmentInputs"`

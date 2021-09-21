@@ -32,10 +32,10 @@ parallel_pipeline:
     deploy:
       enabled: true
     manual_judgment:
-      enabled: false
+      enabled: true
       name: "Human approval before cleanup"
       stageTimeoutMs: 1800000
     delete:
-      enabled: false
+      enabled: true
 
 

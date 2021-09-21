@@ -41,8 +41,6 @@ type Metadata struct {
 	Type                 string   `yaml:"type,omitempty" json:"type,omitempty"`
 	RefId                string   `yaml:"refId,omitempty" json:"refId,omitempty"`
 	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
-
-	//SwinchLinkToPriorRefIds *int `yaml:"SwinchLinkToPriorRefIds,omitempty"`
 }
 
 type Common struct {
