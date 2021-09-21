@@ -53,6 +53,7 @@ func Delete() {
 			a.Destroy()
 		case p.Manifest.Kind:
 			p.LoadManifest(manifest)
+			p.Destroy()
 		}
 	}
 }

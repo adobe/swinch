@@ -5,7 +5,6 @@ metadata:
   name: complexParallelPipe1
   application: sample-swinch-chart
 spec:
-# TODO auto index all pipelines in an application
   index: 0
   keepWaitingPipelines: false
   limitConcurrent: true

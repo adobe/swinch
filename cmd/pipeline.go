@@ -30,8 +30,8 @@ var pipelineCmd = &cobra.Command{
 		ValidateConfig()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		action := cmd.Parent().Use
-		cmdPipeAction(applicationName, pipelineName, action)
+		subCmd := cmd.Parent().Use
+		cmdPipeAction(subCmd)
 	},
 }
 
@@ -63,14 +63,14 @@ func init() {
 	planCmd.AddCommand(&PlanPipeCmd)
 }
 
-func cmdPipeAction(app, pipe, action string) {
+func cmdPipeAction(subCmd string) {
 	p := pipeline.Pipeline{}
-	switch action {
+	switch subCmd {
 	case deleteAction:
-		p.Delete(app, pipe)
+		p.Delete(applicationName, pipelineName)
 	case importAction:
 		fmt.Println("Import TBA")
 	default:
-		log.Fatalf("Bad application action")
+		log.Fatalf("Unknown pipeline command")
 	}
 }

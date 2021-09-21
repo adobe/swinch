@@ -10,21 +10,19 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package pipeline
+package stages
 
 import (
 	"encoding/json"
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 	"swinch/domain/datastore"
-	"swinch/domain/stage"
 )
 
+const manualJudgment = "manualJudgment"
+
 type ManualJudgment struct {
-	Name                 string   `yaml:"name" json:"name"`
-	Type                 string   `yaml:"type,omitempty" json:"type,omitempty"`
-	RefId                string   `yaml:"refId,omitempty" json:"refId"`
-	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
+	Stage `mapstructure:",squash"`
 
 	IsNew                          bool          `yaml:"isNew,omitempty" json:"isNew,omitempty"`
 	JudgmentInputs                 []interface{} `yaml:"judgmentInputs" json:"judgmentInputs"`
@@ -39,31 +37,35 @@ type ManualJudgment struct {
 	Notifications                 []interface{} `yaml:"notifications" json:"notifications"`
 }
 
-func (mj ManualJudgment) ProcessManualJudgment(stageMap *map[string]interface{}, metadata *stage.Stage) {
-	mj.decode(stageMap)
-	mj.RefId = metadata.RefId
-	mj.update(stageMap)
+func (mj ManualJudgment) GetStageType() string {
+	return manualJudgment
 }
 
-func (mj *ManualJudgment) decode(stageMap *map[string]interface{}) {
+func (mj ManualJudgment) Process(stage *Stage) {
+	mj.decode(stage)
+	mj.update(stage)
+}
+
+func (mj *ManualJudgment) decode(stage *Stage) {
 	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &mj}
 	decoder, err := mapstructure.NewDecoder(&decoderConfig)
-	if err != nil {
-		log.Fatalf("err: %v", err)
-	}
 
-	err = decoder.Decode(stageMap)
+	err = decoder.Decode(stage.Metadata)
 	if err != nil {
-		log.Fatalf("err: %v", err)
+		log.Fatalf("error decoding stage metadata: %v", err)
+	}
+	err = decoder.Decode(stage.Spec)
+	if err != nil {
+		log.Fatalf("error decoding stage spec: %v", err)
 	}
 }
 
-func (mj *ManualJudgment) update(stageMap *map[string]interface{}) {
+func (mj *ManualJudgment) update(stage *Stage) {
 	d := datastore.Datastore{}
-	buffer := new(map[string]interface{})
-	err := json.Unmarshal(d.MarshalJSON(mj), buffer)
+	tmpStage := new(map[string]interface{})
+	err := json.Unmarshal(d.MarshalJSON(mj), tmpStage)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
-	*stageMap = *buffer
+	*stage.RawStage = *tmpStage
 }

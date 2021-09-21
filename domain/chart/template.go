@@ -14,6 +14,7 @@ package chart
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/Masterminds/sprig"
 	log "github.com/sirupsen/logrus"
 	"os"
@@ -22,6 +23,7 @@ import (
 	"swinch/domain/datastore"
 	"swinch/domain/manifest"
 	"swinch/domain/pipeline"
+	"swinch/domain/stages"
 	"text/template"
 )
 
@@ -36,6 +38,11 @@ func (t *Template) TemplateChart(chartPath, valuesFile, outputPath string, fullR
 		log.Debugf("Found chart template: %v", chartTemplate)
 
 		buffer := t.templateFile(chartPath, chartTemplate.Name(), values)
+		fmt.Println(buffer)
+		fmt.Println("---")
+		buffer = t.fullRender(buffer)
+		fmt.Println(buffer)
+		os.Exit(1)
 
 		if fullRender != false {
 			buffer = t.fullRender(buffer)
@@ -79,15 +86,17 @@ func (t *Template) fullRender(buffer *bytes.Buffer) *bytes.Buffer {
 
 	manifests := m.DecodeManifests(buffer)
 	buffer.Reset()
-
+	fmt.Println("Full render")
 	for _, manifest := range manifests {
 		switch manifest.Kind {
 		case a.Manifest.Kind:
 			a.LoadManifest(manifest)
 			buffer.Write(t.MarshalYAML(a))
-		case p.Manifest.Kind:
+		case p.GetKind():
 			p.LoadManifest(manifest)
-			buffer.Write(t.MarshalYAML(p))
+			s := stages.Processor{}
+			s.Process(&p.Manifest)
+			buffer.Write(t.MarshalYAML(p.Manifest))
 		}
 	}
 

@@ -36,10 +36,6 @@ type Manifest struct {
 	Spec       interface{} `yaml:"spec" json:"spec"`
 }
 
-type M interface {
-	LoadManifest(manifest interface{})
-}
-
 func (m *Manifest) GetManifests(filePath string) []Manifest {
 	d := datastore.Datastore{}
 	return m.DecodeManifests(d.LoadYAMLFiles(filePath))
@@ -64,7 +60,6 @@ func (m *Manifest) DecodeManifests(buffer *bytes.Buffer) []Manifest {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		manifests = append(manifests, *m)
 	}
 

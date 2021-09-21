@@ -10,7 +10,7 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package pipeline
+package stages
 
 import (
 	"encoding/json"
@@ -18,14 +18,12 @@ import (
 	log "github.com/sirupsen/logrus"
 	"strconv"
 	"swinch/domain/datastore"
-	"swinch/domain/stage"
 )
 
+const runJobManifest = "runJobManifest"
+
 type RunJobManifest struct {
-	Name                 string   `yaml:"name" json:"name"`
-	Type                 string   `yaml:"type,omitempty" json:"type,omitempty"`
-	RefId                string   `yaml:"refId,omitempty" json:"refId"`
-	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
+	Stage `mapstructure:",squash"`
 
 	IsNew                 bool   `yaml:"isNew,omitempty" json:"isNew,omitempty"`
 	Account               string `yaml:"account" json:"account"`
@@ -40,63 +38,69 @@ type RunJobManifest struct {
 	ContinuePipeline              bool `yaml:"continuePipeline,omitempty" json:"continuePipeline,omitempty"`
 	FailPipeline                  bool `yaml:"failPipeline,omitempty" json:"failPipeline,omitempty"`
 	CompleteOtherBranchesThenFail bool `yaml:"completeOtherBranchesThenFail,omitempty" json:"completeOtherBranchesThenFail,omitempty"`
-
-	// Swinch only field
-	JobBakeStageRefIds *int `yaml:"bakeStageRefIds,omitempty" json:"-"`
+	JobBakeStageRefIds            *int `yaml:"jobBakeStageRefIds,omitempty" json:"-"`
 }
 
-func (rjm RunJobManifest) ProcessRunJobManifest(p *Pipeline, stageMap *map[string]interface{}, metadata *stage.Stage) {
-	rjm.decode(stageMap)
-	rjm.expand(p, metadata)
-	rjm.update(stageMap)
+func (rjm RunJobManifest) GetStageType() string {
+	return runJobManifest
 }
 
-func (rjm *RunJobManifest) decode(stageMap *map[string]interface{}) {
+func (rjm RunJobManifest) Process(stage *Stage) {
+	rjm.decode(stage)
+	rjm.expand(stage)
+	rjm.update(stage)
+}
+
+func (rjm *RunJobManifest) decode(stage *Stage) {
 	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &rjm}
 	decoder, err := mapstructure.NewDecoder(&decoderConfig)
 	if err != nil {
 		log.Fatalf("err: %v", err)
 	}
 
-	err = decoder.Decode(stageMap)
+	err = decoder.Decode(stage.Metadata)
 	if err != nil {
-		log.Fatalf("err: %v", err)
+		log.Fatalf("error decoding stage metadata: %v", err)
+	}
+	err = decoder.Decode(stage.Spec)
+	if err != nil {
+		log.Fatalf("error decoding stage spec: %v", err)
 	}
 }
 
-func (rjm *RunJobManifest) expand(p *Pipeline, metadata *stage.Stage) {
-	bakeStageIndex := new(int)
-
-	// Bind job stage to a specific bake
-	if rjm.JobBakeStageRefIds == nil {
-		// Presume a job stage has the bake stage as the first element in RequisiteStageRefIds
-		*bakeStageIndex, _ = strconv.Atoi(rjm.RequisiteStageRefIds[0])
-	} else {
-		*bakeStageIndex = *rjm.JobBakeStageRefIds
-	}
-
-	// Convert from Spinnaker human-readable indexing
-	*bakeStageIndex -= 1
-
+func (rjm *RunJobManifest) expand(stage *Stage) {
+	bakeIndex := rjm.getBakeIndex()
 	//TODO get the bake stage without decoding
 	bake := new(BakeManifest)
-	err := mapstructure.Decode(p.Manifest.Spec.Stages[*bakeStageIndex], bake)
+	err := mapstructure.Decode((*stage.Stages)[bakeIndex], bake)
 	if err != nil {
 		log.Fatalf("err: %v", err)
 	}
 
 	rjm.ManifestArtifactId = bake.ExpectedArtifacts[0].Id
-
-	// RefId is either specified by the user or generated based on the stage index
-	rjm.RefId = metadata.RefId
 }
 
-func (rjm *RunJobManifest) update(stageMap *map[string]interface{}) {
+func (rjm *RunJobManifest) getBakeIndex() int {
+	bakeStageIndex := new(int)
+	// Bind deploy stage to a specific bake
+	if rjm.JobBakeStageRefIds == nil {
+		// Presume a deploy stage has the bake stage as the first element in RequisiteStageRefIds
+		*bakeStageIndex, _ = strconv.Atoi(rjm.RequisiteStageRefIds[0])
+	} else {
+		*bakeStageIndex = *rjm.JobBakeStageRefIds
+	}
+	// Convert from Spinnaker human readable indexing
+	*bakeStageIndex -= 1
+
+	return *bakeStageIndex
+}
+
+func (rjm *RunJobManifest) update(stage *Stage) {
 	d := datastore.Datastore{}
-	buffer := new(map[string]interface{})
-	err := json.Unmarshal(d.MarshalJSON(rjm), buffer)
+	tmpStage := new(map[string]interface{})
+	err := json.Unmarshal(d.MarshalJSON(rjm), tmpStage)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
-	*stageMap = *buffer
+	*stage.RawStage = *tmpStage
 }

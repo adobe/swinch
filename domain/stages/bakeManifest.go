@@ -10,22 +10,21 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package pipeline
+package stages
 
 import (
 	"encoding/json"
-	"github.com/google/uuid"
+	"fmt"
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 	"swinch/domain/datastore"
-	"swinch/domain/stage"
+	"swinch/domain/util"
 )
 
+const StageType = "bakeManifest"
+
 type BakeManifest struct {
-	Name                 string   `yaml:"name" json:"name"`
-	Type                 string   `yaml:"type,omitempty" json:"type,omitempty"`
-	RefId                string   `yaml:"refId,omitempty" json:"refId"`
-	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
+	Metadata `mapstructure:",squash"`
 
 	Account                     string              `yaml:"account,omitempty" json:"account,omitempty"`
 	OutputName                  string              `json:"outputName"`
@@ -79,31 +78,41 @@ type InputArtifacts struct {
 	} `yaml:"artifact" json:"artifact"`
 }
 
-func (bm BakeManifest) ProcessBakeManifest(p *Pipeline, stageMap *map[string]interface{}, metadata *stage.Stage) {
-	bm.decode(stageMap)
-	bm.expand(metadata)
-	bm.update(stageMap)
+func (bm BakeManifest) GetStageType() string {
+	return StageType
 }
 
-func (bm *BakeManifest) decode(stageMap *map[string]interface{}) {
+func (bm BakeManifest) Process(stage *Stage) {
+	fmt.Println("good")
+	bm.decode(stage)
+	bm.expand()
+	bm.update(stage)
+}
+
+func (bm *BakeManifest) decode(stage *Stage) {
 	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &bm}
 	decoder, err := mapstructure.NewDecoder(&decoderConfig)
-
 	if err != nil {
 		log.Fatalf("err: %v", err)
 	}
 
-	err = decoder.Decode(stageMap)
+	err = decoder.Decode(stage.Metadata)
 	if err != nil {
-		log.Fatalf("err: %v", err)
+		log.Fatalf("error decoding stage metadata: %v", err)
+	}
+	err = decoder.Decode(stage.Spec)
+	if err != nil {
+		log.Fatalf("error decoding stage spec: %v", err)
 	}
 }
 
-func (bm *BakeManifest) expand(metadata *stage.Stage) {
+func (bm *BakeManifest) expand() {
+	u := util.Util{}
+
 	// TODO check that index on ExpectedArtifacts is always 0
 	expectArtifacts := &bm.ExpectedArtifacts[0]
 	// expectArtifacts ID is used by the deploy stage
-	expectArtifacts.Id = bm.newUUID(expectArtifacts.DisplayName + bm.Name).String()
+	expectArtifacts.Id = u.GenerateUUID(expectArtifacts.DisplayName + bm.Name).String()
 
 	// TODO make sure MatchArtifact ID is not used
 	//expectArtifacts.MatchArtifact.Id = bm.newUUID(expectArtifacts.MatchArtifact.Name+expectArtifacts.MatchArtifact.Type).String()
@@ -114,23 +123,15 @@ func (bm *BakeManifest) expand(metadata *stage.Stage) {
 	inputArtifacts.Artifact.ArtifactAccount = inputArtifacts.Account
 	// inputArtifacts.Artifact.Id not mandatory
 	//inputArtifacts.Artifact.Id = bm.newUUID(inputArtifacts.Artifact.Name + inputArtifacts.Artifact.Version).String()
-
-	// RefId is either specified by the user or generated based on the stage index
-	bm.RefId = metadata.RefId
+	fmt.Println(bm)
 }
 
-func (bm BakeManifest) newUUID(data string) uuid.UUID {
-	// Just a rand root uuid
-	namespace, _ := uuid.Parse("e8b764da-5fe5-51ed-8af8-c5c6eca28d7a")
-	return uuid.NewSHA1(namespace, []byte(data))
-}
-
-func (bm *BakeManifest) update(stageMap *map[string]interface{}) {
+func (bm *BakeManifest) update(stage *Stage) {
 	d := datastore.Datastore{}
-	buffer := new(map[string]interface{})
-	err := json.Unmarshal(d.MarshalJSON(bm), buffer)
+	tmpStage := new(map[string]interface{})
+	err := json.Unmarshal(d.MarshalJSON(bm), tmpStage)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
-	*stageMap = *buffer
+	*stage.RawStage = *tmpStage
 }

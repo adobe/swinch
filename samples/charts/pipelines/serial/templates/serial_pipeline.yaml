@@ -64,7 +64,7 @@ spec:
       stageTimeoutMs: {{ $manual_judgment.stageTimeoutMs }}
       requisiteStageRefIds:
         - {{ add $lenBake $lenDeploy }}
-    {{ end }}
+    {{- end }}
     - name: Delete (Manifest)
       requisiteStageRefIds:
     {{- if $manual_judgment.enabled }}

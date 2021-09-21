@@ -17,6 +17,7 @@ import (
 	"swinch/domain/application"
 	"swinch/domain/manifest"
 	"swinch/domain/pipeline"
+	"swinch/domain/stages"
 )
 
 // applyCmd represents the apply command
@@ -52,8 +53,11 @@ func Apply() {
 		case a.Manifest.Kind:
 			a.LoadManifest(manifest)
 			a.Apply(true, plan)
-		case p.Manifest.Kind:
+		case p.GetKind():
 			p.LoadManifest(manifest)
+			s := stages.Processor{}
+			s.Process(&p.Manifest)
+			p.Apply(true, plan)
 		}
 	}
 }

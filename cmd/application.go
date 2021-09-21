@@ -30,8 +30,8 @@ var applicationCmd = &cobra.Command{
 		ValidateConfig()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		action := cmd.Parent().Use
-		cmdAppAction(action)
+		subCmd := cmd.Parent().Use
+		cmdAppAction(subCmd)
 	},
 }
 
@@ -59,14 +59,14 @@ func init() {
 	planCmd.AddCommand(&PlanAppCmd)
 }
 
-func cmdAppAction(action string) {
+func cmdAppAction(subCmd string) {
 	a := application.Application{}
-	switch action {
+	switch subCmd {
 	case deleteAction:
 		a.Delete(applicationName)
 	case importAction:
 		fmt.Println("Import TBA")
 	default:
-		log.Fatalf("Bad application action")
+		log.Fatalf("Unknown application command")
 	}
 }

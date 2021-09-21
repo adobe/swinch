@@ -40,6 +40,10 @@ type Metadata struct {
 	Application string `yaml:"application" json:"application"`
 }
 
+func (m *Manifest) GetKind() string{
+	return Kind
+}
+
 func (m *Manifest) MakeManifest(spec Spec) *Manifest {
 	m.ApiVersion = API
 	m.Kind = Kind
@@ -69,7 +73,7 @@ func (m *Manifest) inferFromMetadata() {
 	m.Spec.Application = m.Metadata.Application
 }
 
-func (m Manifest) Validate() error {
+func (m *Manifest) Validate() error {
 	if len(m.Spec.Name) < 3 {
 		return PipeNameLen
 	}

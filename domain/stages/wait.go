@@ -10,21 +10,19 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-package pipeline
+package stages
 
 import (
 	"encoding/json"
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 	"swinch/domain/datastore"
-	"swinch/domain/stage"
 )
 
+const wait = "wait"
+
 type Wait struct {
-	Name                 string   `yaml:"name" json:"name"`
-	Type                 string   `yaml:"type,omitempty" json:"type,omitempty"`
-	RefId                string   `yaml:"refId,omitempty" json:"refId"`
-	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
+	Stage `mapstructure:",squash"`
 
 	IsNew        bool   `yaml:"isNew,omitempty" json:"isNew,omitempty"`
 	SkipWaitText string `yaml:"skipWaitText" json:"skipWaitText"`
@@ -35,31 +33,35 @@ type Wait struct {
 	CompleteOtherBranchesThenFail bool `yaml:"completeOtherBranchesThenFail,omitempty" json:"completeOtherBranchesThenFail,omitempty"`
 }
 
-func (wt Wait) ProcessWait(stageMap *map[string]interface{}, metadata *stage.Stage) {
-	wt.decode(stageMap)
-	wt.RefId = metadata.RefId
-	wt.update(stageMap)
+func (wt Wait) GetStageType() string {
+	return wait
 }
 
-func (wt *Wait) decode(stageMap *map[string]interface{}) {
+func (wt Wait) Process(stage *Stage) {
+	wt.decode(stage)
+	wt.update(stage)
+}
+
+func (wt *Wait) decode(stage *Stage) {
 	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &wt}
 	decoder, err := mapstructure.NewDecoder(&decoderConfig)
-	if err != nil {
-		log.Fatalf("err: %v", err)
-	}
 
-	err = decoder.Decode(stageMap)
+	err = decoder.Decode(stage.Metadata)
 	if err != nil {
-		log.Fatalf("err: %v", err)
+		log.Fatalf("error decoding stage metadata: %v", err)
+	}
+	err = decoder.Decode(stage.Spec)
+	if err != nil {
+		log.Fatalf("error decoding stage spec: %v", err)
 	}
 }
 
-func (wt *Wait) update(stageMap *map[string]interface{}) {
+func (wt *Wait) update(stage *Stage) {
 	d := datastore.Datastore{}
-	buffer := new(map[string]interface{})
-	err := json.Unmarshal(d.MarshalJSON(wt), buffer)
+	tmpStage := new(map[string]interface{})
+	err := json.Unmarshal(d.MarshalJSON(wt), tmpStage)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
-	*stageMap = *buffer
+	*stage.RawStage = *tmpStage
 }

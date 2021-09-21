@@ -15,7 +15,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	version "swinch/version"
+	"swinch/version"
 )
 
 // versionCmd represents the version command
