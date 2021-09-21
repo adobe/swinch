@@ -46,6 +46,9 @@ func (wt Wait) MakeStage(stage *Stage) *map[string]interface{} {
 func (wt *Wait) decode(stage *Stage) {
 	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &wt}
 	decoder, err := mapstructure.NewDecoder(&decoderConfig)
+	if err != nil {
+		log.Fatalf("err: %v", err)
+	}
 
 	err = decoder.Decode(stage.Metadata)
 	if err != nil {

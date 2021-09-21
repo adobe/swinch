@@ -22,7 +22,7 @@ import (
 const jenkins = "jenkins"
 
 type Jenkins struct {
-	Stage  `mapstructure:",squash"`
+	Metadata  `mapstructure:",squash"`
 	Common `mapstructure:",squash"`
 
 	IsNew                    bool     `yaml:"isNew" json:"isNew"`
