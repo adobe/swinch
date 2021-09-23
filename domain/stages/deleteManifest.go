@@ -19,7 +19,7 @@ import (
 	"swinch/domain/datastore"
 )
 
-const deleteManifest = "deleteManifest"
+const deleteManifest StageType = "deleteManifest"
 
 type DeleteManifest struct {
 	Metadata `mapstructure:",squash"`
@@ -49,10 +49,6 @@ type LabelSelectors struct {
 type Options struct {
 	Cascading          bool `yaml:"cascading" json:"cascading"`
 	GracePeriodSeconds int  `yaml:"gracePeriodSeconds" json:"gracePeriodSeconds"`
-}
-
-func (delm DeleteManifest) GetStageType() string {
-	return deleteManifest
 }
 
 func (delm DeleteManifest) MakeStage(stage *Stage) *map[string]interface{} {

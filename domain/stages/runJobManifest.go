@@ -20,7 +20,7 @@ import (
 	"swinch/domain/datastore"
 )
 
-const runJobManifest = "runJobManifest"
+const runJobManifest StageType = "runJobManifest"
 
 type RunJobManifest struct {
 	Metadata `mapstructure:",squash"`
@@ -37,10 +37,6 @@ type RunJobManifest struct {
 	ConsumeArtifactSource string `yaml:"consumeArtifactSource" json:"consumeArtifactSource"`
 
 	JobBakeStageRefIds *int `yaml:"jobBakeStageRefIds,omitempty" json:"-"`
-}
-
-func (rjm RunJobManifest) GetStageType() string {
-	return runJobManifest
 }
 
 func (rjm RunJobManifest) MakeStage(stage *Stage) *map[string]interface{} {
@@ -70,7 +66,7 @@ func (rjm *RunJobManifest) expand(stage *Stage) {
 	bakeIndex := rjm.getBakeIndex()
 	//TODO get the bake stage without decoding
 	bake := new(BakeManifest)
-	err := mapstructure.Decode((*stage.Stages)[bakeIndex], bake)
+	err := mapstructure.Decode((*stage.AllStages)[bakeIndex], bake)
 	if err != nil {
 		log.Fatalf("err: %v", err)
 	}

@@ -20,7 +20,7 @@ import (
 	"swinch/domain/util"
 )
 
-const StageType = "bakeManifest"
+const bakeManifest StageType = "bakeManifest"
 
 type BakeManifest struct {
 	Metadata `mapstructure:",squash"`
@@ -72,10 +72,6 @@ type InputArtifacts struct {
 		Type            string `yaml:"type" json:"type"`
 		Version         string `yaml:"version" json:"version"`
 	} `yaml:"artifact" json:"artifact"`
-}
-
-func (bm BakeManifest) GetStageType() string {
-	return StageType
 }
 
 func (bm BakeManifest) MakeStage(stage *Stage) *map[string]interface{} {

@@ -19,7 +19,7 @@ import (
 	"swinch/domain/datastore"
 )
 
-const pipeline = "pipeline"
+const pipeline StageType = "pipeline"
 
 type Pipeline struct {
 	Metadata `mapstructure:",squash"`
@@ -32,10 +32,6 @@ type Pipeline struct {
 
 	// Overriding the field from Common struct without "omitempty" as it's required by the Pipeline Stage
 	FailPipeline bool `yaml:"failPipeline" json:"failPipeline"`
-}
-
-func (pp Pipeline) GetStageType() string {
-	return pipeline
 }
 
 func (pp Pipeline) MakeStage(stage *Stage) *map[string]interface{} {

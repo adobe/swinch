@@ -19,7 +19,7 @@ import (
 	"swinch/domain/datastore"
 )
 
-const jenkins = "jenkins"
+const jenkins StageType = "jenkins"
 
 type Jenkins struct {
 	Metadata `mapstructure:",squash"`
@@ -34,10 +34,6 @@ type Jenkins struct {
 
 	// Overriding the field from Common struct without "omitempty" as it's required by the Jenkins Stage
 	ContinuePipeline bool `yaml:"continuePipeline" json:"continuePipeline"`
-}
-
-func (jks Jenkins) GetStageType() string {
-	return jenkins
 }
 
 func (jks Jenkins) MakeStage(stage *Stage) *map[string]interface{} {
