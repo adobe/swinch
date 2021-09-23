@@ -28,10 +28,6 @@ type Wait struct {
 	IsNew        bool   `yaml:"isNew,omitempty" json:"isNew,omitempty"`
 	SkipWaitText string `yaml:"skipWaitText" json:"skipWaitText"`
 	WaitTime     int    `yaml:"waitTime" json:"waitTime"`
-
-	ContinuePipeline              bool `yaml:"continuePipeline,omitempty" json:"continuePipeline,omitempty"`
-	FailPipeline                  bool `yaml:"failPipeline,omitempty" json:"failPipeline,omitempty"`
-	CompleteOtherBranchesThenFail bool `yaml:"completeOtherBranchesThenFail,omitempty" json:"completeOtherBranchesThenFail,omitempty"`
 }
 
 func (wt Wait) GetStageType() string {

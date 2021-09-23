@@ -36,10 +36,7 @@ type RunJobManifest struct {
 	ManifestArtifactId    string `json:"manifestArtifactId"`
 	ConsumeArtifactSource string `yaml:"consumeArtifactSource" json:"consumeArtifactSource"`
 
-	ContinuePipeline              bool `yaml:"continuePipeline,omitempty" json:"continuePipeline,omitempty"`
-	FailPipeline                  bool `yaml:"failPipeline,omitempty" json:"failPipeline,omitempty"`
-	CompleteOtherBranchesThenFail bool `yaml:"completeOtherBranchesThenFail,omitempty" json:"completeOtherBranchesThenFail,omitempty"`
-	JobBakeStageRefIds            *int `yaml:"jobBakeStageRefIds,omitempty" json:"-"`
+	JobBakeStageRefIds *int `yaml:"jobBakeStageRefIds,omitempty" json:"-"`
 }
 
 func (rjm RunJobManifest) GetStageType() string {
@@ -85,12 +82,12 @@ func (rjm *RunJobManifest) getBakeIndex() int {
 	bakeStageIndex := new(int)
 	// Bind deploy stage to a specific bake
 	if rjm.JobBakeStageRefIds == nil {
-		// Presume a deploy stage has the bake stage as the first element in RequisiteStageRefIds
+		// Presume a deployment stage has the bake stage as the first element in RequisiteStageRefIds
 		*bakeStageIndex, _ = strconv.Atoi(rjm.RequisiteStageRefIds[0])
 	} else {
 		*bakeStageIndex = *rjm.JobBakeStageRefIds
 	}
-	// Convert from Spinnaker human readable indexing
+	// Convert from Spinnaker human-readable indexing
 	*bakeStageIndex -= 1
 
 	return *bakeStageIndex

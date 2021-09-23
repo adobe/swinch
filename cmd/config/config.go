@@ -101,7 +101,7 @@ func (scf SpinConfigFile) GenerateSpinConfigFile() {
 	d.WriteFile(HomeFolder()+CfgFolderName+CfgSpinFileName, spinCfgFile, CfgSpinFilePerm)
 }
 
-// GetContexts method parses the ~/.swinch/config.yaml file and returns the the contexts
+// GetContexts method parses the ~/.swinch/config.yaml file and returns the contexts
 func (cd ContextDefinition) GetContexts() ([]ContextDefinition, []string) {
 	var ctx []ContextDefinition
 	var ctxList []string
@@ -127,7 +127,7 @@ func (cc CurrentContext) GetCurrentContext() string {
 	return cc.Name
 }
 
-// ValidateCurrentContext function validates that 'current-context' exists in the contexts list and it is valid (all fields populated); returns bool type
+// ValidateCurrentContext function validates that 'current-context' exists in the contexts list, and it is valid (all fields populated); returns bool type
 func (cd ContextDefinition) ValidateCurrentContext() error {
 	_, ctxList := cd.GetContexts()
 

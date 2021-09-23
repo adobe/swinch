@@ -25,16 +25,15 @@ type Jenkins struct {
 	Metadata `mapstructure:",squash"`
 	Common   `mapstructure:",squash"`
 
-	IsNew                    bool     `yaml:"isNew" json:"isNew"`
+	IsNew                    bool     `yaml:"isNew,omitempty" json:"isNew,omitempty"`
 	Master                   string   `yaml:"master" json:"master"`
 	Job                      string   `yaml:"job" json:"job"`
 	Parameters               struct{} `yaml:"parameters" json:"parameters"`
 	MarkUnstableAsSuccessful bool     `yaml:"markUnstableAsSuccessful" json:"markUnstableAsSuccessful"`
 	WaitForCompletion        bool     `yaml:"waitForCompletion" json:"waitForCompletion"`
 
-	ContinuePipeline              bool `yaml:"continuePipeline" json:"continuePipeline"`
-	FailPipeline                  bool `yaml:"failPipeline,omitempty" json:"failPipeline,omitempty"`
-	CompleteOtherBranchesThenFail bool `yaml:"completeOtherBranchesThenFail,omitempty" json:"completeOtherBranchesThenFail,omitempty"`
+	// Overriding the field from Common struct without "omitempty" as it's required by the Jenkins Stage
+	ContinuePipeline bool `yaml:"continuePipeline" json:"continuePipeline"`
 }
 
 func (jks Jenkins) GetStageType() string {

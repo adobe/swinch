@@ -38,6 +38,9 @@ func (a *Application) Apply(dryRun, plan bool) {
 		newApp = true
 	} else {
 		changes = a.Changes(a.MarshalJSON(a.loadSpec(existingApp)), a.MarshalJSON(a.Spec))
+		if changes == false {
+			log.Infof("No changes detected for application '%v'", a.Metadata.Name)
+		}
 	}
 
 	if changes && plan {

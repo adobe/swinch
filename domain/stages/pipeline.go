@@ -19,30 +19,32 @@ import (
 	"swinch/domain/datastore"
 )
 
-const manualJudgment = "manualJudgment"
+const pipeline = "pipeline"
 
-type ManualJudgment struct {
+type Pipeline struct {
 	Metadata `mapstructure:",squash"`
 	Common   `mapstructure:",squash"`
 
-	IsNew                          bool          `yaml:"isNew,omitempty" json:"isNew,omitempty"`
-	JudgmentInputs                 []interface{} `yaml:"judgmentInputs" json:"judgmentInputs"`
-	PropagateAuthenticationContext bool          `yaml:"propagateAuthenticationContext" json:"propagateAuthenticationContext"`
-	SelectedStageRoles             []string      `yaml:"selectedStageRoles,omitempty" json:"selectedStageRoles,omitempty"`
-	Instructions                   string        `yaml:"instructions" json:"instructions"`
+	Application       string `yaml:"application" json:"application"`
+	IsNew             bool   `yaml:"isNew,omitempty" json:"isNew,omitempty"`
+	Pipeline          string `yaml:"pipeline" json:"pipeline"`
+	WaitForCompletion bool   `yaml:"waitForCompletion" json:"waitForCompletion"`
+
+	// Overriding the field from Common struct without "omitempty" as it's required by the Pipeline Stage
+	FailPipeline bool `yaml:"failPipeline" json:"failPipeline"`
 }
 
-func (mj ManualJudgment) GetStageType() string {
-	return manualJudgment
+func (pp Pipeline) GetStageType() string {
+	return pipeline
 }
 
-func (mj ManualJudgment) MakeStage(stage *Stage) *map[string]interface{} {
-	mj.decode(stage)
-	return mj.encode()
+func (pp Pipeline) MakeStage(stage *Stage) *map[string]interface{} {
+	pp.decode(stage)
+	return pp.encode()
 }
 
-func (mj *ManualJudgment) decode(stage *Stage) {
-	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &mj}
+func (pp *Pipeline) decode(stage *Stage) {
+	decoderConfig := mapstructure.DecoderConfig{WeaklyTypedInput: true, Result: &pp}
 	decoder, err := mapstructure.NewDecoder(&decoderConfig)
 	if err != nil {
 		log.Fatalf("err: %v", err)
@@ -58,10 +60,10 @@ func (mj *ManualJudgment) decode(stage *Stage) {
 	}
 }
 
-func (mj *ManualJudgment) encode() *map[string]interface{} {
+func (pp *Pipeline) encode() *map[string]interface{} {
 	d := datastore.Datastore{}
 	stage := new(map[string]interface{})
-	err := json.Unmarshal(d.MarshalJSON(mj), stage)
+	err := json.Unmarshal(d.MarshalJSON(pp), stage)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal JSON:  %v", err)
 	}
