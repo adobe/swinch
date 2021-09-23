@@ -4,7 +4,7 @@ kind: Application
 metadata:
   name:  sample-swinch-chart
 spec:
-  email: dcoman@adobe.com
+  email: example@example.com
   cloudProviders: ""
   permissions:
     EXECUTE:

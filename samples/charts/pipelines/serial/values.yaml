@@ -1,6 +1,6 @@
 application:
   name: sample-swinch-chart
-  email: dcoman@adobe.com
+  email: example@example.com
 
 global:
   bake:
