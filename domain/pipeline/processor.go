@@ -20,57 +20,30 @@ import (
 
 type Processor struct {
 	Manifest
-	stages.Stage
-	stages.BakeManifest
-	stages.DeleteManifest
-	stages.DeployManifest
-	stages.ManualJudgment
-	stages.RunJobManifest
-	stages.Jenkins
-	stages.Wait
-	stages.Pipeline
+	stages.Stages
 }
 
-type S interface {
-	MakeStage(*stages.Stage) *map[string]interface{}
-	GetStageType() string
-}
-
-func (ps *Processor) processStage(stage S) {
-	// Propagate the manifest metadata to the stage
-	ps.Stage.ManifestMetadata.Name = ps.Manifest.Metadata.Name
-	ps.Stage.ManifestMetadata.Application = ps.Manifest.Metadata.Application
-	*ps.InitStage = *stage.MakeStage(&ps.Stage)
-}
-
-func (ps Processor) processManifest(manifest *Manifest) {
+func (ps *Processor) processManifest(manifest *Manifest) {
+	ps.Stages.GetTypes()
 	ps.Manifest = *manifest
 	for i := 0; i < len(ps.Manifest.Spec.Stages); i++ {
 		ps.Stage = ps.Decode(&ps.Manifest.Spec.Stages[i])
 		ps.InitStage = &ps.Manifest.Spec.Stages[i]
-		ps.Stages = &ps.Manifest.Spec.Stages
+		ps.AllStages = &ps.Manifest.Spec.Stages
 
 		// Set some stage metadata
 		ps.Stage.Metadata.RefId = strconv.Itoa(i + 1)
-		switch ps.Stage.Type {
-		case ps.BakeManifest.GetStageType():
-			ps.processStage(ps.BakeManifest)
-		case ps.DeleteManifest.GetStageType():
-			ps.processStage(ps.DeleteManifest)
-		case ps.DeployManifest.GetStageType():
-			ps.processStage(ps.DeployManifest)
-		case ps.ManualJudgment.GetStageType():
-			ps.processStage(ps.ManualJudgment)
-		case ps.RunJobManifest.GetStageType():
-			ps.processStage(ps.RunJobManifest)
-		case ps.Jenkins.GetStageType():
-			ps.processStage(ps.Jenkins)
-		case ps.Wait.GetStageType():
-			ps.processStage(ps.Wait)
-		case ps.Pipeline.GetStageType():
-			ps.processStage(ps.Pipeline)
-		default:
-			log.Fatalf("Failed to detect stage type: %v", ps.Stage.Metadata.Type)
+		// Propagate the manifest metadata to the stage
+		ps.Stage.ManifestMetadata.Name = ps.Manifest.Metadata.Name
+		ps.Stage.ManifestMetadata.Application = ps.Manifest.Metadata.Application
+
+		stageType := stages.StageType(ps.Stage.Type)
+		_, ok := ps.Types[stageType]
+		if !ok {
+			log.Fatalf("Failed to detect stage type: %v", ps.Stage.Type)
 		}
+
+		//Overwrite the initial stage map with he newly generated stage spec
+		*ps.InitStage = *ps.Types[stageType].MakeStage(&ps.Stage)
 	}
 }

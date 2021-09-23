@@ -20,7 +20,7 @@ import (
 	"swinch/domain/datastore"
 )
 
-const deployManifest = "deployManifest"
+const deployManifest StageType = "deployManifest"
 
 type DeployManifest struct {
 	Metadata `mapstructure:",squash"`
@@ -41,10 +41,6 @@ type DeployManifest struct {
 // Moniker is part of Stages
 type Moniker struct {
 	App string `yaml:"app" json:"app"`
-}
-
-func (dm DeployManifest) GetStageType() string {
-	return deployManifest
 }
 
 func (dm DeployManifest) MakeStage(stage *Stage) *map[string]interface{} {
@@ -76,7 +72,7 @@ func (dm *DeployManifest) expand(stage *Stage) {
 
 	bakeIndex := dm.getBakeIndex()
 	bake := new(BakeManifest)
-	err := mapstructure.Decode((*stage.Stages)[bakeIndex], bake)
+	err := mapstructure.Decode((*stage.AllStages)[bakeIndex], bake)
 	if err != nil {
 		log.Fatalf("err: %v", err)
 	}

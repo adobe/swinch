@@ -25,7 +25,7 @@ type Stage struct {
 	// Stage specific fields
 	Spec map[string]interface{} `mapstructure:",remain"`
 	// Map for lookup on other referenced stages
-	Stages *[]map[string]interface{}
+	AllStages *[]map[string]interface{}
 	// After processing the stage overwrite it's initial state
 	InitStage *map[string]interface{}
 }

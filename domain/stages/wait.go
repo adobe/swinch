@@ -19,7 +19,7 @@ import (
 	"swinch/domain/datastore"
 )
 
-const wait = "wait"
+const wait StageType = "wait"
 
 type Wait struct {
 	Metadata `mapstructure:",squash"`
@@ -28,10 +28,6 @@ type Wait struct {
 	IsNew        bool   `yaml:"isNew,omitempty" json:"isNew,omitempty"`
 	SkipWaitText string `yaml:"skipWaitText" json:"skipWaitText"`
 	WaitTime     int    `yaml:"waitTime" json:"waitTime"`
-}
-
-func (wt Wait) GetStageType() string {
-	return wait
 }
 
 func (wt Wait) MakeStage(stage *Stage) *map[string]interface{} {
