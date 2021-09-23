@@ -39,6 +39,9 @@ func (p *Pipeline) Apply(dryRun, plan bool) {
 		newPipe = true
 	} else {
 		changes = p.Changes(p.MarshalJSON(p.loadSpec(existingPipe)), p.MarshalJSON(p.Spec))
+		if changes == false {
+			log.Infof("No changes detected for pipeline '%v' in application '%v'", p.Metadata.Name, p.Metadata.Application)
+		}
 	}
 
 	if changes && plan {

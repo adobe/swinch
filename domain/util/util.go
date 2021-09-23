@@ -13,10 +13,8 @@ type Util struct {
 func (u Util) Changes(oldData, newData []byte) bool {
 	changes := bytes.Compare(oldData, newData)
 	if changes == 0 {
-		log.Infof("No changes detected")
 		return false
 	}
-
 	return true
 }
 

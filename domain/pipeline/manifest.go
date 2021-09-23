@@ -42,14 +42,17 @@ type Metadata struct {
 }
 
 type Spec struct {
-	Application          string                   `yaml:"-" json:"application"`
-	Name                 string                   `yaml:"-" json:"name"`
-	Index                int                      `yaml:"index" json:"index"`
+	Application string `yaml:"-" json:"application"`
+	Name        string `yaml:"-" json:"name"`
+	Disabled    bool   `yaml:"disabled,omitempty" json:"disabled,omitempty"`
+	// Index not used at this time
+	//Index                int                      `yaml:"index,omitempty" json:"index,omitempty"`
+	Id                   string                   `yaml:"id,omitempty" json:"id,omitempty"`
 	KeepWaitingPipelines bool                     `yaml:"keepWaitingPipelines,omitempty" json:"keepWaitingPipelines,omitempty"`
 	LimitConcurrent      bool                     `yaml:"limitConcurrent,omitempty" json:"limitConcurrent,omitempty"`
 	SpelEvaluator        string                   `yaml:"spelEvaluator,omitempty" json:"spelEvaluator,omitempty"`
 	Stages               []map[string]interface{} `yaml:"stages" json:"stages"`
-	Triggers             []interface{}            `yaml:"triggers,omitempty" json:"triggers,omitempty""`
+	Triggers             []interface{}            `yaml:"triggers,omitempty" json:"triggers,omitempty"`
 }
 
 func (p *Pipeline) GetKind() string {

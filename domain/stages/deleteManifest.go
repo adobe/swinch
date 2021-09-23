@@ -36,10 +36,6 @@ type DeleteManifest struct {
 	Mode               string          `yaml:"mode,omitempty" json:"mode,omitempty"`
 	CloudProvider      string          `yaml:"cloudProvider,omitempty" json:"cloudProvider,omitempty"`
 	ManifestArtifactId *string         `json:"manifestArtifactId,omitempty"`
-
-	ContinuePipeline              bool `yaml:"continuePipeline,omitempty" json:"continuePipeline,omitempty"`
-	FailPipeline                  bool `yaml:"failPipeline,omitempty" json:"failPipeline,omitempty"`
-	CompleteOtherBranchesThenFail bool `yaml:"completeOtherBranchesThenFail,omitempty" json:"completeOtherBranchesThenFail,omitempty"`
 }
 
 type LabelSelectors struct {

@@ -36,10 +36,6 @@ type BakeManifest struct {
 	Overrides                   struct{}            `yaml:"overrides,omitempty" json:"overrides,omitempty"`
 	RawOverrides                bool                `yaml:"rawOverrides,omitempty" json:"rawOverrides,omitempty"`
 	EvaluateOverrideExpressions bool                `yaml:"evaluateOverrideExpressions,omitempty" json:"evaluateOverrideExpressions,omitempty"`
-
-	ContinuePipeline              bool `yaml:"continuePipeline,omitempty" json:"continuePipeline,omitempty"`
-	FailPipeline                  bool `yaml:"failPipeline,omitempty" json:"failPipeline,omitempty"`
-	CompleteOtherBranchesThenFail bool `yaml:"completeOtherBranchesThenFail,omitempty" json:"completeOtherBranchesThenFail,omitempty"`
 }
 
 type ExpectedArtifacts struct {

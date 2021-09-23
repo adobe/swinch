@@ -28,6 +28,7 @@ type Processor struct {
 	stages.RunJobManifest
 	stages.Jenkins
 	stages.Wait
+	stages.Pipeline
 }
 
 type S interface {
@@ -66,6 +67,8 @@ func (ps Processor) processManifest(manifest *Manifest) {
 			ps.processStage(ps.Jenkins)
 		case ps.Wait.GetStageType():
 			ps.processStage(ps.Wait)
+		case ps.Pipeline.GetStageType():
+			ps.processStage(ps.Pipeline)
 		default:
 			log.Fatalf("Failed to detect stage type: %v", ps.Stage.Metadata.Type)
 		}
