@@ -11,6 +11,8 @@ type Stages struct {
 	RunJobManifest
 	Jenkins
 	Wait
+	EthosNamespaceCreate
+	EthosNamespaceDelete
 }
 
 type StageType string
@@ -33,4 +35,6 @@ func (ss *Stages) GetTypes() {
 	ss.addStageDefinition(pipeline, Pipeline{})
 	ss.addStageDefinition(runJobManifest, RunJobManifest{})
 	ss.addStageDefinition(wait, Wait{})
+	ss.addStageDefinition(ethosNamespaceCreate, EthosNamespaceCreate{})
+	ss.addStageDefinition(ethosNamespaceDelete, EthosNamespaceDelete{})
 }
