@@ -21,7 +21,6 @@ import (
 	"swinch/domain/datastore"
 )
 
-
 type Values struct {
 	Values map[interface{}]interface{}
 }
@@ -30,8 +29,9 @@ func (v *Values) loadValuesFile(chartPath, valuesFilePaths string, excludeDefaul
 	paths := v.getPaths(chartPath, valuesFilePaths, excludeDefaultValues)
 	d := datastore.Datastore{}
 
-	for _ , valuesFilePath := range paths {
-		_, err := os.Stat(valuesFilePath) ; os.IsNotExist(err)
+	for _, valuesFilePath := range paths {
+		_, err := os.Stat(valuesFilePath)
+		os.IsNotExist(err)
 		values := d.UnmarshalYAMLValues(d.ReadFile(valuesFilePath))
 		if err = mergo.Merge(&v.Values, values, mergo.WithOverride); err != nil {
 			log.Fatalf(err.Error())
@@ -44,7 +44,7 @@ func (v *Values) loadValuesFile(chartPath, valuesFilePaths string, excludeDefaul
 func (v Values) getPaths(chartPath, cliPaths string, excludeDefaultValues bool) []string {
 	paths := make([]string, 0)
 	switch {
-	case excludeDefaultValues == false :
+	case excludeDefaultValues == false:
 		paths = append(paths, path.Join(chartPath, "/values.yaml"))
 		fallthrough
 	case cliPaths != "":
@@ -53,7 +53,7 @@ func (v Values) getPaths(chartPath, cliPaths string, excludeDefaultValues bool) 
 		fallthrough
 	default:
 		log.Fatalf("Failed to find values file paths")
-		
+
 	}
 	return paths
 }

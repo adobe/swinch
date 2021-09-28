@@ -15,7 +15,6 @@ package datastore
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -66,7 +65,6 @@ func (d Datastore) LoadYAMLFiles(path string) *bytes.Buffer {
 }
 
 func (d Datastore) WriteJSON(data interface{}, outputPath string) {
-	fmt.Println(data)
 	byteData := d.MarshalJSON(data)
 	d.WriteFile(outputPath, byteData, FilePerm)
 }
@@ -100,7 +98,7 @@ func (d *Datastore) MarshalYAML(data interface{}) []byte {
 	return byteData.Bytes()
 }
 
-func (d *Datastore) UnmarshalYAMLValues(byteData []byte) map[interface{}]interface{}  {
+func (d *Datastore) UnmarshalYAMLValues(byteData []byte) map[interface{}]interface{} {
 	mapData := new(map[interface{}]interface{})
 	err := yaml.Unmarshal(byteData, &mapData)
 	if err != nil {
