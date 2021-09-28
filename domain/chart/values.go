@@ -28,7 +28,6 @@ type Values struct {
 func (v *Values) loadValuesFile(chartPath, valuesFilePaths string, excludeDefaultValues bool) Values {
 	paths := v.getPaths(chartPath, valuesFilePaths, excludeDefaultValues)
 	d := datastore.Datastore{}
-
 	for _, valuesFilePath := range paths {
 		_, err := os.Stat(valuesFilePath)
 		os.IsNotExist(err)
@@ -37,23 +36,23 @@ func (v *Values) loadValuesFile(chartPath, valuesFilePaths string, excludeDefaul
 			log.Fatalf(err.Error())
 		}
 	}
-
 	return *v
 }
 
 func (v Values) getPaths(chartPath, cliPaths string, excludeDefaultValues bool) []string {
 	paths := make([]string, 0)
-	switch {
-	case excludeDefaultValues == false:
-		paths = append(paths, path.Join(chartPath, "/values.yaml"))
-		fallthrough
-	case cliPaths != "":
-		paths = append(paths, strings.Split(cliPaths, ",")...)
-	case len(paths) == 0:
-		fallthrough
-	default:
-		log.Fatalf("Failed to find values file paths")
 
+	if excludeDefaultValues == false {
+		paths = append(paths, path.Join(chartPath, "/values.yaml"))
 	}
+
+	if  len(cliPaths) > 0 {
+		paths = append(paths, strings.Split(cliPaths, ",")...)
+	}
+
+	if len(paths) == 0 {
+		log.Fatalf("Failed to find values file paths")
+	}
+
 	return paths
 }
