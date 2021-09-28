@@ -198,3 +198,9 @@ Push a release commit:
 bump2version patch
 git push upstream master  --follow-tags  
 ```
+
+### Run test
+
+```bash
+go test ./...
+```

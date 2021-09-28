@@ -1,1 +1,2 @@
-package test
+test:
+  default_values: true

@@ -13,7 +13,6 @@ governing permissions and limitations under the License.
 package chart
 
 import (
-	"fmt"
 	"github.com/imdario/mergo"
 	log "github.com/sirupsen/logrus"
 	"os"
@@ -21,6 +20,7 @@ import (
 	"strings"
 	"swinch/domain/datastore"
 )
+
 
 type Values struct {
 	Values map[interface{}]interface{}
@@ -33,12 +33,11 @@ func (v *Values) loadValuesFile(chartPath, valuesFilePaths string, excludeDefaul
 	for _ , valuesFilePath := range paths {
 		_, err := os.Stat(valuesFilePath) ; os.IsNotExist(err)
 		values := d.UnmarshalYAMLValues(d.ReadFile(valuesFilePath))
-		if err := mergo.Merge(&v.Values, values, mergo.WithOverride); err != nil {
+		if err = mergo.Merge(&v.Values, values, mergo.WithOverride); err != nil {
 			log.Fatalf(err.Error())
 		}
 	}
-	fmt.Println(v)
-	os.Exit(0)
+
 	return *v
 }
 
@@ -56,6 +55,5 @@ func (v Values) getPaths(chartPath, cliPaths string, excludeDefaultValues bool) 
 		log.Fatalf("Failed to find values file paths")
 		
 	}
-
 	return paths
 }
