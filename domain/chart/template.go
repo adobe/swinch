@@ -28,8 +28,8 @@ type Template struct {
 	datastore.Datastore
 }
 
-func (t *Template) TemplateChart(chartPath, valuesFile, outputPath string, fullRender bool) {
-	values := t.loadValuesFile(chartPath, valuesFile)
+func (t *Template) TemplateChart(chartPath, valuesFile, outputPath string, fullRender, excludeDefaultValues bool) {
+	values := t.loadValuesFile(chartPath, valuesFile, excludeDefaultValues)
 	for _, chartTemplate := range t.discoverTemplates(chartPath) {
 		log.Debugf("Found chart template: %v", chartTemplate)
 

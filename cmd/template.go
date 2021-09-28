@@ -37,6 +37,7 @@ func init() {
 	templateCmd.Flags().StringVarP(&valuesFilePath, "values", "f", "", "Overwrite chart values file")
 	templateCmd.Flags().StringVarP(&outputPath, "output", "o", "", "Dir path for writing templated manifests")
 	templateCmd.Flags().BoolVarP(&fullRender, "full-render", "r", false, "Full render templates, including UUID's, RefID's and other data required in spinnaker.")
+	templateCmd.Flags().BoolVarP(&excludeDefaultValues, "exclude-default-values", "", false, "Don't use the default Values.yaml file from the chart.")
 	templateCmd.MarkFlagRequired("chart")
 	templateCmd.MarkFlagRequired("output")
 	rootCmd.AddCommand(templateCmd)
@@ -44,5 +45,5 @@ func init() {
 
 func Template() {
 	t := chart.Template{}
-	t.TemplateChart(chartPath, valuesFilePath, outputPath, fullRender)
+	t.TemplateChart(chartPath, valuesFilePath, outputPath, fullRender, excludeDefaultValues)
 }

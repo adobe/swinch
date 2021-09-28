@@ -49,7 +49,7 @@ Values file:
 ```yaml
 application:
   name: swinchuuidtest
-  email: dcoman@adobe.com
+  email: example@example.com
   ldap: "add_spinnaker_team_ldap"
 ```
 
@@ -62,7 +62,7 @@ kind: Application
 metadata:
   name:  swinchuuidtest
 spec:
-  email: dcoman@adobe.com
+  email: example@example.com
   cloudProviders: ""
   permissions:
     EXECUTE:
@@ -197,4 +197,10 @@ Push a release commit:
 ```bash
 bump2version patch
 git push upstream master  --follow-tags  
+```
+
+### Run test
+
+```bash
+go test ./...
 ```

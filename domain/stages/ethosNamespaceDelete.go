@@ -31,9 +31,9 @@ type EthosNamespaceDelete struct {
 }
 
 type EthosNamespaceDeleteParameters struct {
-	Cluster            string `yaml:"Cluster" json:"Cluster"`
-	Namespace          string `yaml:"Namespace" json:"Namespace"`
-	Project            string `yaml:"Project" json:"Project"`
+	Cluster   string `yaml:"Cluster" json:"Cluster"`
+	Namespace string `yaml:"Namespace" json:"Namespace"`
+	Project   string `yaml:"Project" json:"Project"`
 }
 
 func (end EthosNamespaceDelete) MakeStage(stage *Stage) *map[string]interface{} {

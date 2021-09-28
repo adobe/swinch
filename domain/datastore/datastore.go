@@ -98,6 +98,15 @@ func (d *Datastore) MarshalYAML(data interface{}) []byte {
 	return byteData.Bytes()
 }
 
+func (d *Datastore) UnmarshalYAMLValues(byteData []byte) map[interface{}]interface{} {
+	mapData := new(map[interface{}]interface{})
+	err := yaml.Unmarshal(byteData, &mapData)
+	if err != nil {
+		log.Fatalf("Failed to unmarshall: %v", err)
+	}
+	return *mapData
+}
+
 // Utils
 
 func (d *Datastore) CreateTmpFolder() string {
