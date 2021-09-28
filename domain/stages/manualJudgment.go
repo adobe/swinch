@@ -30,6 +30,8 @@ type ManualJudgment struct {
 	PropagateAuthenticationContext bool          `yaml:"propagateAuthenticationContext" json:"propagateAuthenticationContext"`
 	SelectedStageRoles             []string      `yaml:"selectedStageRoles,omitempty" json:"selectedStageRoles,omitempty"`
 	Instructions                   string        `yaml:"instructions" json:"instructions"`
+
+	StageTimeoutMs *int `yaml:"stageTimeoutMs,omitempty" json:"stageTimeoutMs,omitempty"`
 }
 
 func (mj ManualJudgment) MakeStage(stage *Stage) *map[string]interface{} {

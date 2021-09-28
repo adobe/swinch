@@ -20,6 +20,7 @@ import (
 type Stage struct {
 	// "squash" will nest keys from Metadata struct directly under Stage
 	Metadata `mapstructure:",squash"`
+	Common `mapstructure:",squash"`
 	// Separate maps that will get decoded into proper stage struct and discarded
 	ManifestMetadata
 	// Stage specific fields
@@ -28,6 +29,10 @@ type Stage struct {
 	AllStages *[]map[string]interface{}
 	// After processing the stage overwrite it's initial state
 	InitStage *map[string]interface{}
+}
+
+type Expander struct {
+	Stage
 }
 
 // ManifestMetadata propagates the metadata from the manifest in the stage
@@ -43,16 +48,22 @@ type Metadata struct {
 	RequisiteStageRefIds []string `yaml:"requisiteStageRefIds" json:"requisiteStageRefIds"`
 }
 
+type Test struct {
+	ContinuePipeline                  *bool  `yaml:"-" json:"continuePipeline,omitempty"`
+	FailPipeline                      *bool  `yaml:"-" json:"failPipeline,omitempty"`
+	CompleteOtherBranchesThenFail     *bool  `yaml:"-" json:"completeOtherBranchesThenFail,omitempty"`
+
+	IfStageFails string `yaml:"ifStageFails,omitempty" json:"-"`
+}
+
+
 type Common struct {
-	ContinuePipeline                  bool `yaml:"continuePipeline,omitempty" json:"continuePipeline,omitempty"`
-	FailPipeline                      bool `yaml:"failPipeline,omitempty" json:"failPipeline,omitempty"`
-	CompleteOtherBranchesThenFail     bool `yaml:"completeOtherBranchesThenFail,omitempty" json:"completeOtherBranchesThenFail,omitempty"`
+	Test `mapstructure:",squash"`
+
 	RestrictExecutionDuringTimeWindow bool `yaml:"restrictExecutionDuringTimeWindow,omitempty" json:"restrictExecutionDuringTimeWindow,omitempty"`
 
 	RestrictedExecutionWindow *RestrictedExecutionWindow `yaml:"restrictedExecutionWindow,omitempty" json:"restrictedExecutionWindow,omitempty"`
 	SkipWindowText            string                     `yaml:"skipWindowText,omitempty" json:"skipWindowText,omitempty"`
-	// StageTimeoutMs applies only to select stages (Deploy, Manual Judgement, Run Job etc.)
-	StageTimeoutMs          *int `yaml:"stageTimeoutMs,omitempty" json:"stageTimeoutMs,omitempty"`
 	FailOnFailedExpressions bool `yaml:"failOnFailedExpressions,omitempty" json:"failOnFailedExpressions,omitempty"`
 
 	StageEnabled *StageEnabled `yaml:"stageEnabled,omitempty" json:"stageEnabled,omitempty"`
@@ -117,4 +128,13 @@ func (s Stage) Decode(stage *map[string]interface{}) Stage {
 		log.Fatalf("err: %v", err)
 	}
 	return *tmp
+}
+
+func (e Expander) Tester() {
+	switch e.IfStageFails {
+	case "ignore the failure":
+		*e.ContinuePipeline = false
+		*e.FailPipeline = false
+		*e.CompleteOtherBranchesThenFail = false
+	}
 }

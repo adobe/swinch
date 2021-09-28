@@ -30,6 +30,8 @@ type Pipeline struct {
 	Pipeline          string `yaml:"pipeline" json:"pipeline"`
 	WaitForCompletion bool   `yaml:"waitForCompletion" json:"waitForCompletion"`
 
+	StageTimeoutMs *int `yaml:"stageTimeoutMs,omitempty" json:"stageTimeoutMs,omitempty"`
+
 	// Overriding the field from Common struct without "omitempty" as it's required by the Pipeline Stage
 	FailPipeline bool `yaml:"failPipeline" json:"failPipeline"`
 }

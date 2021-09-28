@@ -36,6 +36,8 @@ type RunJobManifest struct {
 	ManifestArtifactId    string `json:"manifestArtifactId"`
 	ConsumeArtifactSource string `yaml:"consumeArtifactSource" json:"consumeArtifactSource"`
 
+	StageTimeoutMs *int `yaml:"stageTimeoutMs,omitempty" json:"stageTimeoutMs,omitempty"`
+
 	JobBakeStageRefIds *int `yaml:"jobBakeStageRefIds,omitempty" json:"-"`
 }
 

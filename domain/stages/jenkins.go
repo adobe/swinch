@@ -32,6 +32,8 @@ type Jenkins struct {
 	MarkUnstableAsSuccessful bool     `yaml:"markUnstableAsSuccessful" json:"markUnstableAsSuccessful"`
 	WaitForCompletion        bool     `yaml:"waitForCompletion" json:"waitForCompletion"`
 
+	StageTimeoutMs *int `yaml:"stageTimeoutMs,omitempty" json:"stageTimeoutMs,omitempty"`
+
 	// Overriding the field from Common struct without "omitempty" as it's required by the Jenkins Stage
 	ContinuePipeline bool `yaml:"continuePipeline" json:"continuePipeline"`
 }

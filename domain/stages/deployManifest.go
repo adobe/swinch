@@ -23,6 +23,7 @@ import (
 const deployManifest StageType = "deployManifest"
 
 type DeployManifest struct {
+	Expander `mapstructure:"-"`
 	Metadata `mapstructure:",squash"`
 	Common   `mapstructure:",squash"`
 
@@ -34,6 +35,8 @@ type DeployManifest struct {
 	Overrides                struct{} `yaml:"overrides,omitempty" json:"overrides,omitempty"`
 	Source                   string   `json:"source"`
 	SkipExpressionEvaluation bool     `yaml:"skipExpressionEvaluation,omitempty" json:"skipExpressionEvaluation,omitempty"`
+
+	StageTimeoutMs *int `yaml:"stageTimeoutMs,omitempty" json:"stageTimeoutMs,omitempty"`
 
 	BakeStageRefIds *int `yaml:"bakeStageRefIds,omitempty" json:"-"`
 }
@@ -77,6 +80,7 @@ func (dm *DeployManifest) expand(stage *Stage) {
 		log.Fatalf("err: %v", err)
 	}
 	dm.ManifestArtifactId = bake.ExpectedArtifacts[0].Id
+	dm.Tester()
 }
 
 func (dm *DeployManifest) getBakeIndex() int {
@@ -88,7 +92,7 @@ func (dm *DeployManifest) getBakeIndex() int {
 	} else {
 		*bakeStageIndex = *dm.BakeStageRefIds
 	}
-	// Convert from Spinnaker human readable indexing
+	// Convert from Spinnaker human-readable indexing
 	*bakeStageIndex -= 1
 
 	return *bakeStageIndex
