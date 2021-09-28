@@ -12,7 +12,7 @@ func TestLoadValuesFile(t *testing.T) {
 	values := Values{
 		Values: map[interface{}]interface{}{
 			"test": map[string]interface{}{
-				"default_values": true, "success": true, "values_1": true, "values_2": true,
+				"default_values": true, "success": true, "values_1": true, "values_2": true, "list": []interface{}{2, 3, 4},
 			},
 		},
 	}

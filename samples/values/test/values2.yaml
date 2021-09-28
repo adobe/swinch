@@ -1,3 +1,7 @@
 test:
   values_2: true
   success: true
+  list:
+    - 2
+    - 3
+    - 4
