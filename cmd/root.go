@@ -22,17 +22,18 @@ import (
 )
 
 var (
-	logLevel        string
-	plan            bool
-	filePath        string
-	outputPath      string
-	valuesFilePath  string
-	chartName       string
-	protectedImport bool
-	applicationName string
-	pipelineName    string
-	chartPath       string
-	fullRender      bool
+	logLevel             string
+	plan                 bool
+	filePath             string
+	outputPath           string
+	valuesFilePath       string
+	chartName            string
+	protectedImport      bool
+	applicationName      string
+	pipelineName         string
+	chartPath            string
+	fullRender           bool
+	excludeDefaultValues bool
 )
 
 const (

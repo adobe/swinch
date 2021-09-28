@@ -13,9 +13,12 @@ governing permissions and limitations under the License.
 package chart
 
 import (
+	"fmt"
+	"github.com/imdario/mergo"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v3"
+	"os"
 	"path"
+	"strings"
 	"swinch/domain/datastore"
 )
 
@@ -23,25 +26,36 @@ type Values struct {
 	Values map[interface{}]interface{}
 }
 
-func (v Values) loadValuesFile(chartPath, valuesFile string) Values {
-	valuesFilePath := v.getValuesFile(chartPath, valuesFile)
-
+func (v *Values) loadValuesFile(chartPath, valuesFilePaths string, excludeDefaultValues bool) Values {
+	paths := v.getPaths(chartPath, valuesFilePaths, excludeDefaultValues)
 	d := datastore.Datastore{}
-	valuesBuffer := d.ReadFile(valuesFilePath)
-	return v.loadValues(valuesBuffer)
+
+	for _ , valuesFilePath := range paths {
+		_, err := os.Stat(valuesFilePath) ; os.IsNotExist(err)
+		values := d.UnmarshalYAMLValues(d.ReadFile(valuesFilePath))
+		if err := mergo.Merge(&v.Values, values, mergo.WithOverride); err != nil {
+			log.Fatalf(err.Error())
+		}
+	}
+	fmt.Println(v)
+	os.Exit(0)
+	return *v
 }
 
-func (v Values) loadValues(byteData []byte) Values {
-	err := yaml.Unmarshal(byteData, &v.Values)
-	if err != nil {
-		log.Fatalf("Error loading values: %v", err)
+func (v Values) getPaths(chartPath, cliPaths string, excludeDefaultValues bool) []string {
+	paths := make([]string, 0)
+	switch {
+	case excludeDefaultValues == false :
+		paths = append(paths, path.Join(chartPath, "/values.yaml"))
+		fallthrough
+	case cliPaths != "":
+		paths = append(paths, strings.Split(cliPaths, ",")...)
+	case len(paths) == 0:
+		fallthrough
+	default:
+		log.Fatalf("Failed to find values file paths")
+		
 	}
-	return v
-}
 
-func (v Values) getValuesFile(chartPath, valuesFile string) string {
-	if valuesFile == "" {
-		valuesFile = path.Join(chartPath, "/values.yaml")
-	}
-	return valuesFile
+	return paths
 }
