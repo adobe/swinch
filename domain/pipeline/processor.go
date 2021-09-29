@@ -43,35 +43,7 @@ func (ps *Processor) processManifest(manifest *Manifest) {
 			log.Fatalf("Failed to detect stage type: %v", ps.Stage.Type)
 		}
 
-		// "If stage fails" execution option has 4 scenarios as seen in the WebUI; to set one of them a bool combination of the below parameters is needed
-		// to avoid complexity, the user will use ONLY the ifStageFails parameter (which exists only in the yaml)
-		ps.Stage.ContinuePipeline = new(bool)
-		ps.Stage.FailPipeline = new(bool)
-		ps.Stage.CompleteOtherBranchesThenFail = new(bool)
-		switch ps.Stage.IfStageFails {
-		case "halt the entire pipeline":
-			*ps.Stage.ContinuePipeline = false
-			*ps.Stage.FailPipeline = true
-			*ps.Stage.CompleteOtherBranchesThenFail = false
-		case "halt this branch of the pipeline":
-			*ps.Stage.ContinuePipeline = false
-			*ps.Stage.FailPipeline = false
-			*ps.Stage.CompleteOtherBranchesThenFail = false
-		case "halt this branch and fail the pipeline once other branches complete":
-			*ps.Stage.ContinuePipeline = false
-			*ps.Stage.FailPipeline = false
-			*ps.Stage.CompleteOtherBranchesThenFail = true
-		case "ignore the failure":
-			*ps.Stage.ContinuePipeline = true
-			*ps.Stage.FailPipeline = false
-			*ps.Stage.CompleteOtherBranchesThenFail = false
-		// without these defaults, if the ifStageFails parameters is not set inside the chart,
-		// the default option will be "halt this branch of the pipeline" instead of "halt the entire pipeline"
-		default:
-			*ps.Stage.ContinuePipeline = false
-			*ps.Stage.FailPipeline = true
-			*ps.Stage.CompleteOtherBranchesThenFail = false
-		}
+		ps.FailStageSetter()
 
 		//Overwrite the initial stage map with he newly generated stage spec
 		*ps.InitStage = *ps.Types[stageType].MakeStage(&ps.Stage)

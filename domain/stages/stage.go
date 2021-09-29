@@ -13,18 +13,21 @@ governing permissions and limitations under the License.
 package stages
 
 import (
+	"fmt"
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 )
 
 type Stage struct {
-	// "squash" will nest keys from Metadata struct directly under Stage
+	// Metadata Common and Spec will be decoded into the final Stage struct
+	// "squash" will nest keys from Metadata and Common struct directly under Stage
 	Metadata `mapstructure:",squash"`
 	Common   `mapstructure:",squash"`
-	// Separate maps that will get decoded into proper stage struct and discarded
-	ManifestMetadata
 	// Stage specific fields
 	Spec map[string]interface{} `mapstructure:",remain"`
+
+	// Separate maps that will get decoded into proper stage struct and discarded
+	ManifestMetadata
 	// Map for lookup on other referenced stages
 	AllStages *[]map[string]interface{}
 	// After processing the stage overwrite it's initial state
@@ -66,6 +69,7 @@ type StageFails struct {
 	FailPipeline                  *bool `yaml:"-" json:"failPipeline,omitempty"`
 	CompleteOtherBranchesThenFail *bool `yaml:"-" json:"completeOtherBranchesThenFail,omitempty"`
 
+	// IfStageFails key only in swinch
 	IfStageFails string `yaml:"ifStageFails,omitempty" json:"-"`
 }
 
@@ -124,3 +128,39 @@ func (s Stage) Decode(stage *map[string]interface{}) Stage {
 	}
 	return *tmp
 }
+
+func (s *Stage) FailStageSetter()  {
+	// "If stage fails" execution option has 4 scenarios as seen in the WebUI; to set one of them a bool combination of the below parameters is needed
+	// to avoid complexity, the user will use ONLY the ifStageFails parameter (which exists only in the yaml)
+	s.ContinuePipeline = new(bool)
+	s.FailPipeline = new(bool)
+	s.CompleteOtherBranchesThenFail = new(bool)
+
+	switch s.IfStageFails {
+	case "halt the entire pipeline":
+		*s.ContinuePipeline = false
+		*s.FailPipeline = true
+		*s.CompleteOtherBranchesThenFail = false
+	case "halt this branch of the pipeline":
+		*s.ContinuePipeline = false
+		*s.FailPipeline = false
+		*s.CompleteOtherBranchesThenFail = false
+	case "halt this branch and fail the pipeline once other branches complete":
+		*s.ContinuePipeline = false
+		*s.FailPipeline = false
+		*s.CompleteOtherBranchesThenFail = true
+	case "ignore the failure":
+		*s.ContinuePipeline = true
+		*s.FailPipeline = false
+		*s.CompleteOtherBranchesThenFail = false
+	// without these defaults, if the ifStageFails parameters is not set inside the chart,
+	// the default option will be "halt this branch of the pipeline" instead of "halt the entire pipeline"
+	default:
+		*s.ContinuePipeline = false
+		*s.FailPipeline = true
+		*s.CompleteOtherBranchesThenFail = false
+	}
+	*s.ContinuePipeline = true
+	fmt.Println(*s.ContinuePipeline)
+}
+

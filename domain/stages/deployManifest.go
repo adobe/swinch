@@ -79,10 +79,6 @@ func (dm *DeployManifest) expand(stage *Stage) {
 		log.Fatalf("err: %v", err)
 	}
 	dm.ManifestArtifactId = bake.ExpectedArtifacts[0].Id
-
-	dm.ContinuePipeline = stage.ContinuePipeline
-	dm.FailPipeline = stage.FailPipeline
-	dm.CompleteOtherBranchesThenFail = stage.CompleteOtherBranchesThenFail
 }
 
 func (dm *DeployManifest) getBakeIndex() int {
