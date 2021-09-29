@@ -1,0 +1,26 @@
+application:
+  name: test-template-options
+  email: test@example.com
+
+global:
+  bake:
+    inputArtifacts:
+      account: stable
+      name: redis
+      version: 10.5.7
+
+clusters:
+  - name: "Cluster 1"
+    namespace: test-ns-1
+    account: test-account-1
+
+parallel_pipeline:
+  enabled: true
+  name: "Parallel Stages Pipeline"
+  stages:
+    bake:
+      enabled: true
+    deploy:
+      enabled: true
+    manual_judgment:
+      enabled: false

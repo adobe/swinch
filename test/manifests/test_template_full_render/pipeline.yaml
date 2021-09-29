@@ -1,0 +1,131 @@
+apiVersion: spinnaker.adobe.com/alpha1
+kind: Pipeline
+metadata:
+  name: Parallel Stages Pipeline
+  application: test-template-full-render
+spec:
+  limitConcurrent: true
+  spelEvaluator: v4
+  stages:
+    - expectedArtifacts:
+        - displayName: redis
+          id: 6d28bebb-3330-51fe-bab5-d2643e5ca4e7
+          matchArtifact:
+            artifactAccount: embedded-artifact
+            name: redis
+            type: embedded/base64
+      inputArtifacts:
+        - account: stable
+          artifact:
+            artifactAccount: stable
+            name: redis
+            type: helm/chart
+            version: 10.5.7
+      name: Bake Cluster 1 - test-ns-1
+      namespace: test-ns-1
+      outputName: redis
+      overrides: {}
+      refId: "1"
+      requisiteStageRefIds: []
+      templateRenderer: HELM2
+      type: bakeManifest
+    - expectedArtifacts:
+        - displayName: redis
+          id: 0083e636-b345-5b63-b840-45252bd6c439
+          matchArtifact:
+            artifactAccount: embedded-artifact
+            name: redis
+            type: embedded/base64
+      inputArtifacts:
+        - account: stable
+          artifact:
+            artifactAccount: stable
+            name: redis
+            type: helm/chart
+            version: 10.5.7
+      name: Bake Cluster 2 - test-ns-2
+      namespace: test-ns-2
+      outputName: redis
+      overrides: {}
+      refId: "2"
+      requisiteStageRefIds: []
+      templateRenderer: HELM2
+      type: bakeManifest
+    - account: test-account-1
+      cloudProvider: kubernetes
+      manifestArtifactId: 6d28bebb-3330-51fe-bab5-d2643e5ca4e7
+      moniker:
+        app: test-template-full-render
+      name: Deploy Cluster 1 - test-ns-1
+      namespaceOverride: test-ns-1
+      overrides: {}
+      refId: "3"
+      requisiteStageRefIds:
+        - "1"
+      skipExpressionEvaluation: true
+      source: artifact
+      type: deployManifest
+    - account: test-account-2
+      cloudProvider: kubernetes
+      manifestArtifactId: 0083e636-b345-5b63-b840-45252bd6c439
+      moniker:
+        app: test-template-full-render
+      name: Deploy Cluster 2 - test-ns-2
+      namespaceOverride: test-ns-2
+      overrides: {}
+      refId: "4"
+      requisiteStageRefIds:
+        - "2"
+      skipExpressionEvaluation: true
+      source: artifact
+      type: deployManifest
+    - account: test-account-1
+      app: test-template-full-render
+      cloudProvider: kubernetes
+      kinds:
+        - statefulSet
+        - configMap
+        - secret
+        - persistentVolumeClaim
+        - service
+      labelSelectors:
+        selectors:
+          - key: app
+            kind: EQUALS
+            values:
+              - redis
+      location: test-ns-1
+      mode: label
+      name: Delete Cluster 1 - test-ns-1
+      options:
+        cascading: true
+        gracePeriodSeconds: 0
+      refId: "5"
+      requisiteStageRefIds:
+        - "3"
+      type: deleteManifest
+    - account: test-account-2
+      app: test-template-full-render
+      cloudProvider: kubernetes
+      kinds:
+        - statefulSet
+        - configMap
+        - secret
+        - persistentVolumeClaim
+        - service
+      labelSelectors:
+        selectors:
+          - key: app
+            kind: EQUALS
+            values:
+              - redis
+      location: test-ns-2
+      mode: label
+      name: Delete Cluster 2 - test-ns-2
+      options:
+        cascading: true
+        gracePeriodSeconds: 0
+      refId: "6"
+      requisiteStageRefIds:
+        - "4"
+      type: deleteManifest

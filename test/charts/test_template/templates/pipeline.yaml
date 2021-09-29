@@ -1,0 +1,100 @@
+{{- if .Values.parallel_pipeline.enabled -}}
+  {{- $application := .Values.application.name -}}
+  {{- $global := .Values.global -}}
+  {{- $pipeline := .Values.parallel_pipeline -}}
+  {{- $clusters := .Values.clusters }}
+  {{- $lenClusters := len $clusters -}}
+---
+apiVersion: spinnaker.adobe.com/alpha1
+kind: Pipeline
+metadata:
+  name: {{ $pipeline.name }}
+  application: {{ $application }}
+spec:
+  index: 0
+  keepWaitingPipelines: false
+  limitConcurrent: true
+  spelEvaluator: v4
+  stages:
+    # Presume 1:1 bake to deploy stage ratio
+    {{- range $indexClusters, $cluster := $clusters }}
+    - name: "Bake {{ $cluster.name }} - {{ $cluster.namespace}}"
+      type: bakeManifest
+      namespace: "{{ $cluster.namespace }}"
+      outputName: redis
+      requisiteStageRefIds: []
+      templateRenderer: HELM2
+      inputArtifacts:
+        - account: {{ $global.bake.inputArtifacts.account }}
+          artifact:
+            name: {{ $global.bake.inputArtifacts.name }}
+            type: helm/chart
+            version: {{ $global.bake.inputArtifacts.version }}
+      expectedArtifacts:
+        - displayName: redis
+          matchArtifact:
+            artifactAccount: embedded-artifact
+            name: redis
+            type: embedded/base64
+    {{ end }}
+
+    {{- range $indexClusters, $cluster := $clusters }}
+    # We loop over the deploy stages, but as we presume a 1:1 ratio to bake we can use the deploy index to refer back to the bake index
+    # Add one to the index, go template starts from 0, spinnaker starts from 1
+    - name: "Deploy {{ $cluster.name }} - {{ $cluster.namespace}}"
+      type: deployManifest
+      requisiteStageRefIds:
+        - {{  add $indexClusters 1 }}
+      account: "{{ $cluster.account }}"
+      cloudProvider: kubernetes
+      namespaceOverride: "{{ $cluster.namespace }}"
+      skipExpressionEvaluation: true
+      source: artifact
+    {{ end }}
+
+    {{- $manual_judgment := $pipeline.stages.manual_judgment -}}
+    {{- if $manual_judgment.enabled }}
+    - name: "{{ $manual_judgment.name }}"
+      type: manualJudgment
+      failPipeline: true
+      isNew: true
+      judgmentInputs: [ ]
+      notifications: [ ]
+      sendNotifications: true
+      stageTimeoutMs: {{ $manual_judgment.stageTimeoutMs }}
+      requisiteStageRefIds:
+      {{- range $indexClusters, $cluster := $clusters }}
+      - {{ add 1 $indexClusters $lenClusters }}
+      {{- end }}
+    {{ end }}
+
+    {{- range $indexClusters, $cluster := $clusters }}
+    - name: "Delete {{ $cluster.name }} - {{ $cluster.namespace}}"
+      type: deleteManifest
+      requisiteStageRefIds:
+      {{- if $manual_judgment.enabled }}
+      - {{ add 1 $lenClusters $lenClusters }}
+      {{- else }}
+      - {{ add 1 $indexClusters $lenClusters }}
+      {{- end }}
+      account:  "{{ $cluster.account }}"
+      namespace: "{{ $cluster.namespace }}"
+      cloudProvider: kubernetes
+      kinds:
+        - statefulSet
+        - configMap
+        - secret
+        - persistentVolumeClaim
+        - service
+      labelSelectors:
+        selectors:
+          - key: app
+            kind: EQUALS
+            values:
+              - redis
+      mode: label
+      options:
+        cascading: true
+    {{ end }}
+  triggers: []
+  {{ end }}

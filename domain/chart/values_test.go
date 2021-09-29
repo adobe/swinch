@@ -8,7 +8,7 @@ import (
 
 func TestLoadValuesFile(t *testing.T) {
 	v := Values{}
-	result := v.loadValuesFile("samples/charts/test", "samples/values/test/values1.yaml,samples/values/test/values2.yaml", false)
+	result := v.loadValuesFile("test/charts/test_values", "test/values/values1.yaml,test/values/values2.yaml", false)
 	values := Values{
 		Values: map[interface{}]interface{}{
 			"test": map[string]interface{}{
