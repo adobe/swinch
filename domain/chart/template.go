@@ -38,7 +38,6 @@ func (t *Template) TemplateChart(chartPath, valuesFile, outputPath string, fullR
 		if fullRender != false {
 			buffer = t.fullRender(buffer)
 		}
-
 		t.writeTemplateFile(outputPath, chartTemplate.Name(), buffer)
 	}
 }
@@ -66,7 +65,6 @@ func (t Template) templateFile(chartPath, chartTemplate string, values Values) *
 	if err != nil {
 		log.Fatalf("Error templating: %v", err)
 	}
-
 	return buffer
 }
 

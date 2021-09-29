@@ -202,5 +202,5 @@ git push upstream master  --follow-tags
 ### Run test
 
 ```bash
-go test ./...
+go test ./... -v
 ```

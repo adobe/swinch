@@ -1,0 +1,69 @@
+---
+apiVersion: spinnaker.adobe.com/alpha1
+kind: Pipeline
+metadata:
+  name: Parallel Stages Pipeline
+  application: test-template-options
+spec:
+  index: 0
+  keepWaitingPipelines: false
+  limitConcurrent: true
+  spelEvaluator: v4
+  stages:
+    # Presume 1:1 bake to deploy stage ratio
+    - name: "Bake Cluster 1 - test-ns-1"
+      type: bakeManifest
+      namespace: "test-ns-1"
+      outputName: redis
+      requisiteStageRefIds: []
+      templateRenderer: HELM2
+      inputArtifacts:
+        - account: stable
+          artifact:
+            name: redis
+            type: helm/chart
+            version: 10.5.7
+      expectedArtifacts:
+        - displayName: redis
+          matchArtifact:
+            artifactAccount: embedded-artifact
+            name: redis
+            type: embedded/base64
+    
+    # We loop over the deploy stages, but as we presume a 1:1 ratio to bake we can use the deploy index to refer back to the bake index
+    # Add one to the index, go template starts from 0, spinnaker starts from 1
+    - name: "Deploy Cluster 1 - test-ns-1"
+      type: deployManifest
+      requisiteStageRefIds:
+        - 1
+      account: "test-account-1"
+      cloudProvider: kubernetes
+      namespaceOverride: "test-ns-1"
+      skipExpressionEvaluation: true
+      source: artifact
+    
+    - name: "Delete Cluster 1 - test-ns-1"
+      type: deleteManifest
+      requisiteStageRefIds:
+      - 2
+      account:  "test-account-1"
+      namespace: "test-ns-1"
+      cloudProvider: kubernetes
+      kinds:
+        - statefulSet
+        - configMap
+        - secret
+        - persistentVolumeClaim
+        - service
+      labelSelectors:
+        selectors:
+          - key: app
+            kind: EQUALS
+            values:
+              - redis
+      mode: label
+      options:
+        cascading: true
+    
+  triggers: []
+  
