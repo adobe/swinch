@@ -30,6 +30,8 @@ type ManualJudgment struct {
 	PropagateAuthenticationContext bool          `yaml:"propagateAuthenticationContext" json:"propagateAuthenticationContext"`
 	SelectedStageRoles             []string      `yaml:"selectedStageRoles,omitempty" json:"selectedStageRoles,omitempty"`
 	Instructions                   string        `yaml:"instructions" json:"instructions"`
+
+	StageTimeoutMs *int `yaml:"stageTimeoutMs,omitempty" json:"stageTimeoutMs,omitempty"`
 }
 
 func (mj ManualJudgment) MakeStage(stage *Stage) *map[string]interface{} {
@@ -49,6 +51,10 @@ func (mj *ManualJudgment) decode(stage *Stage) {
 		log.Fatalf("error decoding stage metadata: %v", err)
 	}
 	err = decoder.Decode(stage.Spec)
+	if err != nil {
+		log.Fatalf("error decoding stage spec: %v", err)
+	}
+	err = decoder.Decode(stage.Common)
 	if err != nil {
 		log.Fatalf("error decoding stage spec: %v", err)
 	}

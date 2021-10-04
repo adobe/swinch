@@ -18,12 +18,15 @@ import (
 )
 
 type Stage struct {
-	// "squash" will nest keys from Metadata struct directly under Stage
+	// Metadata Common and Spec will be decoded into the final Stage struct
+	// "squash" will nest keys from Metadata and Common struct directly under Stage
 	Metadata `mapstructure:",squash"`
-	// Separate maps that will get decoded into proper stage struct and discarded
-	ManifestMetadata
+	Common   `mapstructure:",squash"`
 	// Stage specific fields
 	Spec map[string]interface{} `mapstructure:",remain"`
+
+	// Separate maps that will get decoded into proper stage struct and discarded
+	ManifestMetadata
 	// Map for lookup on other referenced stages
 	AllStages *[]map[string]interface{}
 	// After processing the stage overwrite it's initial state
@@ -44,16 +47,13 @@ type Metadata struct {
 }
 
 type Common struct {
-	ContinuePipeline                  bool `yaml:"continuePipeline,omitempty" json:"continuePipeline,omitempty"`
-	FailPipeline                      bool `yaml:"failPipeline,omitempty" json:"failPipeline,omitempty"`
-	CompleteOtherBranchesThenFail     bool `yaml:"completeOtherBranchesThenFail,omitempty" json:"completeOtherBranchesThenFail,omitempty"`
+	StageFails `mapstructure:",squash"`
+
 	RestrictExecutionDuringTimeWindow bool `yaml:"restrictExecutionDuringTimeWindow,omitempty" json:"restrictExecutionDuringTimeWindow,omitempty"`
 
 	RestrictedExecutionWindow *RestrictedExecutionWindow `yaml:"restrictedExecutionWindow,omitempty" json:"restrictedExecutionWindow,omitempty"`
 	SkipWindowText            string                     `yaml:"skipWindowText,omitempty" json:"skipWindowText,omitempty"`
-	// StageTimeoutMs applies only to select stages (Deploy, Manual Judgement, Run Job etc.)
-	StageTimeoutMs          *int `yaml:"stageTimeoutMs,omitempty" json:"stageTimeoutMs,omitempty"`
-	FailOnFailedExpressions bool `yaml:"failOnFailedExpressions,omitempty" json:"failOnFailedExpressions,omitempty"`
+	FailOnFailedExpressions   bool                       `yaml:"failOnFailedExpressions,omitempty" json:"failOnFailedExpressions,omitempty"`
 
 	StageEnabled *StageEnabled `yaml:"stageEnabled,omitempty" json:"stageEnabled,omitempty"`
 
@@ -61,6 +61,15 @@ type Common struct {
 	Notifications     *Notifications `yaml:"notifications,omitempty" json:"notifications,omitempty"`
 
 	Comments string `yaml:"comments,omitempty" json:"comments,omitempty"`
+}
+
+type StageFails struct {
+	ContinuePipeline              *bool `yaml:"-" json:"continuePipeline,omitempty"`
+	FailPipeline                  *bool `yaml:"-" json:"failPipeline,omitempty"`
+	CompleteOtherBranchesThenFail *bool `yaml:"-" json:"completeOtherBranchesThenFail,omitempty"`
+
+	// IfStageFails key only in swinch
+	IfStageFails string `yaml:"ifStageFails,omitempty" json:"-"`
 }
 
 type RestrictedExecutionWindow struct {
@@ -117,4 +126,38 @@ func (s Stage) Decode(stage *map[string]interface{}) Stage {
 		log.Fatalf("err: %v", err)
 	}
 	return *tmp
+}
+
+// FailStageSetter method reduces the complexity of "If stage fails" execution option
+// "If stage fails" execution option has 4 scenarios as seen in the WebUI; to set one of them a bool combination of the below parameters is needed
+// to avoid complexity, the user will use ONLY the ifStageFails parameter (which exists only in the yaml)
+func (s *Stage) FailStageSetter() {
+	s.ContinuePipeline = new(bool)
+	s.FailPipeline = new(bool)
+	s.CompleteOtherBranchesThenFail = new(bool)
+
+	switch s.IfStageFails {
+	case "halt the entire pipeline":
+		*s.ContinuePipeline = false
+		*s.FailPipeline = true
+		*s.CompleteOtherBranchesThenFail = false
+	case "halt this branch of the pipeline":
+		*s.ContinuePipeline = false
+		*s.FailPipeline = false
+		*s.CompleteOtherBranchesThenFail = false
+	case "halt this branch and fail the pipeline once other branches complete":
+		*s.ContinuePipeline = false
+		*s.FailPipeline = false
+		*s.CompleteOtherBranchesThenFail = true
+	case "ignore the failure":
+		*s.ContinuePipeline = true
+		*s.FailPipeline = false
+		*s.CompleteOtherBranchesThenFail = false
+	// without these defaults, if the ifStageFails parameters is not set inside the chart,
+	// the default option will be "halt this branch of the pipeline" instead of "halt the entire pipeline"
+	default:
+		*s.ContinuePipeline = false
+		*s.FailPipeline = true
+		*s.CompleteOtherBranchesThenFail = false
+	}
 }

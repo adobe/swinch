@@ -5,7 +5,7 @@
 Swinch is a CLI tool that aims at functionality similar to kubectl and helm, but for Spinnaker.  
 
 Our goal is to make using Spinnaker friendly for users already familiar with the Kubernetes way of deploying by provide the same language and format used for managing Kubernetes asset.
-Manage your Spinnaker pipelines with Kubernetes manifest and object, programmatically and sourced controlled, from templated Charts, with built in support for dry-run and validation.
+Manage your Spinnaker pipelines with Kubernetes manifest and object, programmatically and sourced controlled, from templated Charts, with built-in support for dry-run and validation.
 
 **Swinch is at an alpha stage and under active development**   
 
@@ -91,7 +91,7 @@ chmod +x
 mv swinch /usr/local/bin/swinch
 
 ```
-On MacOS allow swinch in `System Preferences` -> `Security and Privacy`
+On macOS allow swinch in `System Preferences` -> `Security and Privacy`
 
 ### Usage
 
@@ -203,4 +203,9 @@ git push upstream master  --follow-tags
 
 ```bash
 go test ./... -v
+```
+
+If Spinnaker parameters change you'll need to update known chart manifest samples used in test:
+```bash
+swinch template -c test/charts/test_template/ -o test/manifests/test_template_full_render -f test/values/test_template_full_render.yaml -r
 ```

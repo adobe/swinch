@@ -7,13 +7,16 @@ spec:
   limitConcurrent: true
   spelEvaluator: v4
   stages:
-    - expectedArtifacts:
+    - completeOtherBranchesThenFail: false
+      continuePipeline: false
+      expectedArtifacts:
         - displayName: redis
           id: 6d28bebb-3330-51fe-bab5-d2643e5ca4e7
           matchArtifact:
             artifactAccount: embedded-artifact
             name: redis
             type: embedded/base64
+      failPipeline: true
       inputArtifacts:
         - account: stable
           artifact:
@@ -29,13 +32,16 @@ spec:
       requisiteStageRefIds: []
       templateRenderer: HELM2
       type: bakeManifest
-    - expectedArtifacts:
+    - completeOtherBranchesThenFail: false
+      continuePipeline: false
+      expectedArtifacts:
         - displayName: redis
           id: 0083e636-b345-5b63-b840-45252bd6c439
           matchArtifact:
             artifactAccount: embedded-artifact
             name: redis
             type: embedded/base64
+      failPipeline: true
       inputArtifacts:
         - account: stable
           artifact:
@@ -53,6 +59,9 @@ spec:
       type: bakeManifest
     - account: test-account-1
       cloudProvider: kubernetes
+      completeOtherBranchesThenFail: false
+      continuePipeline: false
+      failPipeline: true
       manifestArtifactId: 6d28bebb-3330-51fe-bab5-d2643e5ca4e7
       moniker:
         app: test-template-full-render
@@ -67,6 +76,9 @@ spec:
       type: deployManifest
     - account: test-account-2
       cloudProvider: kubernetes
+      completeOtherBranchesThenFail: false
+      continuePipeline: false
+      failPipeline: true
       manifestArtifactId: 0083e636-b345-5b63-b840-45252bd6c439
       moniker:
         app: test-template-full-render
@@ -82,6 +94,9 @@ spec:
     - account: test-account-1
       app: test-template-full-render
       cloudProvider: kubernetes
+      completeOtherBranchesThenFail: false
+      continuePipeline: false
+      failPipeline: true
       kinds:
         - statefulSet
         - configMap
@@ -107,6 +122,9 @@ spec:
     - account: test-account-2
       app: test-template-full-render
       cloudProvider: kubernetes
+      completeOtherBranchesThenFail: false
+      continuePipeline: false
+      failPipeline: true
       kinds:
         - statefulSet
         - configMap

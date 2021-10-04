@@ -36,6 +36,8 @@ type RunJobManifest struct {
 	ManifestArtifactId    string `json:"manifestArtifactId"`
 	ConsumeArtifactSource string `yaml:"consumeArtifactSource" json:"consumeArtifactSource"`
 
+	StageTimeoutMs *int `yaml:"stageTimeoutMs,omitempty" json:"stageTimeoutMs,omitempty"`
+
 	JobBakeStageRefIds *int `yaml:"jobBakeStageRefIds,omitempty" json:"-"`
 }
 
@@ -57,6 +59,10 @@ func (rjm *RunJobManifest) decode(stage *Stage) {
 		log.Fatalf("error decoding stage metadata: %v", err)
 	}
 	err = decoder.Decode(stage.Spec)
+	if err != nil {
+		log.Fatalf("error decoding stage spec: %v", err)
+	}
+	err = decoder.Decode(stage.Common)
 	if err != nil {
 		log.Fatalf("error decoding stage spec: %v", err)
 	}

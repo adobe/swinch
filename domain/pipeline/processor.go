@@ -43,6 +43,8 @@ func (ps *Processor) processManifest(manifest *Manifest) {
 			log.Fatalf("Failed to detect stage type: %v", ps.Stage.Type)
 		}
 
+		ps.FailStageSetter()
+
 		//Overwrite the initial stage map with he newly generated stage spec
 		*ps.InitStage = *ps.Types[stageType].MakeStage(&ps.Stage)
 	}

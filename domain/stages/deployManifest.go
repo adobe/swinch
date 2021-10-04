@@ -35,6 +35,8 @@ type DeployManifest struct {
 	Source                   string   `json:"source"`
 	SkipExpressionEvaluation bool     `yaml:"skipExpressionEvaluation,omitempty" json:"skipExpressionEvaluation,omitempty"`
 
+	StageTimeoutMs *int `yaml:"stageTimeoutMs,omitempty" json:"stageTimeoutMs,omitempty"`
+
 	BakeStageRefIds *int `yaml:"bakeStageRefIds,omitempty" json:"-"`
 }
 
@@ -64,6 +66,10 @@ func (dm *DeployManifest) decode(stage *Stage) {
 	if err != nil {
 		log.Fatalf("error decoding stage spec: %v", err)
 	}
+	err = decoder.Decode(stage.Common)
+	if err != nil {
+		log.Fatalf("error decoding stage spec: %v", err)
+	}
 }
 
 func (dm *DeployManifest) expand(stage *Stage) {
@@ -88,7 +94,7 @@ func (dm *DeployManifest) getBakeIndex() int {
 	} else {
 		*bakeStageIndex = *dm.BakeStageRefIds
 	}
-	// Convert from Spinnaker human readable indexing
+	// Convert from Spinnaker human-readable indexing
 	*bakeStageIndex -= 1
 
 	return *bakeStageIndex
