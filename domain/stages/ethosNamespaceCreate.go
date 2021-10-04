@@ -63,6 +63,10 @@ func (enc *EthosNamespaceCreate) decode(stage *Stage) {
 	if err != nil {
 		log.Fatalf("error decoding stage spec: %v", err)
 	}
+	err = decoder.Decode(stage.Common)
+	if err != nil {
+		log.Fatalf("error decoding stage spec: %v", err)
+	}
 }
 
 func (enc *EthosNamespaceCreate) encode() *map[string]interface{} {

@@ -13,7 +13,6 @@ governing permissions and limitations under the License.
 package stages
 
 import (
-	"fmt"
 	"github.com/mitchellh/mapstructure"
 	log "github.com/sirupsen/logrus"
 )
@@ -129,9 +128,10 @@ func (s Stage) Decode(stage *map[string]interface{}) Stage {
 	return *tmp
 }
 
-func (s *Stage) FailStageSetter()  {
-	// "If stage fails" execution option has 4 scenarios as seen in the WebUI; to set one of them a bool combination of the below parameters is needed
-	// to avoid complexity, the user will use ONLY the ifStageFails parameter (which exists only in the yaml)
+// FailStageSetter method reduces the complexity of "If stage fails" execution option
+// "If stage fails" execution option has 4 scenarios as seen in the WebUI; to set one of them a bool combination of the below parameters is needed
+// to avoid complexity, the user will use ONLY the ifStageFails parameter (which exists only in the yaml)
+func (s *Stage) FailStageSetter() {
 	s.ContinuePipeline = new(bool)
 	s.FailPipeline = new(bool)
 	s.CompleteOtherBranchesThenFail = new(bool)
@@ -160,7 +160,4 @@ func (s *Stage) FailStageSetter()  {
 		*s.FailPipeline = true
 		*s.CompleteOtherBranchesThenFail = false
 	}
-	*s.ContinuePipeline = true
-	fmt.Println(*s.ContinuePipeline)
 }
-

@@ -54,6 +54,10 @@ func (mj *ManualJudgment) decode(stage *Stage) {
 	if err != nil {
 		log.Fatalf("error decoding stage spec: %v", err)
 	}
+	err = decoder.Decode(stage.Common)
+	if err != nil {
+		log.Fatalf("error decoding stage spec: %v", err)
+	}
 }
 
 func (mj *ManualJudgment) encode() *map[string]interface{} {

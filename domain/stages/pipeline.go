@@ -31,9 +31,6 @@ type Pipeline struct {
 	WaitForCompletion bool   `yaml:"waitForCompletion" json:"waitForCompletion"`
 
 	StageTimeoutMs *int `yaml:"stageTimeoutMs,omitempty" json:"stageTimeoutMs,omitempty"`
-
-	// Overriding the field from Common struct without "omitempty" as it's required by the Pipeline Stage
-	FailPipeline bool `yaml:"failPipeline" json:"failPipeline"`
 }
 
 func (pp Pipeline) MakeStage(stage *Stage) *map[string]interface{} {
@@ -53,6 +50,10 @@ func (pp *Pipeline) decode(stage *Stage) {
 		log.Fatalf("error decoding stage metadata: %v", err)
 	}
 	err = decoder.Decode(stage.Spec)
+	if err != nil {
+		log.Fatalf("error decoding stage spec: %v", err)
+	}
+	err = decoder.Decode(stage.Common)
 	if err != nil {
 		log.Fatalf("error decoding stage spec: %v", err)
 	}
