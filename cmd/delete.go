@@ -45,14 +45,21 @@ func Destroy(m manifest.M) {
 func runDelete() {
 	m := manifest.NewManifest{}
 	manifests := m.GetManifests(filePath)
+
+	// Pipelines deletion should run before application deletion
+	for _, newManifest := range manifests {
+		switch newManifest.Kind {
+		case m.Pipeline.GetKind():
+			pipeline := m.Pipeline.Load(newManifest)
+			Destroy(pipeline)
+		}
+	}
+
 	for _, newManifest := range manifests {
 		switch newManifest.Kind {
 		case m.Application.GetKind():
 			application := m.Application.Load(newManifest)
 			Destroy(application)
-		case m.Pipeline.GetKind():
-			pipeline := m.Pipeline.Load(newManifest)
-			Destroy(pipeline)
 		}
 	}
 }

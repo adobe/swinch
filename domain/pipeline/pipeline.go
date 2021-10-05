@@ -56,5 +56,5 @@ func (p *Pipeline) Apply(dryRun, plan bool) {
 }
 
 func (p *Pipeline) Destroy() {
-	p.Delete(p.Metadata.Name, p.Metadata.Application)
+	p.Delete(p.Metadata.Application, p.Metadata.Name)
 }
