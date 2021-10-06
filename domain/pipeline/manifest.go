@@ -45,9 +45,9 @@ type Spec struct {
 	Application string `yaml:"-" json:"application"`
 	Name        string `yaml:"-" json:"name"`
 	Disabled    bool   `yaml:"disabled,omitempty" json:"disabled,omitempty"`
-	// Index not used at this time
+	// Index and Id are not used at this time
 	//Index                int                      `yaml:"index,omitempty" json:"index,omitempty"`
-	Id                   string                   `yaml:"id,omitempty" json:"id,omitempty"`
+	//Id                   string                   `yaml:"id,omitempty" json:"id,omitempty"`
 	KeepWaitingPipelines bool                     `yaml:"keepWaitingPipelines,omitempty" json:"keepWaitingPipelines,omitempty"`
 	LimitConcurrent      bool                     `yaml:"limitConcurrent,omitempty" json:"limitConcurrent,omitempty"`
 	SpelEvaluator        string                   `yaml:"spelEvaluator,omitempty" json:"spelEvaluator,omitempty"`

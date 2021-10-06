@@ -46,10 +46,17 @@ func Apply(m manifest.M, dryRun, plan bool) {
 func runApply() {
 	m := manifest.NewManifest{}
 	manifests := m.GetManifests(filePath)
+
+	// Application creation should run before pipelines creation
 	for _, newManifest := range manifests {
 		switch newManifest.Kind {
 		case m.Application.GetKind():
 			Apply(m.Application.Load(newManifest), false, plan)
+		}
+	}
+
+	for _, newManifest := range manifests {
+		switch newManifest.Kind {
 		case m.Pipeline.GetKind():
 			Apply(m.Pipeline.Load(newManifest), false, plan)
 		}

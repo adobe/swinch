@@ -22,8 +22,8 @@ import (
 // pipelineCmd represents the pipeline command
 var pipelineCmd = &cobra.Command{
 	Use:   "pipeline",
-	Short: "Import Spinnaker pipelines",
-	Long:  `Import Spinnaker pipelines`,
+	Short: "Run operations on a Spinnaker pipeline",
+	Long:  `Run operations on a Spinnaker pipeline`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		SetLogLevel(logLevel)
 		ValidateConfigFile()

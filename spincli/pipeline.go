@@ -83,7 +83,7 @@ func (p *PipelineAPI) status(err error) {
 		case p.NotFound().Error():
 			log.Infof("Pipeline '%v' not found", p.pipeName)
 		case p.NotAllowed().Error():
-			log.Fatalf("Attempting action on pipeline '%v' from application '%v' which does not exist", p.pipeName, p.appName)
+			log.Errorf("Attempting action on pipeline '%v' from application '%v' which does not exist", p.pipeName, p.appName)
 		case p.unhandledNotFound().Error():
 			log.Fatalf("Request repeated too quickly")
 		case p.unhandledNotAllowed().Error():
